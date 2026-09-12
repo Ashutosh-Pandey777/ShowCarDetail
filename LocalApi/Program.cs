@@ -13,7 +13,6 @@ string cs;
 
 if (!string.IsNullOrWhiteSpace(databaseUrl))
 {
-
     var uri = new Uri(databaseUrl);
 
     var userInfo = uri.UserInfo.Split(':', 2);
@@ -21,7 +20,7 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
     if (userInfo.Length != 2)
     {
         throw new InvalidOperationException(
-            "DATABASE_URL format is invalid. Expected PostgreSQL URL."
+            "DATABASE_URL format is invalid."
         );
     }
 
@@ -30,9 +29,12 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
 
     var databaseName = uri.AbsolutePath.TrimStart('/');
 
+    // Render PostgreSQL normally uses port 5432
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
     cs =
         $"Host={uri.Host};" +
-        $"Port={uri.Port};" +
+        $"Port={port};" +
         $"Database={databaseName};" +
         $"Username={username};" +
         $"Password={password};" +
@@ -41,7 +43,6 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
 }
 else
 {
-    // Local development
     cs = builder.Configuration.GetConnectionString("DefaultConnection")
          ?? throw new InvalidOperationException(
              "DefaultConnection is not configured."
