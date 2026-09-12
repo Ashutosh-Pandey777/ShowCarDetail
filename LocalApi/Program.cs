@@ -126,6 +126,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/", () => Results.Ok(new
+{
+    status = "API is running",
+    message = "Welcome To ShowCarDetail"
+}));
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
