@@ -7,38 +7,87 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
-var cs = Environment.GetEnvironmentVariable("DATABASE_URL")
-         ?? builder.Configuration.GetConnectionString("DefaultConnection");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-builder.Services.AddDbContext<AppDbContext>(o =>
-    o.UseNpgsql(cs));
+string cs;
 
-// Services
+if (!string.IsNullOrWhiteSpace(databaseUrl))
+{
+
+    var uri = new Uri(databaseUrl);
+
+    var userInfo = uri.UserInfo.Split(':', 2);
+
+    if (userInfo.Length != 2)
+    {
+        throw new InvalidOperationException(
+            "DATABASE_URL format is invalid. Expected PostgreSQL URL."
+        );
+    }
+
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = Uri.UnescapeDataString(userInfo[1]);
+
+    var databaseName = uri.AbsolutePath.TrimStart('/');
+
+    cs =
+        $"Host={uri.Host};" +
+        $"Port={uri.Port};" +
+        $"Database={databaseName};" +
+        $"Username={username};" +
+        $"Password={password};" +
+        "SSL Mode=Require;" +
+        "Trust Server Certificate=true;";
+}
+else
+{
+    // Local development
+    cs = builder.Configuration.GetConnectionString("DefaultConnection")
+         ?? throw new InvalidOperationException(
+             "DefaultConnection is not configured."
+         );
+}
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(cs));
+
+
 builder.Services.AddScoped<JwtService>();
 
-// Controllers
 builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
-// CORS
-builder.Services.AddCors(o =>
-    o.AddDefaultPolicy(p =>
-        p.AllowAnyHeader()
-         .AllowAnyMethod()
-         .AllowAnyOrigin()));
 
-// JWT
-var key = Encoding.UTF8.GetBytes(
-    builder.Configuration["Jwt:Key"]!
-);
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowAnyOrigin();
+    });
+});
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "JWT Key is not configured."
+    );
+}
+
+var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
+    .AddJwtBearer(options =>
     {
-        o.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
@@ -61,24 +110,29 @@ app.UseCors();
 
 app.UseStaticFiles();
 
+
+// Swagger only in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Database initialization
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
     await db.Database.EnsureCreatedAsync();
 
+    // Create default admin if no users exist
     if (!db.Users.Any())
     {
         db.Users.Add(
@@ -95,5 +149,4 @@ using (var scope = app.Services.CreateScope())
         await db.SaveChangesAsync();
     }
 }
-
 app.Run();
