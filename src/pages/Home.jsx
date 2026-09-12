@@ -64,7 +64,7 @@ function Hero() {
 
   return (
     <section className="relative h-[92vh] min-h-[640px] overflow-hidden">
-      <img src="https://media.base44.com/images/public/6a7339c4158e000097245929/18bb6f86c_generated_50c4b9a7.png" alt="Cinematic luxury SUV" className="absolute inset-0 w-full h-full object-cover" />
+      <img src="https://detector.media/doc/images/news/archive/2021/243549/ArticleImage_243549.webp" alt="Cinematic luxury SUV" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
       <div className="relative h-full max-w-chassis mx-auto px-4 sm:px-6 flex flex-col justify-end pb-16">
