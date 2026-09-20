@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Clock, Send, Loader2, CheckCircle2 } from "lucide-
 
 const INFO = [
   { icon: Mail, label: "Email", value: "hello@kinetic.auto", href: "mailto:hello@kinetic.auto" },
-  { icon: Phone, label: "Phone", value: "+91 98765 43210", href: "tel:+919876543210" },
+  { icon: Phone, label: "Phone", value: "9891984320", href: "tel:9891984320" },
   { icon: MapPin, label: "Showroom", value: "Unit 12, Auto District, Mumbai 400001" },
   { icon: Clock, label: "Hours", value: "Mon–Sat · 10:00–19:00" },
 ];
