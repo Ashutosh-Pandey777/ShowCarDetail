@@ -32,7 +32,6 @@ export default function CarManager() {
         imageUrl = uploaded.file_url;
       }
     const data = { ...editing, image_url: imageUrl,
-      ...editing,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
       seating: editing.seating ? Number(editing.seating) : undefined,
