@@ -1,316 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
-import { Image } from '@/components/ui/image';
-import { ChevronRight, ArrowRight, Zap, Shield, Gauge, Wallet, Car as CarIcon, Star, Plus } from 'lucide-react';
+import React,{useEffect,useMemo,useState} from 'react';
+import {Link} from 'react-router-dom';
+import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
-import EMICalculator from '@/components/EMICalculator';
-import GalleryStrip from '@/components/GalleryStrip';
+import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,Zap,Users,CalendarDays,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
-export default function Home() {
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    base44.entities.Car.list('-created_date', 60)
-      .then(data => setCars(Array.isArray(data) ? data : []))
-      .catch(() => setCars([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const byTag = (t) => cars.filter(c => c.tags?.includes(t));
-  const featured = byTag('Featured');
-  const latest = byTag('Latest');
-  const upcoming = byTag('Upcoming');
-  const electric = byTag('Electric');
-  const luxury = byTag('Luxury');
-  const popular = byTag('Popular');
-  const usedCars = cars.filter(c => String(c.condition || c.listing_type || '').toLowerCase() === 'used');
-
-  return (
-    <div className="bg-obsidian">
-      <Hero />
-      <QuickSearch />
-      <BrandStrip />
-      <CarRow title="Featured" label="Curated Selection" cars={featured} loading={loading} viewAll="/browse" />
-      <Categories />
-      <CarRow title="Latest Arrivals" label="New Inventory" cars={latest} loading={loading} viewAll="/browse?condition=New" />
-      <CarRow title="Used Cars" label="Verified Pre-Owned Selection" cars={usedCars} loading={loading} viewAll="/browse?condition=Used" />
-      <CompareCTA />
-      <div className="grid lg:grid-cols-2 gap-1">
-        <CarRow title="Electric" label="Zero Emission" cars={electric} loading={loading} compact viewAll="/browse?fuel=Electric" />
-        <CarRow title="Luxury" label="Prestige Tier" cars={luxury} loading={loading} compact viewAll="/browse" />
+const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz'];
+const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
+const TYPES=[['SUV','SUV'],['Hatchback','Hatchback'],['Sedan','Sedan'],['MUV','MUV'],['Luxury','Luxury'],['Electric','Electric']];
+export default function Home(){
+ const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[city,setCity]=useState('Patna');
+ useEffect(()=>{base44.entities.Car.list('-created_date',100).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
+ const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
+ const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
+ const go=(extra='')=>{const p=new URLSearchParams();p.set('condition',kind);if(query)p.set('q',query);if(city)p.set('city',city);if(extra)p.set('budget',extra);window.location.href='/browse?'+p.toString();};
+ return <div className="min-h-screen bg-white text-slate-800">
+  <section className="bg-[#f4f7fb] border-b border-slate-200">
+   <div className="mx-auto max-w-6xl px-4 py-9 sm:px-6 lg:py-12">
+    <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_.9fr]">
+     <div><p className="mb-2 text-sm font-semibold text-red-600">India's car search destination</p><h1 className="max-w-xl text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">Find the right car for you</h1><p className="mt-3 max-w-lg text-sm leading-6 text-slate-600">Explore new cars, compare prices and discover trusted pre-owned cars in your city.</p>
+      <div className="mt-6 inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">{['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'rounded-md px-6 py-2 text-sm font-semibold '+(kind===v?'bg-red-600 text-white':'text-slate-600 hover:bg-slate-50')}>{v} Cars</button>)}</div>
+      <div className="mt-3 flex max-w-2xl flex-col gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:flex-row">
+       <div className="flex min-w-0 flex-1 items-center gap-2 px-2"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by car name or brand" className="w-full py-2 text-sm outline-none"/></div>
+       <div className="flex items-center gap-2 border-t border-slate-100 px-2 sm:border-l sm:border-t-0"><MapPin className="h-4 w-4 text-red-600"/><select value={city} onChange={e=>setCity(e.target.value)} className="w-full bg-transparent py-2 text-sm outline-none"><option>Patna</option><option>Delhi NCR</option><option>Mumbai</option><option>Bengaluru</option><option>Hyderabad</option><option>Pune</option><option>Kolkata</option><option>Lucknow</option></select></div>
+       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-6 py-3 text-sm font-bold text-white hover:bg-red-700">Search <ArrowRight className="h-4 w-4"/></button>
       </div>
-      <CarRow title="Upcoming" label="Forthcoming Models" cars={upcoming} loading={loading} viewAll="/browse" />
-      <GalleryStrip />
-      <FinanceCTA />
-      <Testimonials />
-      <FAQ />
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500"><span>Popular:</span>{['Maruti Swift','Tata Nexon','Hyundai Creta','Mahindra Thar'].map(x=><button key={x} onClick={()=>{setQuery(x);window.location.href='/browse?q='+encodeURIComponent(x)+'&condition='+kind;}} className="text-blue-700 hover:underline">{x}</button>)}</div>
+     </div>
+     <div className="relative hidden lg:block"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=85" alt="Modern car" className="h-[285px] w-full rounded-xl object-cover shadow-md"/><div className="absolute bottom-4 left-4 rounded-lg bg-white/95 px-4 py-3 shadow"><p className="text-xs text-slate-500">Make your next move</p><p className="font-bold text-slate-900">Explore cars that fit your life</p></div></div>
     </div>
-  );
+   </div>
+  </section>
+  <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+   <SectionHeading title="Explore cars by" subtitle="Find cars that match your needs"/>
+   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">{TYPES.map(([label,value])=><Link key={label} to={'/browse?body='+value} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 transition hover:border-red-300 hover:shadow-sm"><span className="grid h-10 w-10 place-items-center rounded-full bg-red-50 text-red-600"><CarFront className="h-5 w-5"/></span><span className="text-sm font-semibold">{label}</span></Link>)}</div>
+  </section>
+  <section className="border-y border-slate-100 bg-slate-50"><div className="mx-auto max-w-6xl px-4 py-8 sm:px-6"><SectionHeading title="Popular car brands" subtitle="Browse the latest models from top manufacturers" action="View all brands" to="/browse"/><div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">{BRANDS.map(b=><Link key={b} to={'/brand/'+b.toLowerCase().replace(/\s+/g,'-')} className="flex min-h-20 items-center justify-center rounded-lg border border-slate-200 bg-white px-2 text-center text-sm font-semibold text-slate-700 hover:border-red-300 hover:text-red-600">{b}</Link>)}</div></div></section>
+  <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6"><SectionHeading title="Cars by budget" subtitle="Choose a car that fits your budget"/><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">{BUDGETS.map(([label,range])=><Link key={label} to={'/browse?condition='+kind+'&budget='+encodeURIComponent(label)} className="rounded-lg border border-slate-200 p-4 hover:border-red-300 hover:shadow-sm"><Wallet className="mb-3 h-5 w-5 text-red-600"/><p className="text-sm font-bold">{label}</p><p className="mt-1 text-xs text-slate-500">Explore cars</p></Link>)}</div></section>
+  <CarSection title="Popular new cars" subtitle="Most searched new cars" cars={newCars} loading={loading} to="/browse?condition=New"/>
+  <CarSection title="Latest used cars" subtitle="Find pre-owned cars near you" cars={usedCars} loading={loading} to="/browse?condition=Used"/>
+  <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><SectionHeading title="Why choose ShowCarDetail?" subtitle="Everything you need to make a confident car decision"/><div className="grid gap-4 sm:grid-cols-3">{[[ShieldCheck,'Helpful car information','Explore specifications, features and safety details.'],[SlidersHorizontal,'Smart car discovery','Filter cars by budget, body type, fuel and more.'],[Star,'Compare with confidence','Shortlist models and compare important details.']].map(([Icon,title,desc])=><div key={title} className="rounded-lg border border-slate-200 p-5"><Icon className="mb-3 h-6 w-6 text-red-600"/><h3 className="font-bold">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p></div>)}</div></section>
+  <section className="bg-[#fff5f4]"><div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center"><div><p className="text-sm font-semibold text-red-600">Stay updated</p><h2 className="mt-1 text-2xl font-bold text-slate-900">Latest car news and expert reviews</h2><p className="mt-2 text-sm text-slate-600">Read the latest updates before you choose your next car.</p></div><Link to="/news-reviews" className="inline-flex items-center gap-2 self-start rounded-md bg-red-600 px-5 py-3 text-sm font-bold text-white md:self-center">Explore News & Reviews <Newspaper className="h-4 w-4"/></Link></div></section>
+ </div>;
 }
-
-/* ── HERO ─────────────────────────────────────────── */
-function Hero() {
-  const [body, setBody] = useState('');
-  const [budget, setBudget] = useState('');
-  const [fuel, setFuel] = useState('');
-
-  const go = () => {
-    const p = new URLSearchParams();
-    if (body) p.set('body', body);
-    if (budget) p.set('budget', budget);
-    if (fuel) p.set('fuel', fuel);
-    window.location.href = `/browse?${p.toString()}`;
-  };
-
-  return (
-    <section className="relative h-[92vh] min-h-[640px] overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=85" alt="Cinematic luxury SUV" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
-      <div className="relative h-full max-w-chassis mx-auto px-4 sm:px-6 flex flex-col justify-end pb-16">
-        <div className="max-w-2xl animate-fade-up">
-          <p className="section-label mb-4 text-white"><span className="w-8 h-px bg-white" />Precision Automotive Marketplace</p>
-          <h1 className="font-heading text-5xl sm:text-7xl font-extrabold leading-[0.95] tracking-tight text-balance text-white">
-            Drive the<br/><span className="text-amber-400">extraordinary.</span>
-          </h1>
-          <p className="mt-5 text-lg text-white/80 max-w-lg leading-relaxed">A high-velocity digital showroom where engineering meets desire. Discover, compare, and finance your next machine.</p>
-        </div>
-
-        {/* Command Line Search */}
-        <div className="mt-10 bg-black/80 backdrop-blur-xl border border-white/15 p-1.5 flex flex-col sm:flex-row gap-1.5 max-w-3xl">
-          <Select value={body} onChange={setBody} options={['SUV','Sedan','Hatchback','Coupe','MUV']} placeholder="Body Type" />
-          <div className="hidden sm:block w-px bg-white/15 self-stretch" />
-          <Select value={budget} onChange={setBudget} options={['Under ₹10L','₹10-20L','₹20-40L','₹40L+']} placeholder="Budget" />
-          <div className="hidden sm:block w-px bg-white/15 self-stretch" />
-          <Select value={fuel} onChange={setFuel} options={['Petrol','Diesel','Electric','Hybrid']} placeholder="Fuel" />
-          <button onClick={go} className="btn-kinetic shrink-0">
-            Search <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {['Trending: SUVs','Electric under ₹20L','Family Sedans','Performance Coupes'].map(t => (
-            <button key={t} onClick={() => window.location.href='/browse'} className="chip bg-white/5 border-white/20 text-white/80 hover:border-white hover:text-white transition-colors">{t}</button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Select({ value, onChange, options, placeholder }) {
-  return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} className="flex-1 bg-transparent text-white px-4 py-3 text-sm outline-none cursor-pointer appearance-none">
-      <option value="" className="bg-black text-white">{placeholder}</option>
-      {options.map(o => <option key={o} value={o} className="bg-black text-white">{o}</option>)}
-    </select>
-  );
-}
-
-/* ── QUICK SEARCH ─────────────────────────────────── */
-function QuickSearch() {
-  const items = [
-    { icon: CarIcon, label: 'By Brand', to: '/browse' },
-    { icon: Wallet, label: 'By Budget', to: '/browse' },
-    { icon: Zap, label: 'By Fuel', to: '/browse?fuel=Electric' },
-    { icon: CarIcon, label: 'By Body Type', to: '/browse' },
-    { icon: Gauge, label: 'By Transmission', to: '/browse' },
-  ];
-  return (
-    <section className="border-b border-hairline bg-gunmetal">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6 py-6 grid grid-cols-2 md:grid-cols-5 gap-3">
-        {items.map(({ icon: Icon, label, to }) => (
-          <Link key={label} to={to} className="flex items-center gap-3 px-4 py-4 border border-hairline bg-card hover:border-primary/40 transition-colors group">
-            <Icon className="w-5 h-5 text-primary" />
-            <span className="text-sm font-medium">{label}</span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ── BRAND STRIP ─────────────────────────────────── */
-function BrandStrip() {
-  const brands = ['Toyota','Hyundai','Tata','Mahindra','Kia','Maruti Suzuki','Honda','BMW','Mercedes-Benz','Audi','MG','Skoda','Volkswagen','Nissan','Renault','BYD','Volvo','Jeep'];
-  return (
-    <section className="py-12 overflow-hidden">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6 mb-6">
-        <div className="section-label"><span className="w-8 h-px bg-primary" />Browse by Manufacturer</div>
-      </div>
-      <div className="relative flex overflow-hidden">
-        <div className="flex gap-8 animate-marquee shrink-0 pr-8">
-          {[...brands, ...brands].map((b, i) => (
-            <Link key={i} to={`/brand/${b.toLowerCase().replace(/\s+/g,'-')}`} className="flex items-center justify-center px-8 py-4 border border-hairline bg-card whitespace-nowrap hover:border-primary/40 transition-colors">
-              <span className="font-heading text-lg font-bold tracking-tight text-muted-foreground hover:text-foreground transition-colors">{b}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── CAR ROW ─────────────────────────────────────── */
-function CarRow({ title, label, cars, loading, viewAll, compact }) {
-  return (
-    <section className="py-10">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <div className="section-label mb-2"><span className="w-8 h-px bg-primary" />{label}</div>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">{title}</h2>
-          </div>
-          {viewAll && <Link to={viewAll} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">View All <ChevronRight className="w-4 h-4" /></Link>}
-        </div>
-        {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(compact?2:4)].map((_,i) => <div key={i} className="aspect-[16/10] bg-card animate-pulse" />)}
-          </div>
-        ) : (
-          <div className={`grid ${compact ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-4'} gap-4`}>
-            {cars.slice(0, compact ? 2 : 4).map(c => <CarCard key={c.id} car={c} />)}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-/* ── CATEGORIES ──────────────────────────────────── */
-function Categories() {
-  const cats = [
-    { name: 'SUVs', desc: 'Command the road', to: '/browse?body=SUV', img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1000&q=85' },
-    { name: 'Sedans', desc: 'Refined elegance', to: '/browse?body=Sedan', img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=85' },
-    { name: 'Electric', desc: 'Silent power', to: '/browse?fuel=Electric', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/cc031488e_generated_740934e7.png' },
-    { name: 'Coupes', desc: 'Performance dna', to: '/browse?body=Coupe', img: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=85' },
-  ];
-  return (
-    <section className="py-16 bg-gunmetal border-y border-hairline">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6">
-        <div className="section-label mb-2"><span className="w-8 h-px bg-primary" />Explore Categories</div>
-        <h2 className="font-heading text-3xl sm:text-4xl font-bold mb-8">Find your form</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {cats.map(c => (
-            <Link key={c.name} to={c.to} className="group relative aspect-[4/5] overflow-hidden bg-card border border-hairline">
-              <img src={c.img} alt={c.name} className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-5">
-                <h3 className="font-heading text-xl font-bold">{c.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{c.desc}</p>
-                <span className="inline-flex items-center gap-1 mt-3 text-xs font-mono-data uppercase tracking-widest text-primary">Explore <ArrowRight className="w-3 h-3" /></span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── COMPARE CTA ─────────────────────────────────── */
-function CompareCTA() {
-  return (
-    <section className="py-16">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6">
-        <div className="relative bg-card border border-hairline p-8 sm:p-12 overflow-hidden">
-          <div className="absolute right-0 top-0 w-1/2 h-full opacity-20">
-            <img src="https://media.base44.com/images/public/6a7339c4158e000097245929/dfa8c5378_generated_ef182013.png" alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="relative max-w-md">
-            <div className="section-label mb-3"><span className="w-8 h-px bg-primary" />Comparison Engine</div>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold mb-3">Spec vs. spec.<br/>No compromises.</h2>
-            <p className="text-muted-foreground mb-6">Stack up to four vehicles side by side. Reveal the delta in horsepower, efficiency, and dimension — in high contrast.</p>
-            <Link to="/compare" className="btn-kinetic">Open Compare <Plus className="w-4 h-4" /></Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── FINANCE CTA ─────────────────────────────────── */
-function FinanceCTA() {
-  return (
-    <section className="py-16 bg-gunmetal border-y border-hairline">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 items-center">
-        <div>
-          <div className="section-label mb-3"><span className="w-8 h-px bg-primary" />Finance Module</div>
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold mb-3">Calculate. Plan. Drive.</h2>
-          <p className="text-muted-foreground mb-6">Estimate your monthly outflow in seconds. Adjust down payment, tenure, and rate to find the configuration that fits your trajectory.</p>
-          <div className="grid grid-cols-3 gap-4">
-            {[['EMI','Instant'],['Loans','Flexible'],['Insurance','Built-in']].map(([a,b]) => (
-              <div key={a} className="border border-hairline p-4">
-                <Shield className="w-5 h-5 text-primary mb-2" />
-                <p className="text-sm font-semibold">{a}</p>
-                <p className="text-xs text-muted-foreground">{b}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <EMICalculator price={2500000} compact />
-      </div>
-    </section>
-  );
-}
-
-/* ── TESTIMONIALS ────────────────────────────────── */
-function Testimonials() {
-  const reviews = [
-    { name: 'Arjun Mehta', role: 'Verified Buyer', text: 'The comparison engine saved me weeks of research. I could see exactly why one SUV outclassed another — down to boot space.', rating: 5 },
-    { name: 'Priya Nair', role: 'EV Enthusiast', text: 'Found my electric sedan through the precision filters. The whole experience felt engineered, not cluttered like other sites.', rating: 5 },
-    { name: 'Rohan Kapoor', role: 'Performance Driver', text: 'The blueprint aesthetic and technical spec layout made choosing a performance coupe genuinely enjoyable.', rating: 4 },
-  ];
-  return (
-    <section className="py-16">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6">
-        <div className="section-label mb-2"><span className="w-8 h-px bg-primary" />Testimonials</div>
-        <h2 className="font-heading text-3xl sm:text-4xl font-bold mb-8">Precision, validated.</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {reviews.map(r => (
-            <div key={r.name} className="bg-card border border-hairline p-6">
-              <div className="flex gap-1 mb-4">{[...Array(5)].map((_,i) => <Star key={i} className={`w-4 h-4 ${i < r.rating ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
-              <p className="text-sm leading-relaxed text-foreground/90 mb-5">"{r.text}"</p>
-              <div className="pt-4 border-t border-hairline">
-                <p className="font-semibold text-sm">{r.name}</p>
-                <p className="text-xs font-mono-data uppercase tracking-widest text-muted-foreground">{r.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── FAQ ─────────────────────────────────────────── */
-function FAQ() {
-  const faqs = [
-    { q: 'How does the comparison engine work?', a: 'Select up to four vehicles and we stack their specifications — price, mileage, engine, dimensions, and safety — side by side, highlighting the delta between each.' },
-    { q: 'Is the EMI calculator accurate?', a: 'It provides a close estimate based on your down payment, interest rate, and tenure. Final figures depend on your lender and credit profile.' },
-    { q: 'Can I filter by city and availability?', a: 'Yes. The browse page supports filtering by body type, fuel, transmission, price range, seating, and city availability.' },
-    { q: 'Do you support electric vehicles?', a: 'Absolutely. Our Electric category includes range, charging, and battery specifications alongside the standard metrics.' },
-  ];
-  const [open, setOpen] = useState(0);
-  return (
-    <section className="py-16 bg-gunmetal border-y border-hairline">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <div className="section-label mb-2 justify-center"><span className="w-8 h-px bg-primary" />FAQ</div>
-        <h2 className="font-heading text-3xl sm:text-4xl font-bold text-center mb-10">Questions, answered.</h2>
-        <div className="space-y-2">
-          {faqs.map((f, i) => (
-            <div key={i} className="border border-hairline bg-card">
-              <button onClick={() => setOpen(open === i ? -1 : i)} className="w-full flex items-center justify-between p-5 text-left">
-                <span className="font-medium text-sm">{f.q}</span>
-                <Plus className={`w-4 h-4 text-primary transition-transform ${open === i ? 'rotate-45' : ''}`} />
-              </button>
-              {open === i && <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{f.a}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+function SectionHeading({title,subtitle,action,to}){return <div className="mb-5 flex items-end justify-between gap-3"><div><h2 className="text-xl font-bold text-slate-900 sm:text-2xl">{title}</h2><p className="mt-1 text-sm text-slate-500">{subtitle}</p></div>{action&&<Link to={to} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-red-600 hover:underline">{action}<ChevronRight className="h-4 w-4"/></Link>}</div>}
+function CarSection({title,subtitle,cars,loading,to}){const list=cars.slice(0,4);return <section className="border-t border-slate-100 bg-white"><div className="mx-auto max-w-6xl px-4 py-9 sm:px-6"><SectionHeading title={title} subtitle={subtitle} action="View all cars" to={to}/>{loading?<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[1,2,3,4].map(x=><div key={x} className="h-64 animate-pulse rounded-lg bg-slate-100"/>)}</div>:list.length?<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{list.map(c=><CarCard key={c.id} car={c}/>)}</div>:<div className="rounded-lg border border-dashed border-slate-300 py-8 text-center text-sm text-slate-500">Cars will appear here when listings are added from the admin dashboard.</div>}</div></section>}
