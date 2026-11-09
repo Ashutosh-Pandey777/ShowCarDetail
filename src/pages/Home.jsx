@@ -25,6 +25,7 @@ export default function Home() {
   const electric = byTag('Electric');
   const luxury = byTag('Luxury');
   const popular = byTag('Popular');
+  const usedCars = cars.filter(c => String(c.condition || c.listing_type || '').toLowerCase() === 'used');
 
   return (
     <div className="bg-obsidian">
@@ -33,7 +34,8 @@ export default function Home() {
       <BrandStrip />
       <CarRow title="Featured" label="Curated Selection" cars={featured} loading={loading} viewAll="/browse" />
       <Categories />
-      <CarRow title="Latest Arrivals" label="New Inventory" cars={latest} loading={loading} viewAll="/browse" />
+      <CarRow title="Latest Arrivals" label="New Inventory" cars={latest} loading={loading} viewAll="/browse?condition=New" />
+      <CarRow title="Used Cars" label="Verified Pre-Owned Selection" cars={usedCars} loading={loading} viewAll="/browse?condition=Used" />
       <CompareCTA />
       <div className="grid lg:grid-cols-2 gap-1">
         <CarRow title="Electric" label="Zero Emission" cars={electric} loading={loading} compact viewAll="/browse?fuel=Electric" />
