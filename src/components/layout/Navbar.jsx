@@ -4,7 +4,45 @@ import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPin, UserRound, N
 import { useAuth } from '@/lib/AuthContext';
 
 const BRANDS = ['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','BMW','Mercedes-Benz','Audi','MG','Skoda','Volkswagen','Nissan','Renault','BYD'];
-const CITIES = ['Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna','Chandigarh','Indore','Bhopal','Nagpur','Surat','Vadodara','Kanpur','Varanasi','Ranchi','Bhubaneswar','Guwahati','Dehradun','Noida','Gurugram'];
+const STATE_CITIES = {
+  'Andhra Pradesh':['Visakhapatnam','Vijayawada','Guntur','Tirupati','Nellore','Kurnool','Rajahmundry','Kakinada'],
+  'Arunachal Pradesh':['Itanagar','Naharlagun','Tawang','Pasighat'],
+  'Assam':['Guwahati','Dibrugarh','Silchar','Jorhat','Tezpur','Nagaon'],
+  'Bihar':['Patna','Gaya','Muzaffarpur','Bhagalpur','Darbhanga','Purnia','Ara','Begusarai','Katihar','Munger','Chhapra','Samastipur','Bihar Sharif','Sasaram'],
+  'Chhattisgarh':['Raipur','Bhilai','Bilaspur','Korba','Durg','Rajnandgaon','Jagdalpur'],
+  'Goa':['Panaji','Margao','Vasco da Gama','Mapusa'],
+  'Gujarat':['Ahmedabad','Surat','Vadodara','Rajkot','Gandhinagar','Bhavnagar','Jamnagar','Junagadh','Anand','Nadiad'],
+  'Haryana':['Gurugram','Faridabad','Panipat','Ambala','Hisar','Karnal','Rohtak','Sonipat'],
+  'Himachal Pradesh':['Shimla','Dharamshala','Solan','Mandi','Kullu','Hamirpur'],
+  'Jharkhand':['Ranchi','Jamshedpur','Dhanbad','Bokaro','Deoghar','Hazaribagh'],
+  'Karnataka':['Bengaluru','Mysuru','Mangaluru','Hubballi','Belagavi','Kalaburagi','Davanagere','Udupi'],
+  'Kerala':['Kochi','Thiruvananthapuram','Kozhikode','Thrissur','Kollam','Kannur','Kottayam'],
+  'Madhya Pradesh':['Indore','Bhopal','Jabalpur','Gwalior','Ujjain','Sagar','Dewas','Satna','Ratlam'],
+  'Maharashtra':['Mumbai','Pune','Nagpur','Nashik','Thane','Navi Mumbai','Chhatrapati Sambhajinagar','Kolhapur','Solapur','Amravati'],
+  'Manipur':['Imphal','Thoubal','Bishnupur'],
+  'Meghalaya':['Shillong','Tura','Jowai'],
+  'Mizoram':['Aizawl','Lunglei','Champhai'],
+  'Nagaland':['Kohima','Dimapur','Mokokchung'],
+  'Odisha':['Bhubaneswar','Cuttack','Rourkela','Berhampur','Sambalpur','Puri','Balasore'],
+  'Punjab':['Ludhiana','Amritsar','Jalandhar','Patiala','Bathinda','Mohali','Pathankot'],
+  'Rajasthan':['Jaipur','Jodhpur','Udaipur','Kota','Ajmer','Bikaner','Alwar','Bharatpur','Sikar'],
+  'Sikkim':['Gangtok','Namchi','Gyalshing'],
+  'Tamil Nadu':['Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tiruppur','Erode','Vellore'],
+  'Telangana':['Hyderabad','Warangal','Karimnagar','Nizamabad','Khammam','Ramagundam'],
+  'Tripura':['Agartala','Udaipur','Dharmanagar'],
+  'Uttar Pradesh':['Lucknow','Kanpur','Varanasi','Agra','Prayagraj','Noida','Ghaziabad','Meerut','Gorakhpur','Bareilly','Aligarh','Moradabad','Jhansi','Mathura'],
+  'Uttarakhand':['Dehradun','Haridwar','Rishikesh','Roorkee','Haldwani','Rudrapur','Kashipur'],
+  'West Bengal':['Kolkata','Howrah','Durgapur','Asansol','Siliguri','Kharagpur','Darjeeling'],
+  'Andaman and Nicobar Islands':['Port Blair'],
+  'Chandigarh':['Chandigarh'],
+  'Dadra and Nagar Haveli and Daman and Diu':['Daman','Diu','Silvassa'],
+  'Delhi':['New Delhi','Delhi'],
+  'Jammu and Kashmir':['Srinagar','Jammu','Anantnag','Baramulla'],
+  'Ladakh':['Leh','Kargil'],
+  'Lakshadweep':['Kavaratti'],
+  'Puducherry':['Puducherry','Karaikal','Yanam']
+};
+const POPULAR_CITIES = ['Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna','Chandigarh','Indore','Bhopal','Nagpur','Surat','Vadodara','Kanpur','Varanasi','Ranchi','Bhubaneswar','Guwahati','Dehradun','Noida','Gurugram'];
 
 export default function Navbar() {
   const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState('');
@@ -90,9 +128,18 @@ export default function Navbar() {
           <button type="button" onClick={detectLocation} disabled={detecting} className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-red-700 hover:bg-red-100 disabled:opacity-60"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-white"><Navigation className="h-4 w-4"/></span><span className="flex-1"><span className="block text-sm font-semibold">{detecting?'Detecting your location…':'Detect my location'}</span><span className="mt-0.5 block text-xs text-red-600">Use your device location</span></span></button>
           {locationError&&<p role="status" className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">{locationError}</p>}
           <div className="relative mt-5"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={citySearch} onChange={e=>setCitySearch(e.target.value)} placeholder="Search your city" aria-label="Search city" className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-red-400"/></div>
-          <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Popular cities</p>
-          <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto">{CITIES.filter(c=>c.toLowerCase().includes(citySearch.toLowerCase())).map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}
-          {CITIES.filter(c=>c.toLowerCase().includes(citySearch.toLowerCase())).length===0&&<p className="col-span-2 py-4 text-center text-sm text-slate-500">No city found. Try another name.</p>}</div>
+          <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">{citySearch.trim()?'Matching cities':'Popular cities'}</p>
+          <div className="max-h-64 space-y-4 overflow-y-auto pr-1">
+            {Object.entries(STATE_CITIES).filter(([state,cities])=>!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()))).map(([state,cities])=>{
+              const stateMatches=!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase());
+              const matches=citySearch.trim()&&!stateMatches?cities.filter(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())):cities;
+              return matches.length>0?<section key={state}>
+                <div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-semibold text-slate-800">{state}</h3><span className="text-xs text-slate-400">{matches.length} {matches.length===1?'city':'cities'}</span></div>
+                <div className="grid grid-cols-2 gap-2">{matches.map(c=><button type="button" key={state+'-'+c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+              </section>:null;
+            })}
+            {!Object.entries(STATE_CITIES).some(([state,cities])=>!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())))&&<p className="py-4 text-center text-sm text-slate-500">No city found. Try another city or state name.</p>}
+          </div>
         </div>
       </section>
     </div>}
