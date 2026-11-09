@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
-import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,Zap,Users,CalendarDays,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
+import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz'];
 const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
