@@ -44,13 +44,24 @@ const STATE_CITIES = {
 };
 const POPULAR_CITIES = ['Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna','Chandigarh','Indore','Bhopal','Nagpur','Surat','Vadodara','Kanpur','Varanasi','Ranchi','Bhubaneswar','Guwahati','Dehradun','Noida','Gurugram'];
 
+const getStateForCity = value => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return '';
+  for (const [state, cities] of Object.entries(STATE_CITIES)) {
+    if (state.toLowerCase() === normalized || cities.some(city => city.toLowerCase() === normalized)) return state;
+  }
+  if (normalized === 'delhi ncr') return 'Delhi';
+  return '';
+};
+
 export default function Navbar() {
   const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState('');
-  const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || 'Select City');
+  const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || '');
+  const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
   const navigate=useNavigate();
   const {user,isAuthenticated,logout}=useAuth();
   const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
-  const chooseCity=value=>{setCity(value);localStorage.setItem('showcardetail_city',value);setLocationOpen(false);setCitySearch('');setLocationError('');};
+  const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);setLocationOpen(false);setCitySearch('');setLocationError('');};
   const detectLocation=()=>{
     setLocationError('');
     if(!navigator.geolocation){setLocationError('Your browser does not support location detection. Please select your city.');return;}
@@ -63,12 +74,12 @@ export default function Navbar() {
         const data=await response.json();
         const address=data.address||{};
         const detectedCity=address.city||address.town||address.city_district||address.suburb||address.county||address.state_district||address.state||'Current Location';
-        chooseCity(detectedCity);
+        chooseCity(detectedCity,address.state||'');
       }catch(error){chooseCity('Current Location');setLocationError('Location detected, but city name could not be fetched.');}
       finally{setDetecting(false);}
     },error=>{setDetecting(false);setLocationError(error.code===1?'Location permission was denied. Allow location access in your browser, or select a city below.':'Unable to detect your location. Please select a city below.');},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
   };
-  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>setLocationOpen(true)} aria-label={city==='Select City'?'Select location': 'Selected location: '+city} title={city==='Select City'?'Select location':city} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 '+(mobile?'mb-3':'')}><MapPin className="h-5 w-5 text-red-600"/></button>;
+  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>{setCitySearch(selectedState||'');setLocationOpen(true);}} aria-label={city?'Selected location: '+(selectedState?selectedState+', ':'')+city:'Select location'} title={city?(selectedState?selectedState+', ':'')+city:'Select location'} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition '+(city?'border-red-300 bg-red-50 text-red-700':'border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600')+' '+(mobile?'mb-3':'')}><MapPin className="h-5 w-5 text-red-600"/></button>;
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'New Cars':[
@@ -130,14 +141,14 @@ export default function Navbar() {
           <div className="relative mt-5"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={citySearch} onChange={e=>setCitySearch(e.target.value)} placeholder="Search your city" aria-label="Search city" className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-red-400"/></div>
           { !citySearch.trim() ? <>
             <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Popular cities</p>
-            <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">{POPULAR_CITIES.map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+            <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">{POPULAR_CITIES.map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-500 bg-red-100 font-semibold text-red-800 ring-1 ring-red-300':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
           </> : <>
             {Object.entries(STATE_CITIES).filter(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()))).map(([state,cities])=>{
               const stateMatches=state.toLowerCase().includes(citySearch.trim().toLowerCase());
               const matches=stateMatches?cities:cities.filter(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()));
               return matches.length>0?<section key={state} className="mt-5">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{state}</h3>
-                <div className="grid grid-cols-2 gap-2">{matches.map(c=><button type="button" key={state+'-'+c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+                <div className="grid grid-cols-2 gap-2">{matches.map(c=><button type="button" key={state+'-'+c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-500 bg-red-100 font-semibold text-red-800 ring-1 ring-red-300':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
               </section>:null;
             })}
             {!Object.entries(STATE_CITIES).some(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())))&&<p className="mt-5 py-4 text-center text-sm text-slate-500">No city found. Try another city or state name.</p>}
