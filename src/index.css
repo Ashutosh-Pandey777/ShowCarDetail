@@ -39,10 +39,10 @@
   html { scroll-behavior: smooth; background: #ffffff; }
   body {
     @apply bg-background text-foreground font-body antialiased;
-    background-color: #0d1118;
+    background-color: #ffffff;
     min-width: 320px;
   }
-  ::selection { background: #eeb52e; color: #10141b; }
+  ::selection { background: #e31e24; color: #ffffff; }
   button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   img { max-width: 100%; }
 }
