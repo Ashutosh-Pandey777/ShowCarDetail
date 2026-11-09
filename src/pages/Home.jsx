@@ -66,7 +66,7 @@ function Hero() {
 
   return (
     <section className="relative h-[92vh] min-h-[640px] overflow-hidden">
-      <img src="https://detector.media/doc/images/news/archive/2021/243549/ArticleImage_243549.webp" alt="Cinematic luxury SUV" className="absolute inset-0 w-full h-full object-cover" />
+      <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=85" alt="Cinematic luxury SUV" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
       <div className="relative h-full max-w-chassis mx-auto px-4 sm:px-6 flex flex-col justify-end pb-16">
@@ -182,10 +182,10 @@ function CarRow({ title, label, cars, loading, viewAll, compact }) {
 /* ── CATEGORIES ──────────────────────────────────── */
 function Categories() {
   const cats = [
-    { name: 'SUVs', desc: 'Command the road', to: '/browse?body=SUV', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/f14449a2c_generated_46ce4132.png' },
-    { name: 'Sedans', desc: 'Refined elegance', to: '/browse?body=Sedan', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/cc031488e_generated_740934e7.png' },
+    { name: 'SUVs', desc: 'Command the road', to: '/browse?body=SUV', img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1000&q=85' },
+    { name: 'Sedans', desc: 'Refined elegance', to: '/browse?body=Sedan', img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=85' },
     { name: 'Electric', desc: 'Silent power', to: '/browse?fuel=Electric', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/cc031488e_generated_740934e7.png' },
-    { name: 'Coupes', desc: 'Performance dna', to: '/browse?body=Coupe', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/dfa8c5378_generated_ef182013.png' },
+    { name: 'Coupes', desc: 'Performance dna', to: '/browse?body=Coupe', img: 'https://images.unsplash.com/photo-1614200187524-dc4b892acji?auto=format&fit=crop&w=1000&q=85' },
   ];
   return (
     <section className="py-16 bg-gunmetal border-y border-hairline">
