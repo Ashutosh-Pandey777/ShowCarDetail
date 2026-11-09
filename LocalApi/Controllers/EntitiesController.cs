@@ -34,6 +34,7 @@ public class EntitiesController(AppDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Get(string entity, Guid id)
     {
+        if (!Allowed.Contains(entity)) return NotFound();
         var row = await db.EntityRecords.FirstOrDefaultAsync(x => x.EntityType == entity && x.Id == id);
         return row is null ? NotFound() : Ok(ToNode(row));
     }
@@ -55,6 +56,7 @@ public class EntitiesController(AppDbContext db) : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update(string entity, Guid id, [FromBody] JsonObject data)
     {
+        if (!Allowed.Contains(entity)) return NotFound();
         var row = await db.EntityRecords.FirstOrDefaultAsync(x => x.EntityType == entity && x.Id == id);
         if (row is null) return NotFound();
         var node = JsonNode.Parse(row.Data)?.AsObject() ?? new JsonObject();
@@ -67,6 +69,7 @@ public class EntitiesController(AppDbContext db) : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(string entity, Guid id)
     {
+        if (!Allowed.Contains(entity)) return NotFound();
         var row = await db.EntityRecords.FirstOrDefaultAsync(x => x.EntityType == entity && x.Id == id);
         if (row is null) return NotFound(); db.EntityRecords.Remove(row); await db.SaveChangesAsync(); return NoContent();
     }
