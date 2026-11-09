@@ -61,7 +61,7 @@ export default function Navbar() {
   const navigate=useNavigate();
   const {user,isAuthenticated,logout}=useAuth();
   const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
-  const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);setLocationOpen(false);setCitySearch('');setLocationError('');};
+  const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);window.dispatchEvent(new Event('showcardetail:locationchange'));setLocationOpen(false);setCitySearch('');setLocationError('');};
   const detectLocation=()=>{
     setLocationError('');
     if(!navigator.geolocation){setLocationError('Your browser does not support location detection. Please select your city.');return;}
