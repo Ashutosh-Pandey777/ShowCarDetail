@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Loader2, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import AdminModal, { Field, TextInput, TextArea, Select, toList } from "@/components/admin/AdminModal";
 
 const EMPTY = {
   name: "", brand: "", brand_slug: "", condition: "New", body_type: "SUV", fuel_type: "Petrol",
   transmission: "Manual", price: "", on_road_price: "", mileage: "", engine: "",
   power: "", torque: "", seating: "", boot_space: "", safety_rating: "",
-  launch_year: "", range_km: "", image_url: "", city: "", description: "",
+  launch_year: "", range_km: "", image_url: "", gallery: "", city: "", description: "",
   colors: "", features: "", tags: "",
 };
 
@@ -16,6 +16,7 @@ export default function CarManager() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
   const [formError, setFormError] = useState("");
 
   const load = async () => setItems(await base44.entities.Car.list("-created_date", 100));
@@ -27,11 +28,16 @@ export default function CarManager() {
     setFormError("");
     try {
       let imageUrl = editing.image_url;
+      let galleryUrls = toList(editing.gallery);
       if (imageFile) {
         const uploaded = await base44.integrations.Core.UploadFile({ file: imageFile });
         imageUrl = uploaded.file_url;
       }
-    const data = { ...editing, image_url: imageUrl,
+      for (const file of galleryFiles) {
+        const uploaded = await base44.integrations.Core.UploadFile({ file });
+        galleryUrls.push(uploaded.file_url);
+      }
+    const data = { ...editing, image_url: imageUrl, gallery: galleryUrls,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
       seating: editing.seating ? Number(editing.seating) : undefined,
@@ -46,6 +52,7 @@ export default function CarManager() {
       else await base44.entities.Car.create(data);
       setEditing(null);
       setImageFile(null);
+      setGalleryFiles([]);
       await load();
     } catch (err) {
       setFormError(err.message || "Unable to save vehicle. Please try again.");
@@ -64,7 +71,7 @@ export default function CarManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Vehicles ({items.length})</h2>
-        <button onClick={() => { setImageFile(null); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-kinetic py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Vehicle
         </button>
       </div>
@@ -92,7 +99,7 @@ export default function CarManager() {
                 <td className="px-4 py-3 text-right font-mono-data">{(c.price || 0).toLocaleString("en-IN")}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => { setImageFile(null); setFormError(""); setEditing({ ...c, colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") }); }} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...c, gallery: (c.gallery || []).join(", "), colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") }); }} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
                     <button onClick={() => remove(c.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </td>
@@ -130,6 +137,8 @@ export default function CarManager() {
               <Field label="Range (km)"><TextInput type="number" value={editing.range_km} onChange={(e) => setEditing({ ...editing, range_km: e.target.value })} /></Field>
               <Field label="Image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
               <Field label="Upload cover image"><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{imageFile && <span className="text-xs text-muted-foreground">{imageFile.name}</span>}</Field>
+              <Field label="Gallery image URLs (comma-separated)"><TextArea value={editing.gallery || ""} onChange={(e) => setEditing({ ...editing, gallery: e.target.value })} /></Field>
+              <Field label="Upload gallery images"><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{galleryFiles.length > 0 && <span className="text-xs text-muted-foreground">{galleryFiles.length} image(s) selected</span>}</Field>
             </div>
             <Field label="Colors (comma-separated)"><TextInput value={editing.colors} onChange={(e) => setEditing({ ...editing, colors: e.target.value })} /></Field>
             <Field label="Features (comma-separated)"><TextInput value={editing.features} onChange={(e) => setEditing({ ...editing, features: e.target.value })} /></Field>
