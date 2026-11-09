@@ -185,7 +185,7 @@ function Categories() {
     { name: 'SUVs', desc: 'Command the road', to: '/browse?body=SUV', img: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1000&q=85' },
     { name: 'Sedans', desc: 'Refined elegance', to: '/browse?body=Sedan', img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=85' },
     { name: 'Electric', desc: 'Silent power', to: '/browse?fuel=Electric', img: 'https://media.base44.com/images/public/6a7339c4158e000097245929/cc031488e_generated_740934e7.png' },
-    { name: 'Coupes', desc: 'Performance dna', to: '/browse?body=Coupe', img: 'https://images.unsplash.com/photo-1614200187524-dc4b892acji?auto=format&fit=crop&w=1000&q=85' },
+    { name: 'Coupes', desc: 'Performance dna', to: '/browse?body=Coupe', img: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=85' },
   ];
   return (
     <section className="py-16 bg-gunmetal border-y border-hairline">
