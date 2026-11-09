@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPin, UserRound, Navigation } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPinned, UserRound, Navigation, Check } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
 const BRANDS = ['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','BMW','Mercedes-Benz','Audi','MG','Skoda','Volkswagen','Nissan','Renault','BYD'];
@@ -55,10 +56,13 @@ const getStateForCity = value => {
 };
 
 export default function Navbar() {
-  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState('');
+  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState(''), [carOptions,setCarOptions]=useState([]), [searchFocused,setSearchFocused]=useState(false);
   const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || '');
   const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
   const navigate=useNavigate();
+  useEffect(()=>{let active=true;base44.entities.Car.list('-created_date',500).then(data=>{if(active)setCarOptions(Array.isArray(data)?data:[]);}).catch(()=>{if(active)setCarOptions([]);});return()=>{active=false;};},[]);
+  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
+  const selectCarSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');navigate('/browse?q='+encodeURIComponent(label));setQuery(label);setSearchFocused(false);close();};
   const {user,isAuthenticated,logout}=useAuth();
   const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
   const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);window.dispatchEvent(new Event('showcardetail:locationchange'));setLocationOpen(false);setCitySearch('');setLocationError('');};
@@ -79,7 +83,7 @@ export default function Navbar() {
       finally{setDetecting(false);}
     },error=>{setDetecting(false);setLocationError(error.code===1?'Location permission was denied. Allow location access in your browser, or select a city below.':'Unable to detect your location. Please select a city below.');},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
   };
-  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>{setCitySearch(selectedState||'');setLocationOpen(true);}} aria-label={city?'Selected location: '+(selectedState?selectedState+', ':'')+city:'Select location'} title={city?(selectedState?selectedState+', ':'')+city:'Select location'} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition '+(city?'border-red-300 bg-red-50 text-red-700':'border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600')+' '+(mobile?'mb-3':'')}><MapPin className="h-5 w-5 text-red-600"/></button>;
+  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>{setCitySearch(selectedState||'');setLocationOpen(true);}} aria-label={city?'Selected location: '+(selectedState?selectedState+', ':'')+city:'Select location'} title={city?(selectedState?selectedState+', ':'')+city:'Select location'} className={'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition '+(city?'border-emerald-300 bg-emerald-50 text-emerald-700':'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700')+' '+(mobile?'':'')}><MapPinned className="h-5 w-5"/>{city&&<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" aria-label="Location selected"/>}</button>;
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'New Cars':[
@@ -107,8 +111,11 @@ export default function Navbar() {
         </Link>
         <nav className="hidden lg:flex items-center"><MenuGroup name="New Cars"/><MenuGroup name="Used Cars"/><MenuGroup name="News & Reviews"/></nav>
         <div className="hidden md:flex items-center gap-3">
+          <div className="relative">
+            <form onSubmit={submit} className="flex h-10 w-56 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-red-400"><Search className="h-4 w-4 shrink-0 text-slate-500"/><input value={query} onFocus={()=>setSearchFocused(true)} onBlur={()=>setTimeout(()=>setSearchFocused(false),150)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" aria-label="Search cars" autoComplete="off" className="w-full bg-transparent text-sm outline-none"/></form>
+            {searchFocused&&query.trim().length>=2&&<div className="absolute left-0 top-full z-[70] mt-2 max-h-80 w-80 overflow-y-auto rounded-lg border border-slate-200 bg-white py-2 shadow-xl">{carSuggestions.length?carSuggestions.map((car,i)=><button type="button" key={car.id||i} onMouseDown={e=>e.preventDefault()} onClick={()=>selectCarSuggestion(car)} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-red-50"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600"><Search className="h-4 w-4"/></span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-slate-800">{[car.brand,car.name||car.model].filter(Boolean).join(' ')}</span><span className="block text-xs text-slate-500">{car.condition||car.listing_type||'Car'}{car.price?' · ₹'+Number(car.price).toLocaleString('en-IN'):''}</span></span></button>):<p className="px-4 py-4 text-sm text-slate-500">No matching cars found in listings.</p>}</div>}
+          </div>
           <LocationPicker/>
-          <form onSubmit={submit} className="flex h-10 w-44 items-center gap-2 rounded border border-slate-200 px-3"><Search className="h-4 w-4 text-slate-500"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search cars" aria-label="Search cars" className="w-full bg-transparent text-sm outline-none"/></form>
           <div className="relative">
             <button type="button" aria-label="Account menu" aria-expanded={accountOpen} onClick={()=>setAccountOpen(v=>!v)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600">
               <UserRound className="h-5 w-5"/>
@@ -123,8 +130,13 @@ export default function Navbar() {
       </div>
     </div>
     {open&&<div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
-      <LocationPicker mobile/>
-      <form onSubmit={submit} className="mb-3 flex h-10 items-center gap-2 rounded border border-slate-200 px-3"><Search className="h-4 w-4"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search cars" className="w-full bg-transparent text-sm outline-none"/></form>
+      <div className="mb-3 flex items-center gap-3">
+       <div className="relative min-w-0 flex-1">
+        <form onSubmit={submit} className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3"><Search className="h-4 w-4 shrink-0"/><input value={query} onFocus={()=>setSearchFocused(true)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" className="w-full min-w-0 bg-transparent text-sm outline-none"/></form>
+        {searchFocused&&query.trim().length>=2&&<div className="absolute left-0 right-0 top-full z-[70] mt-1 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">{carSuggestions.length?carSuggestions.map((car,i)=><button type="button" key={car.id||i} onClick={()=>selectCarSuggestion(car)} className="block w-full px-3 py-2 text-left text-sm hover:bg-red-50">{[car.brand,car.name||car.model].filter(Boolean).join(' ')}</button>):<p className="px-3 py-3 text-xs text-slate-500">No matching cars found in listings.</p>}</div>}
+       </div>
+       <LocationPicker mobile/>
+      </div>
       {Object.entries(menus).map(([name,items])=><section key={name} className="border-b border-slate-100 py-2"><button onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex w-full items-center justify-between py-2 font-semibold text-slate-800">{name}<ChevronDown className="h-4 w-4"/></button>{activeMenu===name&&<div className="grid grid-cols-2 gap-1">{items.map(([label,to])=><Link key={label} to={to} onClick={close} className="rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{label}</Link>)}</div>}</section>)}
       <div className="flex items-center justify-between border-t border-slate-100 pt-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-800"><UserRound className="h-5 w-5 text-red-600"/>{isAuthenticated&&user?'My Account':'Your Account'}</div>
