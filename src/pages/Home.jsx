@@ -14,19 +14,22 @@ export default function Home(){
  const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
  const go=(extra='')=>{const p=new URLSearchParams();p.set('condition',kind);if(query)p.set('q',query);if(city)p.set('city',city);if(extra)p.set('budget',extra);window.location.href='/browse?'+p.toString();};
  return <div className="min-h-screen bg-white text-slate-800">
-  <section className="bg-[#f4f7fb] border-b border-slate-200">
-   <div className="mx-auto max-w-6xl px-4 py-9 sm:px-6 lg:py-12">
-    <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_.9fr]">
-     <div><p className="mb-2 text-sm font-semibold text-red-600">India's car search destination</p><h1 className="max-w-xl text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">Find the right car for you</h1><p className="mt-3 max-w-lg text-sm leading-6 text-slate-600">Explore new cars, compare prices and discover trusted pre-owned cars in your city.</p>
-      <div className="mt-6 inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">{['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'rounded-md px-6 py-2 text-sm font-semibold '+(kind===v?'bg-red-600 text-white':'text-slate-600 hover:bg-slate-50')}>{v} Cars</button>)}</div>
-      <div className="mt-3 flex max-w-2xl flex-col gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:flex-row">
-       <div className="flex min-w-0 flex-1 items-center gap-2 px-2"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by car name or brand" className="w-full py-2 text-sm outline-none"/></div>
-       <div className="flex items-center gap-2 border-t border-slate-100 px-2 sm:border-l sm:border-t-0"><MapPin className="h-4 w-4 text-red-600"/><select value={city} onChange={e=>setCity(e.target.value)} className="w-full bg-transparent py-2 text-sm outline-none"><option>Patna</option><option>Delhi NCR</option><option>Mumbai</option><option>Bengaluru</option><option>Hyderabad</option><option>Pune</option><option>Kolkata</option><option>Lucknow</option></select></div>
-       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-6 py-3 text-sm font-bold text-white hover:bg-red-700">Search <ArrowRight className="h-4 w-4"/></button>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500"><span>Popular:</span>{['Maruti Swift','Tata Nexon','Hyundai Creta','Mahindra Thar'].map(x=><button key={x} onClick={()=>{setQuery(x);window.location.href='/browse?q='+encodeURIComponent(x)+'&condition='+kind;}} className="text-blue-700 hover:underline">{x}</button>)}</div>
+  <section className="w-full bg-white">
+   <div className="relative h-[300px] w-full overflow-hidden sm:h-[390px] lg:h-[460px]">
+    <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2200&q=90" alt="Premium car on the road" className="absolute inset-0 h-full w-full object-cover object-center"/>
+    <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent"/>
+   </div>
+   <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+    <div className="relative -mt-1 rounded-b-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
+     <div className="mb-4 flex items-center gap-5 border-b border-slate-100 pb-3">
+      {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Cars</button>)}
      </div>
-     <div className="relative hidden lg:block"><img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=85" alt="Modern car" className="h-[285px] w-full rounded-xl object-cover shadow-md"/><div className="absolute bottom-4 left-4 rounded-lg bg-white/95 px-4 py-3 shadow"><p className="text-xs text-slate-500">Make your next move</p><p className="font-bold text-slate-900">Explore cars that fit your life</p></div></div>
+     <div className="grid gap-3 sm:grid-cols-[1fr_190px_auto]">
+      <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by car name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
+      <div className="flex items-center gap-2 rounded-md border border-slate-200 px-3"><MapPin className="h-4 w-4 shrink-0 text-red-600"/><select value={city} onChange={e=>setCity(e.target.value)} className="w-full bg-transparent py-3 text-sm outline-none"><option>Patna</option><option>Delhi NCR</option><option>Mumbai</option><option>Bengaluru</option><option>Hyderabad</option><option>Pune</option><option>Kolkata</option><option>Lucknow</option></select></div>
+      <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Cars <ArrowRight className="h-4 w-4"/></button>
+     </div>
+     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500"><span className="font-semibold text-slate-600">Popular:</span>{['Maruti Swift','Tata Nexon','Hyundai Creta','Mahindra Thar'].map(x=><button key={x} onClick={()=>{setQuery(x);window.location.href='/browse?q='+encodeURIComponent(x)+'&condition='+kind;}} className="text-blue-700 hover:underline">{x}</button>)}</div>
     </div>
    </div>
   </section>
