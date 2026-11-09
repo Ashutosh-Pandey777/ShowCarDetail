@@ -21,6 +21,7 @@ import Brand from '@/pages/Brand';
 import Finance from '@/pages/Finance';
 import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
+import NewsReviews from '@/pages/NewsReviews';
 
 const AuthenticatedApp = () => (
   <Routes>
@@ -31,6 +32,7 @@ const AuthenticatedApp = () => (
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
       <Route path="/browse" element={<Browse />} />
+      <Route path="/news-reviews" element={<NewsReviews />} />
       <Route path="/car/:id" element={<CarDetails />} />
       <Route path="/compare" element={<Compare />} />
       <Route path="/brand/:slug" element={<Brand />} />
