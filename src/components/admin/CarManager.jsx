@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Upload } from "lucide-react";
 import AdminModal, { Field, TextInput, TextArea, Select, toList } from "@/components/admin/AdminModal";
 
 const EMPTY = {
@@ -15,6 +15,8 @@ export default function CarManager() {
   const [items, setItems] = useState(null);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [formError, setFormError] = useState("");
 
   const load = async () => setItems(await base44.entities.Car.list("-created_date", 100));
   useEffect(() => { load(); }, []);
@@ -22,7 +24,14 @@ export default function CarManager() {
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
-    const data = {
+    setFormError("");
+    try {
+      let imageUrl = editing.image_url;
+      if (imageFile) {
+        const uploaded = await base44.integrations.Core.UploadFile({ file: imageFile });
+        imageUrl = uploaded.file_url;
+      }
+    const data = { ...editing, image_url: imageUrl,
       ...editing,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
@@ -34,11 +43,13 @@ export default function CarManager() {
       features: toList(editing.features),
       tags: toList(editing.tags),
     };
-    try {
       if (editing.id) await base44.entities.Car.update(editing.id, data);
       else await base44.entities.Car.create(data);
       setEditing(null);
-      load();
+      setImageFile(null);
+      await load();
+    } catch (err) {
+      setFormError(err.message || "Unable to save vehicle. Please try again.");
     } finally { setSaving(false); }
   };
 
@@ -54,7 +65,7 @@ export default function CarManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Vehicles ({items.length})</h2>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => { setImageFile(null); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-kinetic py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Vehicle
         </button>
       </div>
@@ -82,7 +93,7 @@ export default function CarManager() {
                 <td className="px-4 py-3 text-right font-mono-data">{(c.price || 0).toLocaleString("en-IN")}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setEditing({ ...c, colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") })} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setImageFile(null); setFormError(""); setEditing({ ...c, colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") }); }} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
                     <button onClick={() => remove(c.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </td>
@@ -118,12 +129,14 @@ export default function CarManager() {
               <Field label="Safety rating (0-5)"><TextInput type="number" step="0.1" value={editing.safety_rating} onChange={(e) => setEditing({ ...editing, safety_rating: e.target.value })} /></Field>
               <Field label="Launch year"><TextInput type="number" value={editing.launch_year} onChange={(e) => setEditing({ ...editing, launch_year: e.target.value })} /></Field>
               <Field label="Range (km)"><TextInput type="number" value={editing.range_km} onChange={(e) => setEditing({ ...editing, range_km: e.target.value })} /></Field>
-              <Field label="Image URL"><TextInput value={editing.image_url} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Upload cover image"><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{imageFile && <span className="text-xs text-muted-foreground">{imageFile.name}</span>}</Field>
             </div>
             <Field label="Colors (comma-separated)"><TextInput value={editing.colors} onChange={(e) => setEditing({ ...editing, colors: e.target.value })} /></Field>
             <Field label="Features (comma-separated)"><TextInput value={editing.features} onChange={(e) => setEditing({ ...editing, features: e.target.value })} /></Field>
             <Field label="Tags (comma-separated)"><TextInput value={editing.tags} onChange={(e) => setEditing({ ...editing, tags: e.target.value })} /></Field>
             <Field label="Description"><TextArea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+            {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditing(null)} className="btn-ghost py-2 px-4 text-xs">Cancel</button>
               <button type="submit" disabled={saving} className="btn-kinetic py-2 px-4 text-xs">
