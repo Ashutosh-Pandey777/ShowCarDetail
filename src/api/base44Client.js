@@ -13,9 +13,18 @@ async function request(path, options = {}) {
   return data;
 }
 
+const asArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.data)) return value.data;
+  if (Array.isArray(value?.results)) return value.results;
+  if (Array.isArray(value?.$values)) return value.$values;
+  return [];
+};
+
 const entityApi = (name) => ({
-  list: (sort, limit = 100) => request(`/entities/${name}?sort=${encodeURIComponent(sort || '')}&limit=${limit}`),
-  filter: (filter = {}, sort, limit = 100) => request(`/entities/${name}?sort=${encodeURIComponent(sort || '')}&limit=${limit}&filter=${encodeURIComponent(JSON.stringify(filter))}`),
+  list: async (sort, limit = 100) => asArray(await request(`/entities/${name}?sort=${encodeURIComponent(sort || '')}&limit=${limit}`)),
+  filter: async (filter = {}, sort, limit = 100) => asArray(await request(`/entities/${name}?sort=${encodeURIComponent(sort || '')}&limit=${limit}&filter=${encodeURIComponent(JSON.stringify(filter))}`)),
   get: (id) => request(`/entities/${name}/${id}`),
   create: (data) => request(`/entities/${name}`, { method: 'POST', body: JSON.stringify(data) }),
   update: (id, data) => request(`/entities/${name}/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
