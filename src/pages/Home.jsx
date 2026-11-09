@@ -13,7 +13,7 @@ export default function Home() {
 
   useEffect(() => {
     base44.entities.Car.list('-created_date', 60)
-      .then(setCars)
+      .then(data => setCars(Array.isArray(data) ? data : []))
       .catch(() => setCars([]))
       .finally(() => setLoading(false));
   }, []);
