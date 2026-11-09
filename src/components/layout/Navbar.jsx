@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPinned, UserRound, Navigation, Check } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPinned, UserRound, Navigation } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -61,7 +61,7 @@ export default function Navbar() {
   const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
   const navigate=useNavigate();
   useEffect(()=>{let active=true;base44.entities.Car.list('-created_date',500).then(data=>{if(active)setCarOptions(Array.isArray(data)?data:[]);}).catch(()=>{if(active)setCarOptions([]);});return()=>{active=false;};},[]);
-  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
+  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=String(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
   const selectCarSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');navigate('/browse?q='+encodeURIComponent(label));setQuery(label);setSearchFocused(false);close();};
   const {user,isAuthenticated,logout}=useAuth();
   const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
