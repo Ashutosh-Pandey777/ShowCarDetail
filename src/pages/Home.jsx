@@ -8,11 +8,12 @@ const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda'
 const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
 const TYPES=[['SUV','SUV'],['Hatchback','Hatchback'],['Sedan','Sedan'],['MUV','MUV'],['Luxury','Luxury'],['Electric','Electric']];
 export default function Home(){
- const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[city,setCity]=useState('Patna');
+ const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
+ useEffect(()=>{const syncLocation=()=>{setCity(localStorage.getItem('showcardetail_city')||'');setState(localStorage.getItem('showcardetail_state')||'');};window.addEventListener('storage',syncLocation);window.addEventListener('focus',syncLocation);return()=>{window.removeEventListener('storage',syncLocation);window.removeEventListener('focus',syncLocation);};},[]);
  useEffect(()=>{base44.entities.Car.list('-created_date',100).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
  const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
  const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
- const go=(extra='')=>{const p=new URLSearchParams();p.set('condition',kind);if(query)p.set('q',query);if(city)p.set('city',city);if(extra)p.set('budget',extra);window.location.href='/browse?'+p.toString();};
+ const go=(extra='')=>{const p=new URLSearchParams();p.set('condition',kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(extra)p.set('budget',extra);window.location.href='/browse?'+p.toString();};
  return <div className="min-h-screen bg-white text-slate-800">
   <section className="w-full bg-white">
    <div className="relative h-[300px] w-full overflow-hidden sm:h-[390px] lg:h-[460px]">
@@ -21,12 +22,16 @@ export default function Home(){
    </div>
    <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
     <div className="relative -mt-1 rounded-b-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
-     <div className="mb-4 flex items-center gap-5 border-b border-slate-100 pb-3">
-      {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Cars</button>)}
+     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+      <div className="flex items-center gap-5">
+       {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Cars</button>)}
+      </div>
+      <div className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-right text-xs font-semibold text-red-700" aria-live="polite">
+       <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
+      </div>
      </div>
-     <div className="grid gap-3 sm:grid-cols-[1fr_190px_auto]">
+     <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
       <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by car name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
-      <div className="flex items-center gap-2 rounded-md border border-slate-200 px-3"><MapPin className="h-4 w-4 shrink-0 text-red-600"/><select value={city} onChange={e=>setCity(e.target.value)} className="w-full bg-transparent py-3 text-sm outline-none"><option>Patna</option><option>Delhi NCR</option><option>Mumbai</option><option>Bengaluru</option><option>Hyderabad</option><option>Pune</option><option>Kolkata</option><option>Lucknow</option></select></div>
       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Cars <ArrowRight className="h-4 w-4"/></button>
      </div>
      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500"><span className="font-semibold text-slate-600">Popular:</span>{['Maruti Swift','Tata Nexon','Hyundai Creta','Mahindra Thar'].map(x=><button key={x} onClick={()=>{setQuery(x);window.location.href='/browse?q='+encodeURIComponent(x)+'&condition='+kind;}} className="text-blue-700 hover:underline">{x}</button>)}</div>
