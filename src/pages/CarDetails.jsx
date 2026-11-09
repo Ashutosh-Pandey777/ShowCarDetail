@@ -69,7 +69,7 @@ export default function CarDetails() {
 
         {/* Summary */}
         <div className="bg-card border border-hairline p-6">
-          <p className="text-xs font-mono-data uppercase tracking-widest text-primary">{car.brand}</p>
+          <div className="flex items-center gap-2"><p className="text-xs font-mono-data uppercase tracking-widest text-primary">{car.brand}</p>{isUsed && <span className="chip border-amber-400/40 text-amber-300">Used Car</span>}</div>
           <h1 className="font-heading text-3xl font-bold mt-1">{car.name}</h1>
           <div className="flex items-center gap-2 mt-2">
             <div className="flex">{Array.from({ length: 5 }).map((_,i) => <Star key={i} className={`w-4 h-4 ${i < (car.safety_rating||4) ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
