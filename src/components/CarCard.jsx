@@ -7,9 +7,9 @@ export default function CarCard({ car }) {
   return (
     <Link
       to={`/car/${car.id}`}
-      className="group relative block bg-card border border-hairline overflow-hidden transition-all duration-300 hover:border-primary/50"
+      className="group relative block bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary/50"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-gunmetal">
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
         <Image
           src={car.image_url}
           alt={`${car.brand} ${car.name}`}
@@ -33,7 +33,7 @@ export default function CarCard({ car }) {
             <p className="text-[11px] font-mono-data uppercase tracking-widest text-muted-foreground">{car.brand}</p>
             <h3 className="font-heading text-lg font-bold leading-tight mt-0.5 group-hover:text-primary transition-colors">{car.name}</h3>
           </div>
-          <button onClick={(e) => e.preventDefault()} className="text-muted-foreground hover:text-primary transition-colors mt-1">
+          <button onClick={(e) => e.preventDefault()} className="text-slate-400 hover:text-primary transition-colors mt-1">
             <Heart className="w-4 h-4" />
           </button>
         </div>
