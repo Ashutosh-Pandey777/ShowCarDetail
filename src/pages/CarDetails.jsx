@@ -72,7 +72,7 @@ export default function CarDetails() {
           <p className="text-xs font-mono-data uppercase tracking-widest text-primary">{car.brand}</p>
           <h1 className="font-heading text-3xl font-bold mt-1">{car.name}</h1>
           <div className="flex items-center gap-2 mt-2">
-            <div className="flex">{[...5].map((_,i) => <Star key={i} className={`w-4 h-4 ${i < (car.safety_rating||4) ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
+            <div className="flex">{Array.from({ length: 5 }).map((_,i) => <Star key={i} className={`w-4 h-4 ${i < (car.safety_rating||4) ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
             <span className="text-xs text-muted-foreground">Safety {car.safety_rating}/5</span>
           </div>
 
@@ -241,7 +241,7 @@ function ReviewCard({ r }) {
           <p className="font-semibold text-sm">{r.author}</p>
           <span className="chip mt-1">{r.type}</span>
         </div>
-        <div className="flex">{[...5].map((_,i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
+        <div className="flex">{Array.from({ length: 5 }).map((_,i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
       </div>
       <p className="font-medium text-sm mb-2">{r.title}</p>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{r.body}</p>
