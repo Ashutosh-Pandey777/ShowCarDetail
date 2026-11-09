@@ -16,6 +16,9 @@ export default function CarCard({ car }) {
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent" />
+        {String(car.condition || car.listing_type || "New").toLowerCase() === "used" && (
+          <span className="absolute top-3 left-3 chip bg-amber-400/15 text-amber-300 border-amber-400/30">Used</span>
+        )}
         {car.tags?.includes('Upcoming') && (
           <span className="absolute top-3 left-3 chip bg-primary/15 text-primary border-primary/30">Upcoming</span>
         )}
