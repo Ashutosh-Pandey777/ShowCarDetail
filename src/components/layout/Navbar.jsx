@@ -1,17 +1,36 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPin, UserRound } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPin, UserRound, Navigation } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 const BRANDS = ['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','BMW','Mercedes-Benz','Audi','MG','Skoda','Volkswagen','Nissan','Renault','BYD'];
-const CITIES = ['Select City','Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna'];
+const CITIES = ['Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna','Chandigarh','Indore','Bhopal','Nagpur','Surat','Vadodara','Kanpur','Varanasi','Ranchi','Bhubaneswar','Guwahati','Dehradun','Noida','Gurugram'];
 
 export default function Navbar() {
-  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false);
+  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState('');
   const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || 'Select City');
   const navigate=useNavigate();
   const {user,isAuthenticated,logout}=useAuth();
-  const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);};
+  const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
+  const chooseCity=value=>{setCity(value);localStorage.setItem('showcardetail_city',value);setLocationOpen(false);setCitySearch('');setLocationError('');};
+  const detectLocation=()=>{
+    setLocationError('');
+    if(!navigator.geolocation){setLocationError('Your browser does not support location detection. Please select your city.');return;}
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(async position=>{
+      const {latitude,longitude}=position.coords;
+      try{
+        const response=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+latitude+'&lon='+longitude);
+        if(!response.ok) throw new Error('Could not identify your city.');
+        const data=await response.json();
+        const address=data.address||{};
+        const detectedCity=address.city||address.town||address.city_district||address.suburb||address.county||address.state_district||address.state||'Current Location';
+        chooseCity(detectedCity);
+      }catch(error){chooseCity('Current Location');setLocationError('Location detected, but city name could not be fetched.');}
+      finally{setDetecting(false);}
+    },error=>{setDetecting(false);setLocationError(error.code===1?'Location permission was denied. Allow location access in your browser, or select a city below.':'Unable to detect your location. Please select a city below.');},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+  };
+  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>setLocationOpen(true)} aria-label="Choose your location" className={'flex h-10 items-center gap-2 rounded border border-slate-200 bg-white px-3 text-left text-slate-700 transition hover:border-red-300 hover:bg-red-50 '+(mobile?'mb-3 w-full':'')}><MapPin className="h-4 w-4 shrink-0 text-red-600"/><span className="max-w-[125px] truncate text-sm">{city==='Select City'?'Select Location':city}</span><ChevronDown className="h-3.5 w-3.5 text-slate-400"/></button>;
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'New Cars':[
@@ -39,9 +58,7 @@ export default function Navbar() {
         </Link>
         <nav className="hidden lg:flex items-center"><MenuGroup name="New Cars"/><MenuGroup name="Used Cars"/><MenuGroup name="News & Reviews"/></nav>
         <div className="hidden md:flex items-center gap-3">
-          <label className="flex h-10 items-center gap-2 rounded border border-slate-200 bg-slate-50 px-3">
-            <MapPin className="h-4 w-4 text-red-600"/><select aria-label="Select city" value={city} onChange={e=>{setCity(e.target.value);localStorage.setItem('showcardetail_city',e.target.value);}} className="max-w-[125px] bg-transparent text-sm text-slate-700 outline-none">{CITIES.map(c=><option key={c}>{c}</option>)}</select>
-          </label>
+          <LocationPicker/>
           <form onSubmit={submit} className="flex h-10 w-44 items-center gap-2 rounded border border-slate-200 px-3"><Search className="h-4 w-4 text-slate-500"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search cars" aria-label="Search cars" className="w-full bg-transparent text-sm outline-none"/></form>
           <div className="relative">
             <button type="button" aria-label="Account menu" aria-expanded={accountOpen} onClick={()=>setAccountOpen(v=>!v)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600">
@@ -57,13 +74,27 @@ export default function Navbar() {
       </div>
     </div>
     {open&&<div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
-      <label className="mb-3 flex h-10 items-center gap-2 rounded border border-slate-200 px-3"><MapPin className="h-4 w-4 text-red-600"/><select value={city} onChange={e=>{setCity(e.target.value);localStorage.setItem('showcardetail_city',e.target.value);}} className="w-full bg-transparent text-sm">{CITIES.map(c=><option key={c}>{c}</option>)}</select></label>
+      <LocationPicker mobile/>
       <form onSubmit={submit} className="mb-3 flex h-10 items-center gap-2 rounded border border-slate-200 px-3"><Search className="h-4 w-4"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search cars" className="w-full bg-transparent text-sm outline-none"/></form>
       {Object.entries(menus).map(([name,items])=><section key={name} className="border-b border-slate-100 py-2"><button onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex w-full items-center justify-between py-2 font-semibold text-slate-800">{name}<ChevronDown className="h-4 w-4"/></button>{activeMenu===name&&<div className="grid grid-cols-2 gap-1">{items.map(([label,to])=><Link key={label} to={to} onClick={close} className="rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{label}</Link>)}</div>}</section>)}
       <div className="flex items-center justify-between border-t border-slate-100 pt-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-800"><UserRound className="h-5 w-5 text-red-600"/>{isAuthenticated&&user?'My Account':'Your Account'}</div>
         {isAuthenticated&&user?<div className="flex gap-4"><Link to="/admin" onClick={close} className="text-sm font-medium text-red-600">Admin</Link><button type="button" onClick={()=>{close();logout(false)}} className="text-sm text-slate-700">Logout</button></div>:<Link to="/login" onClick={close} className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white">Login / Sign Up</Link>}
       </div>
+    </div>}
+
+    {locationOpen&&<div className="fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/50 px-4 py-16 sm:items-center" onMouseDown={e=>{if(e.target===e.currentTarget)setLocationOpen(false);}}>
+      <section role="dialog" aria-modal="true" aria-labelledby="location-picker-title" className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><h2 id="location-picker-title" className="text-lg font-bold text-slate-900">Select your city</h2><p className="mt-1 text-xs text-slate-500">Find cars and prices available near you</p></div><button type="button" aria-label="Close location selector" onClick={()=>setLocationOpen(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5"/></button></div>
+        <div className="p-5">
+          <button type="button" onClick={detectLocation} disabled={detecting} className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-red-700 hover:bg-red-100 disabled:opacity-60"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-white"><Navigation className="h-4 w-4"/></span><span className="flex-1"><span className="block text-sm font-semibold">{detecting?'Detecting your location…':'Detect my location'}</span><span className="mt-0.5 block text-xs text-red-600">Use your device location</span></span></button>
+          {locationError&&<p role="status" className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">{locationError}</p>}
+          <div className="relative mt-5"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={citySearch} onChange={e=>setCitySearch(e.target.value)} placeholder="Search your city" aria-label="Search city" className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-red-400"/></div>
+          <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Popular cities</p>
+          <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto">{CITIES.filter(c=>c.toLowerCase().includes(citySearch.toLowerCase())).map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}
+          {CITIES.filter(c=>c.toLowerCase().includes(citySearch.toLowerCase())).length===0&&<p className="col-span-2 py-4 text-center text-sm text-slate-500">No city found. Try another name.</p>}</div>
+        </div>
+      </section>
     </div>}
   </header>;
 }
