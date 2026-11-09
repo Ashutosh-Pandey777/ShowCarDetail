@@ -22,6 +22,7 @@ import Finance from '@/pages/Finance';
 import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
 import NewsReviews from '@/pages/NewsReviews';
+import CompanyInfoPage from '@/pages/CompanyInfoPage';
 
 const AuthenticatedApp = () => (
   <Routes>
@@ -33,6 +34,10 @@ const AuthenticatedApp = () => (
       <Route path="/" element={<Home />} />
       <Route path="/browse" element={<Browse />} />
       <Route path="/news-reviews" element={<NewsReviews />} />
+      <Route path="/about-us" element={<CompanyInfoPage />} />
+      <Route path="/careers" element={<CompanyInfoPage />} />
+      <Route path="/terms-and-conditions" element={<CompanyInfoPage />} />
+      <Route path="/advertise" element={<CompanyInfoPage />} />
       <Route path="/car/:id" element={<CarDetails />} />
       <Route path="/compare" element={<Compare />} />
       <Route path="/brand/:slug" element={<Brand />} />
