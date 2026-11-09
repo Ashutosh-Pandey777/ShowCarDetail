@@ -68,7 +68,7 @@ export default function Navbar() {
       finally{setDetecting(false);}
     },error=>{setDetecting(false);setLocationError(error.code===1?'Location permission was denied. Allow location access in your browser, or select a city below.':'Unable to detect your location. Please select a city below.');},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
   };
-  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>setLocationOpen(true)} aria-label="Choose your location" className={'flex h-10 items-center gap-2 rounded border border-slate-200 bg-white px-3 text-left text-slate-700 transition hover:border-red-300 hover:bg-red-50 '+(mobile?'mb-3 w-full':'')}><MapPin className="h-4 w-4 shrink-0 text-red-600"/><span className="max-w-[125px] truncate text-sm">{city==='Select City'?'Select Location':city}</span><ChevronDown className="h-3.5 w-3.5 text-slate-400"/></button>;
+  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>setLocationOpen(true)} aria-label={city==='Select City'?'Select location': 'Selected location: '+city} title={city==='Select City'?'Select location':city} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 '+(mobile?'mb-3':'')}><MapPin className="h-5 w-5 text-red-600"/></button>;
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'New Cars':[
@@ -128,18 +128,20 @@ export default function Navbar() {
           <button type="button" onClick={detectLocation} disabled={detecting} className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-red-700 hover:bg-red-100 disabled:opacity-60"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-white"><Navigation className="h-4 w-4"/></span><span className="flex-1"><span className="block text-sm font-semibold">{detecting?'Detecting your location…':'Detect my location'}</span><span className="mt-0.5 block text-xs text-red-600">Use your device location</span></span></button>
           {locationError&&<p role="status" className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">{locationError}</p>}
           <div className="relative mt-5"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={citySearch} onChange={e=>setCitySearch(e.target.value)} placeholder="Search your city" aria-label="Search city" className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-red-400"/></div>
-          <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">{citySearch.trim()?'Matching cities':'Popular cities'}</p>
-          <div className="max-h-64 space-y-4 overflow-y-auto pr-1">
-            {Object.entries(STATE_CITIES).filter(([state,cities])=>!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()))).map(([state,cities])=>{
-              const stateMatches=!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase());
-              const matches=citySearch.trim()&&!stateMatches?cities.filter(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())):cities;
-              return matches.length>0?<section key={state}>
-                <div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-semibold text-slate-800">{state}</h3><span className="text-xs text-slate-400">{matches.length} {matches.length===1?'city':'cities'}</span></div>
+          { !citySearch.trim() ? <>
+            <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Popular cities</p>
+            <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">{POPULAR_CITIES.map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+          </> : <>
+            {Object.entries(STATE_CITIES).filter(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()))).map(([state,cities])=>{
+              const stateMatches=state.toLowerCase().includes(citySearch.trim().toLowerCase());
+              const matches=stateMatches?cities:cities.filter(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()));
+              return matches.length>0?<section key={state} className="mt-5">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{state}</h3>
                 <div className="grid grid-cols-2 gap-2">{matches.map(c=><button type="button" key={state+'-'+c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-300 bg-red-50 font-semibold text-red-700':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
               </section>:null;
             })}
-            {!Object.entries(STATE_CITIES).some(([state,cities])=>!citySearch.trim()||state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())))&&<p className="py-4 text-center text-sm text-slate-500">No city found. Try another city or state name.</p>}
-          </div>
+            {!Object.entries(STATE_CITIES).some(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())))&&<p className="mt-5 py-4 text-center text-sm text-slate-500">No city found. Try another city or state name.</p>}
+          </>}
         </div>
       </section>
     </div>}
