@@ -4,122 +4,88 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
+import { LogIn, ShieldCheck, Loader2, ArrowLeft } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState("mobile");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
-  // Post-login destination (e.g. the MCP OAuth consent page sends users here
-  // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const sendOtp = async (e) => {
+    e.preventDefault(); setError(""); setNotice("");
+    const number = mobile.replace(/\D/g, "").replace(/^91/, "");
+    if (!/^[6-9]\d{9}$/.test(number)) { setError("Please enter a valid 10-digit Indian mobile number."); return; }
     setLoading(true);
     try {
-        const result = await base44.auth.loginViaEmailPassword(email, password);
+      await base44.auth.sendOtp(number);
+      setMobile(number); setStep("otp");
+      setNotice("OTP sent to +91 " + number + ". Please check your messages.");
+    } catch (err) { setError(err.message || "Unable to send OTP. Please try again."); }
+    finally { setLoading(false); }
+  };
 
-        if (result?.user?.role === "admin") {
-            window.location.href = "/admin";
-        } else {
-            window.location.href = returnTo;
-        }
-    } catch (err) {
-      setError(err.message || "Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
+  const verifyOtp = async (e) => {
+    e.preventDefault(); setError(""); setNotice("");
+    if (!/^\d{6}$/.test(otp)) { setError("Enter the 6-digit OTP."); return; }
+    setLoading(true);
+    try {
+      const result = await base44.auth.verifyMobileOtp(mobile, otp);
+      if (result?.access_token) base44.auth.setToken(result.access_token);
+      window.location.href = result?.user?.role === "admin" ? "/admin" : returnTo;
+    } catch (err) { setError(err.message || "Invalid or expired OTP. Please try again."); }
+    finally { setLoading(false); }
+  };
+
+  const resendOtp = async () => {
+    setError(""); setNotice(""); setLoading(true);
+    try { await base44.auth.sendOtp(mobile); setNotice("A new OTP has been sent to +91 " + mobile + "."); setOtp(""); }
+    catch (err) { setError(err.message || "Unable to resend OTP."); }
+    finally { setLoading(false); }
   };
 
   return (
-    <AuthLayout
-      icon={LogIn}
-      title="Welcome back"
-      subtitle="Log in to your account"
-      footer={
-        <>
-          Don't have an account?{" "}
-          <Link
-            to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-primary font-medium hover:underline"
-          >
-            Create one
-          </Link>
-        </>
-      }
-    >
-      <div className="mb-6" />
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {error}
-        </div>
+    <AuthLayout icon={LogIn} title="Login to ShowCarDetail" subtitle={step === "mobile" ? "Continue with your mobile number" : "Verify your mobile number"} footer={<>New to ShowCarDetail? <Link to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="text-primary font-medium hover:underline">Create an account</Link></>}>
+      {error && <div role="alert" className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+      {notice && <div role="status" className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</div>}
+      {step === "mobile" ? (
+        <form onSubmit={sendOtp} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="mobile">Mobile number</Label>
+            <div className="flex h-12 items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring">
+              <span className="border-r px-3 text-sm font-medium text-muted-foreground">+91</span>
+              <Input id="mobile" type="tel" inputMode="numeric" autoComplete="tel-national" autoFocus maxLength={10} placeholder="Enter 10-digit mobile number" value={mobile} onChange={e=>setMobile(e.target.value.replace(/\D/g, "").slice(0,10))} className="h-full border-0 shadow-none focus-visible:ring-0" required />
+            </div>
+            <p className="text-xs text-muted-foreground">We’ll send a one-time password to verify your number.</p>
+          </div>
+          <Button type="submit" className="h-12 w-full font-medium" disabled={loading || mobile.length !== 10}>
+            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Sending OTP...</> : "Send OTP"}
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={verifyOtp} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="otp">Enter 6-digit OTP</Label>
+            <div className="relative">
+              <ShieldCheck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"/>
+              <Input id="otp" type="text" inputMode="numeric" autoComplete="one-time-code" autoFocus maxLength={6} placeholder="••••••" value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g, "").slice(0,6))} className="h-12 pl-10 text-center text-xl tracking-[0.5em]" required/>
+            </div>
+            <p className="text-xs text-muted-foreground">Sent to +91 {mobile}</p>
+          </div>
+          <Button type="submit" className="h-12 w-full font-medium" disabled={loading || otp.length !== 6}>
+            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Verifying...</> : "Verify OTP & Login"}
+          </Button>
+          <div className="flex items-center justify-between text-sm">
+            <button type="button" onClick={()=>{setStep("mobile");setOtp("");setError("");setNotice("");}} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4"/>Change number</button>
+            <button type="button" onClick={resendOtp} disabled={loading} className="font-medium text-primary hover:underline">Resend OTP</button>
+          </div>
+        </form>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
-            </Link>
-          </div>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
-        </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Logging in...
-            </>
-          ) : (
-            "Log in"
-          )}
-        </Button>
-      </form>
     </AuthLayout>
   );
 }
