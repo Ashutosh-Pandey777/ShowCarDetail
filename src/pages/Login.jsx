@@ -21,36 +21,24 @@ export default function Login() {
     e.preventDefault(); setError(""); setNotice("");
     const number = mobile.replace(/\D/g, "").replace(/^91/, "");
     if (!/^[6-9]\d{9}$/.test(number)) { setError("Please enter a valid 10-digit Indian mobile number."); return; }
-    setLoading(true);
-    try {
-      await base44.auth.sendOtp(number);
-      setMobile(number); setStep("otp");
-      setNotice("OTP sent to +91 " + number + ". Please check your messages.");
-    } catch (err) { setError(err.message || "Unable to send OTP. Please try again."); }
-    finally { setLoading(false); }
+    setMobile(number); setStep("otp");
+    setNotice("UI preview only: OTP delivery is not connected yet. No SMS has been sent.");
   };
 
   const verifyOtp = async (e) => {
     e.preventDefault(); setError(""); setNotice("");
     if (!/^\d{6}$/.test(otp)) { setError("Enter the 6-digit OTP."); return; }
-    setLoading(true);
-    try {
-      const result = await base44.auth.verifyMobileOtp(mobile, otp);
-      if (result?.access_token) base44.auth.setToken(result.access_token);
-      window.location.href = result?.user?.role === "admin" ? "/admin" : returnTo;
-    } catch (err) { setError(err.message || "Invalid or expired OTP. Please try again."); }
-    finally { setLoading(false); }
+    setError("Mobile OTP login is currently a UI preview. Real OTP verification will be enabled after MSG91 setup.");
   };
 
   const resendOtp = async () => {
-    setError(""); setNotice(""); setLoading(true);
-    try { await base44.auth.sendOtp(mobile); setNotice("A new OTP has been sent to +91 " + mobile + "."); setOtp(""); }
-    catch (err) { setError(err.message || "Unable to resend OTP."); }
-    finally { setLoading(false); }
+    setError(""); setOtp("");
+    setNotice("UI preview only: resend will work after OTP service is connected. No SMS has been sent.");
   };
 
   return (
     <AuthLayout icon={LogIn} title="Login to ShowCarDetail" subtitle={step === "mobile" ? "Continue with your mobile number" : "Verify your mobile number"} footer={<>New to ShowCarDetail? <Link to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="text-primary font-medium hover:underline">Create an account</Link></>}>
+      <div role="note" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">Preview mode: mobile OTP screens are ready, but SMS delivery and verification are not connected yet.</div>
       {error && <div role="alert" className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
       {notice && <div role="status" className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</div>}
       {step === "mobile" ? (
