@@ -14,11 +14,11 @@ export default function Browse() {
   const [params] = useSearchParams();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(() => params.get('filters') === '1');
   const [sort, setSort] = useState('-created_date');
   const [filters, setFilters] = useState({
     condition: params.get('condition') || '', body: params.get('body') || '',
-    fuel: params.get('fuel') || '', transmission: '', seats: '', budget: '', q: params.get('q') || '',
+    fuel: params.get('fuel') || '', transmission: params.get('transmission') || '', seats: params.get('seats') || '', budget: params.get('budget') || '', q: params.get('q') || '',
   });
   useEffect(() => {
     let mounted = true;
