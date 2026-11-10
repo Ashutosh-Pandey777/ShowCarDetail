@@ -141,8 +141,8 @@ using (var scope = app.Services.CreateScope())
     await db.Database.EnsureCreatedAsync();
 
     // Add phone login support to existing PostgreSQL databases without dropping user data.
-    await db.Database.ExecuteSqlRawAsync("ALTER TABLE \\\"Users\\\" ADD COLUMN IF NOT EXISTS \\\"PhoneNumber\\\" character varying(20);");
-    await db.Database.ExecuteSqlRawAsync("CREATE UNIQUE INDEX IF NOT EXISTS \\\"IX_Users_PhoneNumber\\\" ON \\\"Users\\\" (\\\"PhoneNumber\\\") WHERE \\\"PhoneNumber\\\" IS NOT NULL;");
+    await db.Database.ExecuteSqlRawAsync("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "PhoneNumber" character varying(20);""");
+    await db.Database.ExecuteSqlRawAsync("""CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_PhoneNumber" ON "Users" ("PhoneNumber") WHERE "PhoneNumber" IS NOT NULL;""");
 
     // Create default admin if no users exist
     if (!db.Users.Any())
