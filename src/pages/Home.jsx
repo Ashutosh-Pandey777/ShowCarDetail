@@ -36,7 +36,7 @@ export default function Home(){
  const fuelCars=useMemo(()=>newCars.filter(c=>normalize(c.fuel_type)===normalize(selectedFuel)).slice(0,4),[newCars,selectedFuel]);
  const [selectedBudget,setSelectedBudget]=useState('Under ₹5 Lakh');
  const budgetCars=useMemo(()=>{const range=BUDGETS.find(x=>x[0]===selectedBudget)?.[1].split('-').map(Number)||[0,999999999];return newCars.filter(c=>Number(c.price||0)>=range[0]&&Number(c.price||0)<range[1]).slice(0,4);},[newCars,selectedBudget]);
- const popularNew=useMemo(()=>[...newCars].sort((a,b)=>(Number(b.popularity)||0)-(Number(a.popularity)||0)).slice(0,8),[newCars]);
+ const popularNew=useMemo(()=>{const featured=newCars.filter(c=>c.is_popular===true);return (featured.length?featured:newCars).slice(0,8);},[newCars]);
  const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
 
 
