@@ -8,7 +8,7 @@ const EMPTY = {
   transmission: "Manual", price: "", on_road_price: "", mileage: "", engine: "",
   power: "", torque: "", seating: "", boot_space: "", safety_rating: "",
   launch_year: "", range_km: "", image_url: "", gallery: "", city: "", description: "",
-  colors: "", features: "", tags: "",
+  colors: "", features: "", tags: "", is_popular: false,
 };
 
 export default function CarManager() {
@@ -19,7 +19,7 @@ export default function CarManager() {
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [formError, setFormError] = useState("");
 
-  const load = async () => setItems(await base44.entities.Car.list("-created_date", 100));
+  const load = async () => setItems(await base44.entities.Car.list("-created_date", 500));
   useEffect(() => { load(); }, []);
 
   const save = async (e) => {
@@ -143,6 +143,7 @@ export default function CarManager() {
             <Field label="Colors (comma-separated)"><TextInput value={editing.colors} onChange={(e) => setEditing({ ...editing, colors: e.target.value })} /></Field>
             <Field label="Features (comma-separated)"><TextInput value={editing.features} onChange={(e) => setEditing({ ...editing, features: e.target.value })} /></Field>
             <Field label="Tags (comma-separated)"><TextInput value={editing.tags} onChange={(e) => setEditing({ ...editing, tags: e.target.value })} /></Field>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(editing.is_popular)} onChange={(e) => setEditing({ ...editing, is_popular: e.target.checked })} /> Feature this vehicle in Popular New Cars (when condition is New)</label>
             <Field label="Description"><TextArea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
             {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-3 pt-2">
