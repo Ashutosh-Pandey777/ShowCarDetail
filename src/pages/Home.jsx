@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
+import CarPhoto from '@/components/CarPhoto';
 import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
@@ -46,7 +47,7 @@ export default function Home(){
  return <div className="min-h-screen bg-white text-slate-800">
   <section className="w-full bg-white">
    <div className="relative h-[300px] w-full overflow-hidden sm:h-[390px] lg:h-[460px]">
-    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90" alt="Premium car on the road" className="absolute inset-0 h-full w-full object-cover object-center"/>
+    <CarPhoto car={{body_type:"Luxury",image_url:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2200&q=90"}} alt="Premium car on the road" className="absolute inset-0 h-full w-full object-cover object-center"/>
     <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent"/>
    </div>
    <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
@@ -79,7 +80,7 @@ export default function Home(){
    <SectionHeading title="Explore Cars by Body Type" subtitle="Choose a category and discover cars with photos, prices and specifications"/>
    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
     {visibleBodyTypes.map((item)=> <Link key={item.id||item.name} to={'/browse?'+new URLSearchParams({condition:'New',body:item.name}).toString()} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-red-300 hover:shadow-lg">
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100"><img src={item.image_url||item.image} alt={item.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105"/><span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">{item.name}</span></div>
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100"><CarPhoto car={{body_type:item.name,image_url:item.image_url||item.image}} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105"/><span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">{item.name}</span></div>
       <div className="p-3"><p className="line-clamp-2 min-h-10 text-xs leading-5 text-slate-600">{item.description||'Explore '+item.name+' cars and compare features.'}</p><span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-red-600">View {item.name} Cars <ChevronRight className="h-3.5 w-3.5"/></span></div>
     </Link>)}
    </div>
