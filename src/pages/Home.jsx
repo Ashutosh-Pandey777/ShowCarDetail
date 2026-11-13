@@ -2,41 +2,39 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
-import CarPhoto from '@/components/CarPhoto';
 import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
 const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
-const BODY_TYPES=[
- {name:'SUV',description:'Spacious cars for family trips and all-road comfort.',image:'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=900&q=85'},
- {name:'Hatchback',description:'Compact, practical cars for everyday city drives.',image:'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=900&q=85'},
- {name:'Sedan',description:'Comfortable rides with elegant design and boot space.',image:'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=85'},
- {name:'MUV',description:'Flexible space and seating for the whole family.',image:'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=900&q=85'},
- {name:'Luxury',description:'Premium comfort, technology and performance.',image:'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85'},
- {name:'Coupe',description:'Sporty styling with a distinctive roofline.',image:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=85'},
- {name:'Convertible',description:'Open-top driving for a more engaging journey.',image:'https://images.unsplash.com/photo-1504215680853-026ed2a45def?auto=format&fit=crop&w=900&q=85'},
- {name:'Pickup',description:'Utility-focused vehicles for work and adventure.',image:'https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=900&q=85'},
- {name:'Compact SUV',description:'SUV-inspired space in an easy-to-drive size.',image:'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?auto=format&fit=crop&w=900&q=85'},
- {name:'Compact Sedan',description:'The balance of sedan comfort and compact size.',image:'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=85'},
- {name:'Minivan',description:'Roomy people movers for larger families.',image:'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=900&q=85'}
-];
 export default function Home(){
- const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[bodyTypeImages,setBodyTypeImages]=useState([]),[selectedBody,setSelectedBody]=useState('SUV'),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
+ const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
  useEffect(()=>{const syncLocation=()=>{setCity(localStorage.getItem('showcardetail_city')||'');setState(localStorage.getItem('showcardetail_state')||'');};window.addEventListener('storage',syncLocation);window.addEventListener('focus',syncLocation);window.addEventListener('showcardetail:locationchange',syncLocation);return()=>{window.removeEventListener('storage',syncLocation);window.removeEventListener('focus',syncLocation);window.removeEventListener('showcardetail:locationchange',syncLocation);};},[]);
  useEffect(()=>{base44.entities.Car.list('-created_date',500).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
- useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBodyTypeImages((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='body type'))).catch(()=>setBodyTypeImages([]));},[]);
+ useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'&&x.active!==false))).catch(()=>setBudgetItems([]));},[]);
  const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
  const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
- const visibleBodyTypes=useMemo(()=>{const saved=bodyTypeImages;const merged=BODY_TYPES.map(base=>{const custom=saved.find(x=>String(x.title||'').toLowerCase()===base.name.toLowerCase());if(custom)return custom.active===false?null:{...base,...custom,name:custom.title};return base;}).filter(Boolean);const extras=saved.filter(x=>x.active!==false&&!BODY_TYPES.some(b=>b.name.toLowerCase()===String(x.title||'').toLowerCase())).map(x=>({...x,name:x.title}));return [...merged,...extras].sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0));},[bodyTypeImages]);
- 
  const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
- const bodyMatches=(car,category)=>{const actual=normalize(car.body_type),wanted=normalize(category);if(actual===wanted)return true;if(wanted==='suv')return actual.includes('suv');if(wanted==='muv')return ['muv','mpv','minivan'].includes(actual);if(wanted==='luxury')return String(car.tags||[]).join(' ').toLowerCase().includes('luxury')||Number(car.price||0)>=4000000;return false;};
- const bodyCars=useMemo(()=>newCars.filter(c=>bodyMatches(c,selectedBody)).slice(0,4),[newCars,selectedBody]);
  const fuelOptions=['Petrol','Diesel','CNG','Electric','Hybrid'];
  const [selectedFuel,setSelectedFuel]=useState('Petrol');
  const fuelCars=useMemo(()=>newCars.filter(c=>normalize(c.fuel_type)===normalize(selectedFuel)).slice(0,4),[newCars,selectedFuel]);
- const [selectedBudget,setSelectedBudget]=useState('Under ₹5 Lakh');
- const budgetCars=useMemo(()=>{const range=BUDGETS.find(x=>x[0]===selectedBudget)?.[1].split('-').map(Number)||[0,999999999];return newCars.filter(c=>Number(c.price||0)>=range[0]&&Number(c.price||0)<range[1]).slice(0,4);},[newCars,selectedBudget]);
+ const DEFAULT_BUDGETS=[
+  {title:'Sub Compact SUV',group:'under',mode:'body',body:'compact-suv',min:0,max:1000000,sort_order:0},
+  {title:'Hatchback',group:'under',mode:'body',body:'hatchback',min:0,max:1000000,sort_order:1},
+  {title:'Sedan & Others',group:'under',mode:'body',body:'others',min:0,max:1000000,sort_order:2},
+  {title:'10 - 20 Lakh',group:'above',mode:'price',min:1000000,max:2000000,sort_order:3},
+  {title:'20 - 30 Lakh',group:'above',mode:'price',min:2000000,max:3000000,sort_order:4},
+  {title:'Luxury Cars',group:'above',mode:'luxury',min:3000000,max:999999999,sort_order:5},
+  {title:'SUV',group:'above',mode:'body',body:'suv',min:1000000,max:999999999,sort_order:6},
+  {title:'Sub Compact SUV',group:'above',mode:'body',body:'compact-suv',min:1000000,max:999999999,sort_order:7},
+  {title:'Sedan & Others',group:'above',mode:'body',body:'others',min:1000000,max:999999999,sort_order:8}
+ ];
+ const configuredBudgets=useMemo(()=>{const parsed=budgetItems.map(x=>{let cfg={};try{cfg=JSON.parse(x.description||'{}')}catch{}return {...cfg,...x,title:x.title,group:cfg.group||'under',mode:cfg.mode||'price',min:Number(cfg.min)||0,max:Number(cfg.max)||999999999,sort_order:Number(x.sort_order)||0};});return parsed.length?parsed:DEFAULT_BUDGETS;},[budgetItems]);
+ const [budgetGroup,setBudgetGroup]=useState('under');
+ const [selectedBudget,setSelectedBudget]=useState('Sub Compact SUV');
+ const currentBudgetOptions=configuredBudgets.filter(x=>x.group===budgetGroup).sort((a,b)=>a.sort_order-b.sort_order);
+ const activeBudget=currentBudgetOptions.find(x=>x.title===selectedBudget)||currentBudgetOptions[0];
+ const matchesBudget=(car,item)=>{const price=Number(car.price||0);if(price<item.min||price>=item.max)return false;const body=normalize(car.body_type);if(item.mode==='price')return true;if(item.mode==='luxury')return price>=item.min&&(String(car.tags||[]).join(' ').toLowerCase().includes('luxury')||price>=4000000);if(item.body==='suv')return body.includes('suv');if(item.body==='compact-suv')return body.includes('compact')&&body.includes('suv');if(item.body==='hatchback')return body.includes('hatch');if(item.body==='others')return !body.includes('suv')&&!body.includes('hatch');return true;};
+ const budgetCars=useMemo(()=>activeBudget?newCars.filter(c=>matchesBudget(c,activeBudget)).slice(0,8):[],[newCars,activeBudget]);
  const popularNew=useMemo(()=>{const featured=newCars.filter(c=>c.is_popular===true);return (featured.length?featured:newCars).slice(0,8);},[newCars]);
  const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
 
@@ -77,30 +75,17 @@ export default function Home(){
    </div>
   </section>
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
-   <SectionHeading title="Explore Cars by Body Type" subtitle="Choose a category and discover cars with photos, prices and specifications"/>
-   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-    {visibleBodyTypes.map((item)=> <Link key={item.id||item.name} to={'/browse?'+new URLSearchParams({condition:'New',body:item.name}).toString()} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-red-300 hover:shadow-lg">
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100"><CarPhoto car={{body_type:item.name,image_url:item.image_url||item.image}} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105"/><span className="absolute bottom-2 left-2 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">{item.name}</span></div>
-      <div className="p-3"><p className="line-clamp-2 min-h-10 text-xs leading-5 text-slate-600">{item.description||'Explore '+item.name+' cars and compare features.'}</p><span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-red-600">View {item.name} Cars <ChevronRight className="h-3.5 w-3.5"/></span></div>
-    </Link>)}
-   </div>
-  </section>
-  <section className="mx-auto max-w-6xl px-4 pb-9 sm:px-6">
-   <div className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-xl font-bold text-slate-900 sm:text-2xl">Popular Cars by Body Type</h2><p className="mt-1 text-sm text-slate-500">Browse popular models and see their images and details</p></div><Link to={'/browse?'+new URLSearchParams({condition:'New',body:selectedBody}).toString()} className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:underline">View all {selectedBody} cars <ChevronRight className="h-4 w-4"/></Link></div>
-   <div className="mb-5 flex gap-2 overflow-x-auto pb-2">{visibleBodyTypes.map(item=><button key={item.id||item.name} onClick={()=>setSelectedBody(item.name)} className={'shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition '+(selectedBody===item.name?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600 hover:border-red-300')}>{item.name}</button>)}</div>
-   {loading?<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[1,2,3,4].map(x=><div key={x} className="h-64 animate-pulse rounded-lg bg-slate-100"/>)}</div>:bodyCars.length?<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{bodyCars.map(car=><CarCard key={car.id} car={car}/>)}</div>:<div className="rounded-lg border border-dashed border-slate-300 py-8 text-center text-sm text-slate-500">No matching {selectedBody} cars found. Admin Dashboard → Cars mein Body Type check karein.</div>}
-  </section>
-  <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
    <SectionHeading title="Cars by Fuel Type" subtitle="Choose a fuel type to see matching cars"/>
    <div className="mb-5 flex flex-wrap gap-2">{fuelOptions.map(x=><button key={x} onClick={()=>setSelectedFuel(x)} className={'rounded-full border px-4 py-2 text-sm font-semibold '+(selectedFuel===x?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600')}>{x}</button>)}</div>
    {fuelCars.length?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{fuelCars.map(car=><CarCard key={car.id} car={car}/>)}</div>:<EmptyCars label={selectedFuel+' cars'} to={'/browse?'+new URLSearchParams({condition:'New',fuel:selectedFuel})}/>}
    <div className="mt-4 text-right"><Link to={'/browse?'+new URLSearchParams({condition:'New',fuel:selectedFuel})} className="text-sm font-semibold text-red-600">View all {selectedFuel} cars →</Link></div>
   </section>
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
-   <SectionHeading title="Cars by Budget" subtitle="Choose your budget and explore matching cars"/>
-   <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">{BUDGETS.map(([label])=><button key={label} onClick={()=>setSelectedBudget(label)} className={'rounded-lg border p-3 text-left transition '+(selectedBudget===label?'border-red-500 bg-red-50':'border-slate-200 bg-white hover:border-red-300')}><Wallet className="mb-2 h-5 w-5 text-red-600"/><p className="text-sm font-bold text-slate-800">{label}</p></button>)}</div>
-   {budgetCars.length?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{budgetCars.map(car=><CarCard key={car.id} car={car}/>)}</div>:<EmptyCars label={selectedBudget+' budget'} to={'/browse?'+new URLSearchParams({condition:'New',budget:selectedBudget})}/>}
-   <div className="mt-4 text-right"><Link to={'/browse?'+new URLSearchParams({condition:'New',budget:selectedBudget})} className="text-sm font-semibold text-red-600">View all cars in this budget →</Link></div>
+   <SectionHeading title="Popular Cars by Budget" subtitle="Find your next car in the right price range"/>
+   <div className="mb-5 flex flex-wrap gap-2">{[['under','Cars Under 10 Lakh'],['above','Cars Above 10 Lakh']].map(([key,label])=><button key={key} onClick={()=>{setBudgetGroup(key);const first=configuredBudgets.find(x=>x.group===key);if(first)setSelectedBudget(first.title);}} className={'rounded-md border px-5 py-3 text-sm font-bold '+(budgetGroup===key?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-700 hover:border-red-300')}>{label}</button>)}</div>
+   <div className="mb-5 flex flex-wrap gap-2">{currentBudgetOptions.map(item=><button key={item.id||item.title} onClick={()=>setSelectedBudget(item.title)} className={'rounded-full border px-4 py-2 text-sm font-semibold transition '+(activeBudget?.title===item.title?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600 hover:border-red-300')}>{item.title}</button>)}</div>
+   {loading?<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[1,2,3,4].map(x=><div key={x} className="h-64 animate-pulse rounded-lg bg-slate-100"/>)}</div>:budgetCars.length?<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{budgetCars.slice(0,4).map(car=><CarCard key={car.id} car={car}/>)}</div>:<EmptyCars label={activeBudget?.title||'budget'} to={'/browse?'+new URLSearchParams({condition:'New'}).toString()}/>}
+   {activeBudget&&<div className="mt-4 text-right"><Link to={'/browse?'+new URLSearchParams(activeBudget.mode==='body'?{condition:'New',body:activeBudget.body==='compact-suv'?'CompactSUV':activeBudget.body==='others'?'SedanOthers':'SUV'}:{condition:'New',budget:activeBudget.min+'-'+activeBudget.max}).toString()} className="text-sm font-semibold text-red-600">View all {activeBudget.title} cars →</Link></div>}
   </section>
   <CarSection title="Popular New Cars" subtitle="Popular models from your car inventory" cars={popularNew} loading={loading} to="/browse?condition=New"/>
   <CarSection title="Latest Used Cars" subtitle="Recently added pre-owned cars" cars={latestUsed} loading={loading} to="/browse?condition=Used"/>
