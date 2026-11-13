@@ -2,6 +2,7 @@ import React,{useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
+import CarPhoto from '@/components/CarPhoto';
 import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
@@ -10,7 +11,7 @@ export default function Home(){
  const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
  useEffect(()=>{const syncLocation=()=>{setCity(localStorage.getItem('showcardetail_city')||'');setState(localStorage.getItem('showcardetail_state')||'');};window.addEventListener('storage',syncLocation);window.addEventListener('focus',syncLocation);window.addEventListener('showcardetail:locationchange',syncLocation);return()=>{window.removeEventListener('storage',syncLocation);window.removeEventListener('focus',syncLocation);window.removeEventListener('showcardetail:locationchange',syncLocation);};},[]);
  useEffect(()=>{base44.entities.Car.list('-created_date',500).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
- useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'&&x.active!==false))).catch(()=>setBudgetItems([]));},[]);
+ useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'))).catch(()=>setBudgetItems([]));},[]);
  const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
  const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
  const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -28,7 +29,7 @@ export default function Home(){
   {title:'Sub Compact SUV',group:'above',mode:'body',body:'compact-suv',min:1000000,max:999999999,sort_order:7},
   {title:'Sedan & Others',group:'above',mode:'body',body:'others',min:1000000,max:999999999,sort_order:8}
  ];
- const configuredBudgets=useMemo(()=>{const parsed=budgetItems.map(x=>{let cfg={};try{cfg=JSON.parse(x.description||'{}')}catch{}return {...cfg,...x,title:x.title,group:cfg.group||'under',mode:cfg.mode||'price',min:Number(cfg.min)||0,max:Number(cfg.max)||999999999,sort_order:Number(x.sort_order)||0};});return parsed.length?parsed:DEFAULT_BUDGETS;},[budgetItems]);
+ const configuredBudgets=useMemo(()=>{const saved=budgetItems.map(x=>{let cfg={};try{cfg=JSON.parse(x.description||'{}')}catch{}return {...cfg,...x,title:x.title,group:cfg.group||'under',mode:cfg.mode||'price',min:Number(cfg.min)||0,max:Number(cfg.max)||999999999,sort_order:Number(x.sort_order)||0};});const merged=DEFAULT_BUDGETS.map(d=>{const found=saved.find(x=>x.title===d.title&&x.group===d.group);return found?{...d,...found}:d;});const extras=saved.filter(x=>!DEFAULT_BUDGETS.some(d=>d.title===x.title&&d.group===x.group));return [...merged,...extras].filter(x=>x.active!==false).sort((a,b)=>a.sort_order-b.sort_order);},[budgetItems]);
  const [budgetGroup,setBudgetGroup]=useState('under');
  const [selectedBudget,setSelectedBudget]=useState('Sub Compact SUV');
  const currentBudgetOptions=configuredBudgets.filter(x=>x.group===budgetGroup).sort((a,b)=>a.sort_order-b.sort_order);
