@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { SlidersHorizontal } from 'lucide-react';
 import CarCard from '@/components/CarCard';
 
-const BODY_TYPES = ['SUV','Sedan','Hatchback','Coupe','MUV','Convertible'];
+const BODY_TYPES = ['SUV','Compact SUV','Hatchback','Sedan','Compact Sedan','MUV','Luxury','Coupe','Convertible','Pickup','Minivan'];
 const FUELS = ['Petrol','Diesel','Electric','Hybrid','CNG'];
 const TRANSMISSIONS = ['Manual','Automatic'];
 const BUDGETS = [['Under ₹10L',0,1000000],['₹10-20L',1000000,2000000],['₹20-40L',2000000,4000000],['₹40L+',4000000,99999999]];
@@ -31,7 +31,7 @@ export default function Browse() {
   const filtered = cars.filter(c => {
     const condition = String(c.condition || c.listing_type || 'New').toLowerCase();
     if (filters.condition && condition !== filters.condition.toLowerCase()) return false;
-    if (filters.body && c.body_type !== filters.body) return false;
+    if (filters.body && String(c.body_type || '').toLowerCase() !== filters.body.toLowerCase()) return false;
     if (filters.fuel && c.fuel_type !== filters.fuel) return false;
     if (filters.transmission && c.transmission !== filters.transmission) return false;
     if (filters.seats && Number(c.seating) !== Number(filters.seats)) return false;
