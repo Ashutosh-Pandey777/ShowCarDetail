@@ -9,6 +9,7 @@ import NewsManager from "@/components/admin/NewsManager";
 import ContactManager from "@/components/admin/ContactManager";
 import VisitManager from "@/components/admin/VisitManager";
 import ImageManager from "@/components/admin/ImageManager";
+import BodyTypeManager from "@/components/admin/BodyTypeManager";
 
 const NAV = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -19,6 +20,7 @@ const NAV = [
   { id: "contacts", label: "Inquiries", icon: Mail },
   { id: "visits", label: "Visits", icon: Eye },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
+  { id: "bodytypes", label: "Body Types", icon: Car },
 ];
 
 export default function Admin() {
@@ -71,6 +73,7 @@ export default function Admin() {
             {active === "contacts" && <ContactManager />}
             {active === "visits" && <VisitManager />}
             {active === "gallery" && <ImageManager />}
+            {active === "bodytypes" && <BodyTypeManager />}
           </section>
         </div>
       </div>
