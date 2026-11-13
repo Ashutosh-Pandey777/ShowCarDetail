@@ -31,11 +31,11 @@ export default function Browse() {
   const filtered = cars.filter(c => {
     const condition = String(c.condition || c.listing_type || 'New').toLowerCase();
     if (filters.condition && condition !== filters.condition.toLowerCase()) return false;
-    if (filters.body) { const actual=String(c.body_type||'').toLowerCase().replace(/[^a-z0-9]/g,''); const wanted=filters.body.toLowerCase().replace(/[^a-z0-9]/g,''); const match=actual===wanted||(wanted==='suv'&&actual.includes('suv'))||(wanted==='muv'&&['muv','mpv','minivan'].includes(actual)); if(!match)return false; }
+    if (filters.body) { const actual=String(c.body_type||'').toLowerCase().replace(/[^a-z0-9]/g,''); const wanted=filters.body.toLowerCase().replace(/[^a-z0-9]/g,''); const match=actual===wanted||(wanted==='suv'&&actual.includes('suv'))||(wanted==='muv'&&['muv','mpv','minivan'].includes(actual))||(wanted==='sedanothers'&&!actual.includes('suv')&&!actual.includes('hatch'))||(wanted==='compactsuv'&&actual.includes('compact')&&actual.includes('suv')); if(!match)return false; }
     if (filters.fuel && String(c.fuel_type||'').toLowerCase() !== filters.fuel.toLowerCase()) return false;
     if (filters.transmission && c.transmission !== filters.transmission) return false;
     if (filters.seats && Number(c.seating) !== Number(filters.seats)) return false;
-    if (filters.budget) { const budget = BUDGETS.find(x => x[0] === filters.budget); const price = Number(c.price) || 0; if (price < budget[1] || price >= budget[2]) return false; }
+    if (filters.budget) { const price = Number(c.price) || 0; const range=filters.budget.match(/^(\\d+)-(\\d+)$/); const budget = BUDGETS.find(x => x[0] === filters.budget); if(range){if(price<Number(range[1])||price>=Number(range[2]))return false;}else if(budget&&(price<budget[1]||price>=budget[2]))return false; }
     if (filters.q && !(String(c.name || '') + ' ' + String(c.brand || '')).toLowerCase().includes(filters.q.toLowerCase())) return false;
     return true;
   });
