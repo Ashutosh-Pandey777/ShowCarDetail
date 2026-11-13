@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Image } from '@/components/ui/image';
+import CarPhoto from '@/components/CarPhoto';
 import { Fuel, Gauge, Cog, Users, Zap, Shield, Ruler, Heart, Share2, Download, GitCompare, ChevronRight, Star, Check, MapPin } from 'lucide-react';
 import CarCard from '@/components/CarCard';
 import EMICalculator from '@/components/EMICalculator';
@@ -53,14 +53,14 @@ export default function CarDetails() {
       <section className="max-w-chassis mx-auto px-4 sm:px-6 grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="relative aspect-[16/10] bg-gunmetal overflow-hidden border border-hairline">
-            <Image src={gallery[activeImg]} alt={car.name} className="w-full h-full object-cover" />
+            <CarPhoto car={{...car,image_url:gallery[activeImg]||car.image_url}} alt={car.name} className="w-full h-full object-cover" />
             {car.tags?.map(t => <span key={t} className="absolute top-4 left-4 chip bg-obsidian/70 backdrop-blur">{t}</span>)}
           </div>
           {gallery.length > 1 && (
             <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-thin">
               {gallery.map((g, i) => (
                 <button key={i} onClick={() => setActiveImg(i)} className={`relative shrink-0 w-24 aspect-[4/3] border-2 overflow-hidden ${activeImg === i ? 'border-primary' : 'border-hairline'}`}>
-                  <img src={g} alt="" className="w-full h-full object-cover" />
+                  <CarPhoto car={{...car,image_url:g}} alt={car.name} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
