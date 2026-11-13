@@ -7,7 +7,7 @@ import CarCard from '@/components/CarCard';
 const BODY_TYPES = ['SUV','Compact SUV','Hatchback','Sedan','Compact Sedan','MUV','Luxury','Coupe','Convertible','Pickup','Minivan'];
 const FUELS = ['Petrol','Diesel','Electric','Hybrid','CNG'];
 const TRANSMISSIONS = ['Manual','Automatic'];
-const BUDGETS = [['Under ₹10L',0,1000000],['₹10-20L',1000000,2000000],['₹20-40L',2000000,4000000],['₹40L+',4000000,99999999]];
+const BUDGETS = [['Under ₹5 Lakh',0,500000],['₹5 - 10 Lakh',500000,1000000],['₹10 - 20 Lakh',1000000,2000000],['₹20 - 30 Lakh',2000000,3000000],['₹30 - 50 Lakh',3000000,5000000],['Above ₹50 Lakh',5000000,999999999]];
 const SEATS = [4,5,6,7,8];
 
 export default function Browse() {
@@ -31,8 +31,8 @@ export default function Browse() {
   const filtered = cars.filter(c => {
     const condition = String(c.condition || c.listing_type || 'New').toLowerCase();
     if (filters.condition && condition !== filters.condition.toLowerCase()) return false;
-    if (filters.body && String(c.body_type || '').toLowerCase() !== filters.body.toLowerCase()) return false;
-    if (filters.fuel && c.fuel_type !== filters.fuel) return false;
+    if (filters.body) { const actual=String(c.body_type||'').toLowerCase().replace(/[^a-z0-9]/g,''); const wanted=filters.body.toLowerCase().replace(/[^a-z0-9]/g,''); const match=actual===wanted||(wanted==='suv'&&actual.includes('suv'))||(wanted==='muv'&&['muv','mpv','minivan'].includes(actual)); if(!match)return false; }
+    if (filters.fuel && String(c.fuel_type||'').toLowerCase() !== filters.fuel.toLowerCase()) return false;
     if (filters.transmission && c.transmission !== filters.transmission) return false;
     if (filters.seats && Number(c.seating) !== Number(filters.seats)) return false;
     if (filters.budget) { const budget = BUDGETS.find(x => x[0] === filters.budget); const price = Number(c.price) || 0; if (price < budget[1] || price >= budget[2]) return false; }
