@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Car, BadgeCheck, Star, Newspaper, Mail, Eye, ImageIcon, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Car, BadgeCheck, Star, Newspaper, Mail, Eye, ImageIcon, ArrowLeft, Wallet } from "lucide-react";
 import AdminStats from "@/components/admin/AdminStats";
 import CarManager from "@/components/admin/CarManager";
 import BrandManager from "@/components/admin/BrandManager";
@@ -9,7 +9,7 @@ import NewsManager from "@/components/admin/NewsManager";
 import ContactManager from "@/components/admin/ContactManager";
 import VisitManager from "@/components/admin/VisitManager";
 import ImageManager from "@/components/admin/ImageManager";
-import BodyTypeManager from "@/components/admin/BodyTypeManager";
+import BudgetManager from "@/components/admin/BudgetManager";
 
 const NAV = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -20,7 +20,7 @@ const NAV = [
   { id: "contacts", label: "Inquiries", icon: Mail },
   { id: "visits", label: "Visits", icon: Eye },
   { id: "gallery", label: "Gallery", icon: ImageIcon },
-  { id: "bodytypes", label: "Body Types", icon: Car },
+  { id: "budgets", label: "Budget Sections", icon: Wallet },
 ];
 
 export default function Admin() {
@@ -73,7 +73,7 @@ export default function Admin() {
             {active === "contacts" && <ContactManager />}
             {active === "visits" && <VisitManager />}
             {active === "gallery" && <ImageManager />}
-            {active === "bodytypes" && <BodyTypeManager />}
+            {active === "budgets" && <BudgetManager />}
           </section>
         </div>
       </div>
