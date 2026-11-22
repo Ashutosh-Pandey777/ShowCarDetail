@@ -22,7 +22,9 @@ import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
 import NewsReviews from '@/pages/NewsReviews';
 import CompanyInfoPage from '@/pages/CompanyInfoPage';
-import VehicleCategoryPage from '@/pages/VehicleCategoryPage';
+import Bike from '@/pages/Bike/Bike';
+import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
+import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
 
 const AuthenticatedApp = () => (
   <Routes>
@@ -36,8 +38,11 @@ const AuthenticatedApp = () => (
     </Route>
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
+      <Route path="/car" element={<Home />} />
+      <Route path="/bike" element={<Bike />} />
+      <Route path="/electric-vehicle" element={<ElectricVehicle />} />
+      <Route path="/commercial-vehicle" element={<CommercialVehicle />} />
       <Route path="/browse" element={<Browse />} />
-      <Route path="/vehicle-category/:category" element={<VehicleCategoryPage />} />
       <Route path="/news-reviews" element={<NewsReviews />} />
       <Route path="/about-us" element={<CompanyInfoPage />} />
       <Route path="/careers" element={<CompanyInfoPage />} />
@@ -66,5 +71,4 @@ function App() {
     </AuthProvider>
   )
 }
-
 export default App
