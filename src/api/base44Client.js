@@ -7,25 +7,29 @@ async function request(path, options = {}) {
   if (token) headers.set('Authorization', `Bearer ${token}`);
   if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json');
 
+  // Hosted APIs can need extra time to wake from an idle state.
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000);
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
   let res;
   try {
     res = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal });
   } catch (error) {
     if (error?.name === 'AbortError') {
-      throw new Error('The server is taking too long to respond. Please try again in a moment.');
+      throw new Error('The server did not respond within 60 seconds. Please check the API service and try again.');
     }
-    throw new Error('Unable to reach the server. Please check the connection and try again.');
+    throw new Error(error?.message ? `Unable to reach the API server: ${error.message}` : 'Unable to reach the API server. Check your internet connection and API service.');
   } finally {
     clearTimeout(timeoutId);
   }
 
-  const text = await res.text();
+  const responseText = await res.text();
   let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  try { data = responseText ? JSON.parse(responseText) : null; } catch { data = responseText; }
   if (!res.ok) {
-    const error = new Error(data?.message || data?.title || `Request failed (${res.status})`);
+    const serverMessage = typeof data === 'string'
+      ? data.trim().slice(0, 1000)
+      : data?.message || data?.title || data?.error || '';
+    const error = new Error(serverMessage || res.statusText || `Request failed with HTTP ${res.status}`);
     error.status = res.status;
     error.data = data;
     throw error;
@@ -56,7 +60,7 @@ export const base44 = {
     me:()=>request('/auth/me'),
     loginViaEmailPassword:async(email,password)=>{
       const result=await request('/auth/login',{method:'POST',body:JSON.stringify({email,password})});
-      if (!result?.access_token) throw new Error('The server did not return a login token. Please contact the administrator.');
+      if (!result?.access_token) throw new Error('The server response did not contain an access token.');
       localStorage.setItem(tokenKey,result.access_token);
       return result;
     },
