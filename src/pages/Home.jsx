@@ -22,15 +22,12 @@ export default function Home(){
  const [selectedFuel,setSelectedFuel]=useState('Petrol');
  const fuelCars=useMemo(()=>newCars.filter(c=>normalize(c.fuel_type)===normalize(selectedFuel)).slice(0,4),[newCars,selectedFuel]);
  const DEFAULT_BUDGETS=[
-  {title:'Sub Compact SUV',group:'under',mode:'body',body:'compact-suv',min:0,max:1000000,sort_order:0},
-  {title:'Hatchback',group:'under',mode:'body',body:'hatchback',min:0,max:1000000,sort_order:1},
-  {title:'Sedan & Others',group:'under',mode:'body',body:'others',min:0,max:1000000,sort_order:2},
-  {title:'10 - 20 Lakh',group:'above',mode:'price',min:1000000,max:2000000,sort_order:3},
-  {title:'20 - 30 Lakh',group:'above',mode:'price',min:2000000,max:3000000,sort_order:4},
-  {title:'Luxury Cars',group:'above',mode:'luxury',min:3000000,max:999999999,sort_order:5},
-  {title:'SUV',group:'above',mode:'body',body:'suv',min:1000000,max:999999999,sort_order:6},
-  {title:'Sub Compact SUV',group:'above',mode:'body',body:'compact-suv',min:1000000,max:999999999,sort_order:7},
-  {title:'Sedan & Others',group:'above',mode:'body',body:'others',min:1000000,max:999999999,sort_order:8}
+  {title:'Under 5 Lakh',group:'under',mode:'price',min:0,max:500000,sort_order:0},
+  {title:'5 - 10 Lakh',group:'under',mode:'price',min:500000,max:1000000,sort_order:1},
+  {title:'10 - 20 Lakh',group:'above',mode:'price',min:1000000,max:2000000,sort_order:2},
+  {title:'20 - 30 Lakh',group:'above',mode:'price',min:2000000,max:3000000,sort_order:3},
+  {title:'30 - 50 Lakh',group:'above',mode:'price',min:3000000,max:5000000,sort_order:4},
+  {title:'Above 50 Lakh',group:'above',mode:'price',min:5000000,max:999999999,sort_order:5}
  ];
  const configuredBudgets=useMemo(()=>{const saved=budgetItems.map(x=>{let cfg={};try{cfg=JSON.parse(x.description||'{}')}catch{}return {...cfg,...x,title:x.title,group:cfg.group||'under',mode:cfg.mode||'price',min:Number(cfg.min)||0,max:Number(cfg.max)||999999999,sort_order:Number(x.sort_order)||0};});const merged=DEFAULT_BUDGETS.map(d=>{const found=saved.find(x=>x.title===d.title&&x.group===d.group);return found?{...d,...found}:d;});const extras=saved.filter(x=>!DEFAULT_BUDGETS.some(d=>d.title===x.title&&d.group===x.group));return [...merged,...extras].filter(x=>x.active!==false).sort((a,b)=>a.sort_order-b.sort_order);},[budgetItems]);
  const [budgetGroup,setBudgetGroup]=useState('under');
