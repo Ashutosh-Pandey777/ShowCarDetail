@@ -79,16 +79,7 @@ export default function Home(){
        </div>
        <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="text-slate-500">Filter new cars by your preferences</span><button type="button" onClick={()=>{window.location.href='/browse?'+new URLSearchParams({condition:'New',filters:'1'}).toString();}} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline"><SlidersHorizontal className="h-3.5 w-3.5"/> All Filters <ChevronRight className="h-3.5 w-3.5"/></button></div>
       </div> : <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600"><span className="mr-1 font-semibold">Popular used cars:</span>{['Maruti Swift','Maruti Wagon R','Hyundai i20','Hyundai Creta','Tata Nexon','Maruti Baleno','Mahindra Thar','Kia Seltos'].map(x=><button key={x} onClick={()=>openUsedModel(x)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-medium text-blue-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">{x}</button>)}</div>}
-     </div> : vehicleType==='Bike' ? <div className="mt-4 space-y-3">
-      <div className="flex flex-wrap gap-2">{[['Find New Bike','find-new-bikes'],['Popular Bikes','popular-bikes'],['Upcoming Bikes','upcoming-bikes'],['By Budget','bikes-by-budget'],['By Brands','bikes-by-brand'],['Scooters','scooters']].map(([label,path])=><button key={path} onClick={()=>window.location.href='/vehicle-category/'+path+(query?'?q='+encodeURIComponent(query):'')} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
-      <p className="text-xs text-slate-500">Search bikes by name, brand, budget or category.</p>
-     </div> : vehicleType==='Commercial Vehicle' ? <div className="mt-4 space-y-3">
-      <div className="flex flex-wrap gap-2">{['Find Commercial Vehicle','By Budget','By Body Type','By Brands'].map(label=><button key={label} onClick={()=>window.location.href='/vehicle-category/commercial-vehicles'+(query?'?q='+encodeURIComponent(query):'')} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
-      <p className="text-xs text-slate-500">Search commercial vehicles by name, budget, body type or brand.</p>
-     </div> : <div className="mt-4 space-y-3">
-      <div className="flex flex-wrap gap-2">{[['Find Electric Cars','/browse?condition=New&fuel=Electric'],['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],['By Body Type','/browse?condition=New&fuel=Electric']].map(([label,to])=><button key={label} onClick={()=>window.location.href=to} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
-      <p className="text-xs text-slate-500">Search electric cars by name, budget or body type.</p>
-     </div>}
+     </div> : <div className="mt-4 text-xs text-slate-500">Search vehicles by name, brand or model.</div>
     </div>
    </div>
   </section>
