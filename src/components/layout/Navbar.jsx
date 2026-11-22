@@ -96,7 +96,7 @@ export default function Navbar() {
     ],
     'Car':[
       {label:'New Car',children:[
-        ['Find New Car','/browse?condition=New'],
+        ['Find New Car','/vehicle-category/find-new-cars'],
         ['By Budget','/browse?condition=New'],
         ['By Body Type','/browse?condition=New'],
         ['By Fuel Type','/browse?condition=New'],
