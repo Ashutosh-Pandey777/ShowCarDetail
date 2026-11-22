@@ -10,7 +10,7 @@ namespace LocalApi.Controllers;
 public class EntitiesController(AppDbContext db) : ControllerBase
 {
     private static readonly HashSet<string> Allowed = new(StringComparer.OrdinalIgnoreCase)
-    { "Car","Brand","GalleryImage","Bike","BikeGalleryImage","ElectricVehicle","ElectricVehicleGalleryImage","CommercialVehicle","CommercialVehicleGalleryImage","Visit","Review","User","Contact","News" };
+    { "Car","Brand","GalleryImage","Bike","BikeGalleryImage","Scooter","ScooterGalleryImage","ElectricVehicle,"ElectricVehicleGalleryImage","CommercialVehicle","CommercialVehicleGalleryImage","Visit","Review","User","Contact","News" };
     [HttpGet][AllowAnonymous]
     public async Task<IActionResult> List(string entity,[FromQuery]string? sort=null,[FromQuery]int limit=100,[FromQuery]string? filter=null)
     {
