@@ -87,8 +87,11 @@ export default function Navbar() {
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'Bike':[
+      {label:'Find New Bike',to:'/vehicle-category/find-new-bikes'},
       {label:'Popular Bikes',to:'/vehicle-category/popular-bikes'},
       {label:'Upcoming Bikes',to:'/vehicle-category/upcoming-bikes'},
+      {label:'By Budget',to:'/vehicle-category/bikes-by-budget'},
+      {label:'By Brands',to:'/vehicle-category/bikes-by-brand'},
       {label:'Scooters',to:'/vehicle-category/scooters'}
     ],
     'Car':[
