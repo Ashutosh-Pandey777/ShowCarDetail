@@ -59,12 +59,14 @@ export default function Home(){
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
       </div>
      </div>
+     {vehicleType==='Car'&&<div className="mb-4 flex items-center gap-5 border-b border-slate-100 pb-3">
+      {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Car</button>)}
+     </div>}
      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
       <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by vehicle name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Cars <ArrowRight className="h-4 w-4"/></button>
      </div>
      {vehicleType==='Car' ? <div className="mt-4 space-y-3">
-      <div className="mb-1 flex items-center gap-5 border-b border-slate-100 pb-3">{['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Car</button>)}</div>
       {kind==='New' ? <div className="space-y-3">
        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <select aria-label="Budget" value={budget} onChange={e=>setBudget(e.target.value)} className={selectClass}><option value="">Budget</option>{['Under ₹10L','₹10-20L','₹20-40L','₹40L+'].map(x=><option key={x} value={x}>{x}</option>)}</select>
