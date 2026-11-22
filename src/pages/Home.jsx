@@ -3,6 +3,9 @@ import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
 import CarPhoto from '@/components/CarPhoto';
+import Bike from '@/pages/Bike/Bike';
+import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
+import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
 import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,Newspaper,Star,ShieldCheck} from 'lucide-react';
 
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
@@ -40,7 +43,7 @@ export default function Home(){
  const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
 
 
- const go=()=>{if(vehicleType==='Bike'){window.location.href='/bike'+(query?'?q='+encodeURIComponent(query):'');return;}if(vehicleType==='Commercial Vehicle'){window.location.href='/commercial-vehicle'+(query?'?q='+encodeURIComponent(query):'');return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
+ const go=()=>{if(vehicleType!=='Car'){document.getElementById('vehicle-content')?.scrollIntoView({behavior:'smooth'});return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
  const openUsedModel=(model)=>{window.location.href='/browse?'+new URLSearchParams({condition:'Used',q:model}).toString();};
  const selectClass='min-w-0 w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-red-400';
  return <div className="min-h-screen bg-white text-slate-800">
@@ -53,7 +56,7 @@ export default function Home(){
     <div className="relative -mt-1 rounded-b-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
       <div className="flex flex-wrap items-center gap-4">
-       {['Bike','Car','Commercial Vehicle','Electric Vehicle'].map(v=><button key={v} onClick={()=>{if(v==='Bike'){window.location.href='/bike';return;}if(v==='Commercial Vehicle'){window.location.href='/commercial-vehicle';return;}if(v==='Electric Vehicle'){window.location.href='/electric-vehicle';return;}setVehicleType(v);setQuery('');setBudget('');setBody('');setFuel('');setTransmission('');}} className={'relative pb-2 text-sm font-bold '+(vehicleType===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v}</button>)}
+       {['Bike','Car','Commercial Vehicle','Electric Vehicle'].map(v=><button key={v} onClick={()=>{setVehicleType(v);setQuery('');setBudget('');setBody('');setFuel('');setTransmission('');}} className={'relative pb-2 text-sm font-bold '+(vehicleType===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v}</button>)}
       </div>
       <div className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-right text-xs font-semibold text-red-700" aria-live="polite">
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
@@ -89,6 +92,7 @@ export default function Home(){
     </div>
    </div>
   </section>
+  {vehicleType==='Bike' ? <div id="vehicle-content"><Bike embedded searchQuery={query}/></div> : vehicleType==='Electric Vehicle' ? <div id="vehicle-content"><ElectricVehicle embedded searchQuery={query}/></div> : vehicleType==='Commercial Vehicle' ? <div id="vehicle-content"><CommercialVehicle embedded searchQuery={query}/></div> : <div id="vehicle-content">
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
    <SectionHeading title="Cars by Fuel Type" subtitle="Choose a fuel type to see matching cars"/>
    <div className="mb-5 flex flex-wrap gap-2">{fuelOptions.map(x=><button key={x} onClick={()=>setSelectedFuel(x)} className={'rounded-full border px-4 py-2 text-sm font-semibold '+(selectedFuel===x?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600')}>{x}</button>)}</div>
@@ -123,6 +127,7 @@ export default function Home(){
    </div>
    <style>{`@keyframes brand-marquee-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}.brand-marquee-track{animation:brand-marquee-right 48s linear infinite;will-change:transform}.brand-marquee:hover .brand-marquee-track{animation-play-state:paused}@media(prefers-reduced-motion:reduce){.brand-marquee-track{animation:none}}`}</style>
   </section>
+  </div>}
  </div>;
 }
 function EmptyCars({label,to}){return <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center"><p className="text-sm font-semibold text-slate-700">No {label} added yet</p><p className="mt-1 text-xs text-slate-500">Admin Dashboard → Cars mein matching cars add karein.</p><Link to={to} className="mt-3 inline-block text-sm font-semibold text-red-600">Browse matching cars →</Link></div>}
