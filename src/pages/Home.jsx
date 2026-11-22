@@ -40,7 +40,7 @@ export default function Home(){
  const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
 
 
- const go=()=>{if(vehicleType==='Bike'){window.location.href='/vehicle-category/find-new-bikes'+(query?'?q='+encodeURIComponent(query):'');return;}if(vehicleType==='Commercial Vehicle'){window.location.href='/vehicle-category/commercial-vehicles'+(query?'?q='+encodeURIComponent(query):'');return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
+ const go=()=>{if(vehicleType==='Bike'){window.location.href='/bike'+(query?'?q='+encodeURIComponent(query):'');return;}if(vehicleType==='Commercial Vehicle'){window.location.href='/commercial-vehicle'+(query?'?q='+encodeURIComponent(query):'');return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
  const openUsedModel=(model)=>{window.location.href='/browse?'+new URLSearchParams({condition:'Used',q:model}).toString();};
  const selectClass='min-w-0 w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-red-400';
  return <div className="min-h-screen bg-white text-slate-800">
@@ -53,7 +53,7 @@ export default function Home(){
     <div className="relative -mt-1 rounded-b-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
       <div className="flex flex-wrap items-center gap-4">
-       {['Bike','Car','Commercial Vehicle','Electric Vehicle'].map(v=><button key={v} onClick={()=>{setVehicleType(v);setQuery('');setBudget('');setBody('');setFuel('');setTransmission('');}} className={'relative pb-2 text-sm font-bold '+(vehicleType===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v}</button>)}
+       {['Bike','Car','Commercial Vehicle','Electric Vehicle'].map(v=><button key={v} onClick={()=>{if(v==='Bike'){window.location.href='/bike';return;}if(v==='Commercial Vehicle'){window.location.href='/commercial-vehicle';return;}if(v==='Electric Vehicle'){window.location.href='/electric-vehicle';return;}setVehicleType(v);setQuery('');setBudget('');setBody('');setFuel('');setTransmission('');}} className={'relative pb-2 text-sm font-bold '+(vehicleType===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v}</button>)}
       </div>
       <div className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-right text-xs font-semibold text-red-700" aria-live="polite">
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
@@ -64,7 +64,7 @@ export default function Home(){
      </div>}
      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
       <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by vehicle name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
-      <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Cars <ArrowRight className="h-4 w-4"/></button>
+      <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Vehicles <ArrowRight className="h-4 w-4"/></button>
      </div>
      {vehicleType==='Car' ? <div className="mt-4 space-y-3">
       {kind==='New' ? <div className="space-y-3">
