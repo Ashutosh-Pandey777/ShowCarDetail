@@ -86,11 +86,15 @@ export default function Navbar() {
   const LocationPicker=({mobile=false})=><button type="button" onClick={()=>{setCitySearch(selectedState||'');setLocationOpen(true);}} aria-label={city?'Selected location: '+(selectedState?selectedState+', ':'')+city:'Select location'} title={city?(selectedState?selectedState+', ':'')+city:'Select location'} className={'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition '+(city?'border-emerald-300 bg-emerald-50 text-emerald-700':'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700')+' '+(mobile?'':'')}><MapPinned className="h-5 w-5"/>{city&&<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" aria-label="Location selected"/>}</button>;
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
-    'New Cars':[
-      ['Find New Cars','/browse?condition=New'],['By Budget','/browse?condition=New'],['By Body Type','/browse?condition=New'],['By Fuel Type','/browse?condition=New'],['By Brand','/browse?condition=New'],['Electric Cars','/browse?condition=New&fuel=Electric'],['Compare Cars','/compare']
+    'Bike':[
+      ['Popular Bikes','/vehicle-category/popular-bikes'],['Upcoming Bikes','/vehicle-category/upcoming-bikes'],['Scooters','/vehicle-category/scooters']
     ],
-    'Used Cars':[
-      ['Find Used Cars','/browse?condition=Used'],['Under ₹5 Lakh','/browse?condition=Used'],['Under ₹10 Lakh','/browse?condition=Used'],['SUVs','/browse?condition=Used&body=SUV'],['Sedans','/browse?condition=Used&body=Sedan'],['Browse by Brand','/browse?condition=Used']
+    'Car':[
+      ['New Cars','/browse?condition=New'],['Find New Cars','/browse?condition=New'],['By Budget','/browse?condition=New'],['By Body Type','/browse?condition=New'],['By Fuel Type','/browse?condition=New'],['By Brand','/browse?condition=New'],['Electric Cars','/browse?condition=New&fuel=Electric'],['Compare Cars','/compare'],
+      ['Used Cars','/browse?condition=Used'],['Find Used Cars','/browse?condition=Used'],['Under ₹5 Lakh','/browse?condition=Used'],['Under ₹10 Lakh','/browse?condition=Used'],['SUVs','/browse?condition=Used&body=SUV'],['Sedans','/browse?condition=Used&body=Sedan'],['Browse by Brand','/browse?condition=Used']
+    ],
+    'Commercial Vehicle':[
+      ['Commercial Vehicles','/vehicle-category/commercial-vehicles']
     ],
     'News & Reviews':[
       ['Latest News','/news-reviews?tab=news'],['Car Reviews','/news-reviews?tab=reviews'],['Expert Reviews','/news-reviews?tab=expert'],['Videos','/news-reviews?tab=videos']
@@ -109,7 +113,7 @@ export default function Navbar() {
           <svg width="34" height="34" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 24.5 9.5 12h17L32 24.5M7 24.5h22" stroke="#e31e24" strokeWidth="2.4" strokeLinejoin="round"/><circle cx="11" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/><circle cx="25" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/></svg>
           <span className="font-heading text-lg font-extrabold tracking-tight">SHOW<span className="text-red-600">CAR</span>DETAIL</span>
         </Link>
-        <nav className="hidden lg:flex items-center"><MenuGroup name="New Cars"/><MenuGroup name="Used Cars"/><MenuGroup name="News & Reviews"/></nav>
+        <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Car"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="Commercial Vehicle"/><MenuGroup name="News & Reviews"/></nav>
         <div className="hidden md:flex items-center gap-3">
           <div className="relative">
             <form onSubmit={submit} className="flex h-10 w-56 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-red-400"><Search className="h-4 w-4 shrink-0 text-slate-500"/><input value={query} onFocus={()=>setSearchFocused(true)} onBlur={()=>setTimeout(()=>setSearchFocused(false),150)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" aria-label="Search cars" autoComplete="off" className="w-full bg-transparent text-sm outline-none"/></form>
