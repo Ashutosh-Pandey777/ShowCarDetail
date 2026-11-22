@@ -20,7 +20,7 @@ import CommercialVehicleImageManager from "@/components/admin/CommercialVehicleI
 const NAV = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "cars", label: "Cars", icon: Car },
-  { id: "car-images", label: "Car Images", icon: ImageIcon },
+  { id: "gallery", label: "Car Images", icon: ImageIcon },
   { id: "bikes", label: "Bikes", icon: Bike },
   { id: "bike-images", label: "Bike Images", icon: ImageIcon },
   { id: "electric-vehicles", label: "Electric Vehicles", icon: Zap },
@@ -85,7 +85,7 @@ export default function Admin() {
             {active === "news" && <NewsManager />}
             {active === "contacts" && <ContactManager />}
             {active === "visits" && <VisitManager />}
-            {active === "car-images" && <ImageManager />}
+            {active === "gallery" && <ImageManager />}
             {active === "bikes" && <BikeManager />}
             {active === "bike-images" && <BikeImageManager />}
             {active === "electric-vehicles" && <ElectricVehicleManager />}
