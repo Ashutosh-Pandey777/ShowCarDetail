@@ -87,13 +87,21 @@ export default function Navbar() {
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'Bike':[
-      {label:'Find New Bike',to:'/vehicle-category/find-new-bikes'},
-      {label:'Popular Bikes',to:'/vehicle-category/popular-bikes'},
-      {label:'Upcoming Bikes',to:'/vehicle-category/upcoming-bikes'},
-      {label:'By Budget',to:'/vehicle-category/bikes-by-budget'},
-      {label:'By Brands',to:'/vehicle-category/bikes-by-brand'},
-      {label:'Scoote',to:'/vehicle-category/scoote'},
-      {label:'Compare Bikes',to:'/compare/bikes'}
+      {label:'New Bike',children:[
+        ['Find New Bike','/vehicle-category/find-new-bikes'],
+        ['Upcoming Bike','/vehicle-category/upcoming-bikes'],
+        ['Popular Bike','/vehicle-category/popular-bikes'],
+        ['By Budget','/vehicle-category/bikes-by-budget'],
+        ['By Brand','/vehicle-category/bikes-by-brand']
+      ]},
+      {label:'Scoote',children:[
+        ['Find New Scoote','/vehicle-category/find-new-scoote'],
+        ['Upcoming Scoote','/vehicle-category/upcoming-scoote'],
+        ['Popular Scoote','/vehicle-category/popular-scoote'],
+        ['By Budget','/vehicle-category/scoote-by-budget'],
+        ['By Brand','/vehicle-category/scoote-by-brand']
+      ]},
+      {label:'Compare',to:'/compare/bikes'}
     ],
     'Car':[
       {label:'New Car',children:[
