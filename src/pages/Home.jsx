@@ -16,7 +16,7 @@ export default function Home(){
  useEffect(()=>{base44.entities.Car.list('-created_date',500).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
  useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'))).catch(()=>setBudgetItems([]));},[]);
  const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
- const usedCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'').toLowerCase()==='used'),[cars]);
+
  const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  const fuelOptions=['Petrol','Diesel','CNG','Electric','Hybrid'];
  const [selectedFuel,setSelectedFuel]=useState('Petrol');
@@ -37,7 +37,7 @@ export default function Home(){
  const matchesBudget=(car,item)=>{const price=Number(car.price||0);if(price<item.min||price>=item.max)return false;const body=normalize(car.body_type);if(item.mode==='price')return true;if(item.mode==='luxury')return price>=item.min&&(String(car.tags||[]).join(' ').toLowerCase().includes('luxury')||price>=4000000);if(item.body==='suv')return body.includes('suv');if(item.body==='compact-suv')return body.includes('compact')&&body.includes('suv');if(item.body==='hatchback')return body.includes('hatch');if(item.body==='others')return !body.includes('suv')&&!body.includes('hatch');return true;};
  const budgetCars=useMemo(()=>activeBudget?newCars.filter(c=>matchesBudget(c,activeBudget)).slice(0,8):[],[newCars,activeBudget]);
  const popularNew=useMemo(()=>{const featured=newCars.filter(c=>c.is_popular===true);return (featured.length?featured:newCars).slice(0,8);},[newCars]);
- const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
+
 
 
  const go=()=>{if(vehicleType!=='Car'){document.getElementById('vehicle-content')?.scrollIntoView({behavior:'smooth'});return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
@@ -59,15 +59,13 @@ export default function Home(){
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
       </div>
      </div>
-     {vehicleType==='Car'&&<div className="mb-4 flex items-center gap-5 border-b border-slate-100 pb-3">
-      {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Car</button>)}
-     </div>}
+     {vehicleType==='Car'&&<div className="mb-4 border-b border-slate-100 pb-3"><span className="relative inline-block pb-2 text-sm font-bold text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600">New Car</span></div>}
      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
       <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by vehicle name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Vehicles <ArrowRight className="h-4 w-4"/></button>
      </div>
      {vehicleType==='Car' ? <div className="mt-4 space-y-3">
-      {kind==='New' ? <div className="space-y-3">
+      {kind==='New' && <div className="space-y-3">
        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <select aria-label="Budget" value={budget} onChange={e=>setBudget(e.target.value)} className={selectClass}><option value="">Budget</option>{['Under ₹10L','₹10-20L','₹20-40L','₹40L+'].map(x=><option key={x} value={x}>{x}</option>)}</select>
         <select aria-label="Body type" value={body} onChange={e=>setBody(e.target.value)} className={selectClass}><option value="">Body Type</option>{['SUV','Sedan','Hatchback','Coupe','MUV','Convertible'].map(x=><option key={x}>{x}</option>)}</select>
@@ -75,7 +73,7 @@ export default function Home(){
         <select aria-label="Transmission" value={transmission} onChange={e=>setTransmission(e.target.value)} className={selectClass}><option value="">Transmission</option>{['Manual','Automatic'].map(x=><option key={x}>{x}</option>)}</select>
        </div>
        <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="text-slate-500">Filter new cars by your preferences</span><button type="button" onClick={()=>{window.location.href='/browse?'+new URLSearchParams({condition:'New',filters:'1'}).toString();}} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline"><SlidersHorizontal className="h-3.5 w-3.5"/> All Filters <ChevronRight className="h-3.5 w-3.5"/></button></div>
-      </div> : <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600"><span className="mr-1 font-semibold">Popular used cars:</span>{['Maruti Swift','Maruti Wagon R','Hyundai i20','Hyundai Creta','Tata Nexon','Maruti Baleno','Mahindra Thar','Kia Seltos'].map(x=><button key={x} onClick={()=>openUsedModel(x)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-medium text-blue-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">{x}</button>)}</div>}
+      </div>}
      </div> : <div className="mt-4 text-xs text-slate-500">Search vehicles by name, brand or model.</div>}
     </div>
    </div>
@@ -95,7 +93,6 @@ export default function Home(){
    {activeBudget&&<div className="mt-4 text-right"><Link to={'/browse?'+new URLSearchParams(activeBudget.mode==='body'?{condition:'New',body:activeBudget.body==='compact-suv'?'CompactSUV':activeBudget.body==='others'?'SedanOthers':'SUV'}:{condition:'New',budget:activeBudget.min+'-'+activeBudget.max}).toString()} className="text-sm font-semibold text-red-600">View all {activeBudget.title} cars →</Link></div>}
   </section>
   <CarSection title="Popular New Cars" subtitle="Popular models from your car inventory" cars={popularNew} loading={loading} to="/browse?condition=New"/>
-  <CarSection title="Latest Used Cars" subtitle="Recently added pre-owned cars" cars={latestUsed} loading={loading} to="/browse?condition=Used"/>
   <section className="border-y border-slate-100 bg-[#f7f8fa]"><div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-9 sm:px-6 md:flex-row md:items-center md:justify-between"><div><p className="text-sm font-semibold text-red-600">Make the right choice</p><h2 className="mt-1 text-2xl font-bold text-slate-900">Compare Cars</h2><p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">Compare prices, specifications, mileage, features and safety ratings side by side before choosing your next car.</p></div><Link to="/compare" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-red-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-red-700">Compare Cars <ArrowRight className="h-4 w-4"/></Link></div></section>
   <section className="bg-[#fff5f4]"><div className="mx-auto flex max-w-6xl flex-col justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center"><div><p className="text-sm font-semibold text-red-600">Stay updated</p><h2 className="mt-1 text-2xl font-bold text-slate-900">Latest car news and expert reviews</h2><p className="mt-2 text-sm text-slate-600">Read the latest updates before you choose your next car.</p></div><Link to="/news-reviews" className="inline-flex items-center gap-2 self-start rounded-md bg-red-600 px-5 py-3 text-sm font-bold text-white md:self-center">Explore News & Reviews <Newspaper className="h-4 w-4"/></Link></div></section>
   <section className="overflow-hidden border-y border-slate-100 bg-[#f7f8fa]">

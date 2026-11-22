@@ -61,7 +61,7 @@ export default function Navbar() {
   const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
   const navigate=useNavigate();
   useEffect(()=>{let active=true;base44.entities.Car.list('-created_date',500).then(data=>{if(active)setCarOptions(Array.isArray(data)?data:[]);}).catch(()=>{if(active)setCarOptions([]);});return()=>{active=false;};},[]);
-  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=String(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
+  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>String(car.condition||car.listing_type||'New').toLowerCase()!=='used').filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=String(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
   const selectCarSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');navigate('/browse?q='+encodeURIComponent(label));setQuery(label);setSearchFocused(false);close();};
   const {user,isAuthenticated,logout}=useAuth();
   const close=()=>{setOpen(false);setActiveMenu('');setActiveSubMenu('');setAccountOpen(false);setLocationOpen(false);};
@@ -87,19 +87,21 @@ export default function Navbar() {
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'Bike':[
-      {label:'Find New Bike',to:'/vehicle-category/find-new-bikes'},
-      {label:'Popular Bikes',to:'/vehicle-category/popular-bikes'},
-      {label:'Upcoming Bikes',to:'/vehicle-category/upcoming-bikes'},
-      {label:'By Budget',to:'/vehicle-category/bikes-by-budget'},
-      {label:'By Brands',to:'/vehicle-category/bikes-by-brand'},
-      {label:'Scoote',to:'/vehicle-category/scoote'}
-    ],
-    'Scoote':[
-      {label:'Find New Scoote',to:'/vehicle-category/find-new-scoote'},
-      {label:'Popular Scoote',to:'/vehicle-category/popular-scoote'},
-      {label:'Upcoming Scoote',to:'/vehicle-category/upcoming-scoote'},
-      {label:'By Budget',to:'/vehicle-category/scoote-by-budget'},
-      {label:'By Brand',to:'/vehicle-category/scoote-by-brand'}
+      {label:'New Bike',children:[
+        ['Find New Bike','/vehicle-category/find-new-bikes'],
+        ['Upcoming Bike','/vehicle-category/upcoming-bikes'],
+        ['Popular Bike','/vehicle-category/popular-bikes'],
+        ['By Budget','/vehicle-category/bikes-by-budget'],
+        ['By Brand','/vehicle-category/bikes-by-brand']
+      ]},
+      {label:'Scoote',children:[
+        ['Find New Scoote','/vehicle-category/find-new-scoote'],
+        ['Upcoming Scoote','/vehicle-category/upcoming-scoote'],
+        ['Popular Scoote','/vehicle-category/popular-scoote'],
+        ['By Budget','/vehicle-category/scoote-by-budget'],
+        ['By Brand','/vehicle-category/scoote-by-brand']
+      ]},
+      {label:'Compare',to:'/compare/bikes'}
     ],
     'Car':[
       {label:'New Car',children:[
@@ -110,15 +112,6 @@ export default function Navbar() {
         ['By Fuel Type','/browse?condition=New'],
         ['Under 5 Lakh','/browse?condition=New&budget=0-500000'],
         ['Under 10 Lakh','/browse?condition=New&budget=0-1000000']
-      ]},
-      {label:'Used Car',children:[
-        ['Find Used Car','/vehicle-category/find-used-cars'],
-        ['By Budget','/browse?condition=Used'],
-        ['By Brand','/vehicle-category/cars-by-brand'],
-        ['By Body Type','/browse?condition=Used'],
-        ['By Fuel Type','/browse?condition=Used'],
-        ['Under 5 Lakh','/browse?condition=Used&budget=0-500000'],
-        ['Under 10 Lakh','/browse?condition=Used&budget=0-1000000']
       ]},
       {label:'Electric Car',children:[
         ['Find Electric Cars','/vehicle-category/find-electric-cars'],
@@ -155,7 +148,7 @@ export default function Navbar() {
           <svg width="34" height="34" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 24.5 9.5 12h17L32 24.5M7 24.5h22" stroke="#e31e24" strokeWidth="2.4" strokeLinejoin="round"/><circle cx="11" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/><circle cx="25" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/></svg>
           <span className="font-heading text-lg font-extrabold tracking-tight">SHOW<span className="text-red-600">CAR</span>DETAIL</span>
         </Link>
-        <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Scoote"/><MenuGroup name="Car"/><MenuGroup name="Commercial Vehicle"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="News & Reviews"/></nav>
+        <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Car"/><MenuGroup name="Commercial Vehicle"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="News & Reviews"/></nav>
         <div className="hidden md:flex items-center gap-3">
           <div className="relative">
             <form onSubmit={submit} className="flex h-10 w-56 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-red-400"><Search className="h-4 w-4 shrink-0 text-slate-500"/><input value={query} onFocus={()=>setSearchFocused(true)} onBlur={()=>setTimeout(()=>setSearchFocused(false),150)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" aria-label="Search cars" autoComplete="off" className="w-full bg-transparent text-sm outline-none"/></form>
