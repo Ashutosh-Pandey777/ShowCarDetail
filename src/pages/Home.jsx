@@ -79,7 +79,7 @@ export default function Home(){
        </div>
        <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="text-slate-500">Filter new cars by your preferences</span><button type="button" onClick={()=>{window.location.href='/browse?'+new URLSearchParams({condition:'New',filters:'1'}).toString();}} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline"><SlidersHorizontal className="h-3.5 w-3.5"/> All Filters <ChevronRight className="h-3.5 w-3.5"/></button></div>
       </div> : <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600"><span className="mr-1 font-semibold">Popular used cars:</span>{['Maruti Swift','Maruti Wagon R','Hyundai i20','Hyundai Creta','Tata Nexon','Maruti Baleno','Mahindra Thar','Kia Seltos'].map(x=><button key={x} onClick={()=>openUsedModel(x)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-medium text-blue-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">{x}</button>)}</div>}
-     </div> : <div className="mt-4 text-xs text-slate-500">Search vehicles by name, brand or model.</div>
+     </div> : <div className="mt-4 text-xs text-slate-500">Search vehicles by name, brand or model.</div>}
     </div>
    </div>
   </section>
