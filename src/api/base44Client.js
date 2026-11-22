@@ -65,13 +65,13 @@ export const base44 = {
       return result;
     },
     register:async({email,password})=>request('/auth/register',{method:'POST',body:JSON.stringify({email,password})}),
-    sendOtp:mobile=>request('/auth/otp/send',{method:'POST',body:JSON.stringify({mobile})),
-    verifyMobileOtp:(mobile,otp)=>request('/auth/otp/verify',{method:'POST',body:JSON.stringify({mobile,otp})),
+    sendOtp:mobile=>request('/auth/otp/send',{method:'POST',body:JSON.stringify({mobile})}),
+    verifyMobileOtp:(mobile,otp)=>request('/auth/otp/verify',{method:'POST',body:JSON.stringify({mobile,otp})}),
     setToken:token=>localStorage.setItem(tokenKey,token),
     logout:()=>localStorage.removeItem(tokenKey),
     redirectToLogin:()=>{window.location.href='/login';},
     loginWithProvider:()=>{throw new Error('Google login is not configured. Use email and password.');},
-    resetPasswordRequest:email=>request('/auth/forgot-password',{method:'POST',body:JSON.stringify({email})),
-    resetPassword:({resetToken,newPassword})=>request('/auth/reset-password',{method:'POST',body:JSON.stringify({resetToken,newPassword}))
+    resetPasswordRequest:email=>request('/auth/forgot-password',{method:'POST',body:JSON.stringify({email})}),
+    resetPassword:({resetToken,newPassword})=>request('/auth/reset-password',{method:'POST',body:JSON.stringify({resetToken,newPassword})})
   }
 };
