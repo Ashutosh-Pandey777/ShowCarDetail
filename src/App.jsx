@@ -22,6 +22,7 @@ import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
 import NewsReviews from '@/pages/NewsReviews';
 import CompanyInfoPage from '@/pages/CompanyInfoPage';
+import VehicleCategoryPage from '@/pages/VehicleCategoryPage';
 
 const AuthenticatedApp = () => (
   <Routes>
@@ -36,6 +37,7 @@ const AuthenticatedApp = () => (
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
       <Route path="/browse" element={<Browse />} />
+      <Route path="/vehicle-category/:category" element={<VehicleCategoryPage />} />
       <Route path="/news-reviews" element={<NewsReviews />} />
       <Route path="/about-us" element={<CompanyInfoPage />} />
       <Route path="/careers" element={<CompanyInfoPage />} />
