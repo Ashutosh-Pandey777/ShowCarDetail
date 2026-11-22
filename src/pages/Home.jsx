@@ -60,20 +60,30 @@ export default function Home(){
       </div>
      </div>
      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-      <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by car name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
+      <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by vehicle name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Cars <ArrowRight className="h-4 w-4"/></button>
      </div>
-     {kind==='New' ? <div className="mt-4 space-y-3">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-       <select aria-label="Budget" value={budget} onChange={e=>setBudget(e.target.value)} className={selectClass}><option value="">Budget</option>{['Under ₹10L','₹10-20L','₹20-40L','₹40L+'].map(x=><option key={x} value={x}>{x}</option>)}</select>
-       <select aria-label="Body type" value={body} onChange={e=>setBody(e.target.value)} className={selectClass}><option value="">Body Type</option>{['SUV','Sedan','Hatchback','Coupe','MUV','Convertible'].map(x=><option key={x}>{x}</option>)}</select>
-       <select aria-label="Fuel type" value={fuel} onChange={e=>setFuel(e.target.value)} className={selectClass}><option value="">Fuel Type</option>{['Petrol','Diesel','Electric','Hybrid','CNG'].map(x=><option key={x}>{x}</option>)}</select>
-       <select aria-label="Transmission" value={transmission} onChange={e=>setTransmission(e.target.value)} className={selectClass}><option value="">Transmission</option>{['Manual','Automatic'].map(x=><option key={x}>{x}</option>)}</select>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="text-slate-500">Filter new cars by your preferences</span><button type="button" onClick={()=>{window.location.href='/browse?'+new URLSearchParams({condition:'New',filters:'1'}).toString();}} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline"><SlidersHorizontal className="h-3.5 w-3.5"/> All Filters <ChevronRight className="h-3.5 w-3.5"/></button></div>
-     </div> : <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600"><span className="mr-1 font-semibold">Popular used cars:</span>{['Maruti Swift','Maruti Wagon R','Hyundai i20','Hyundai Creta','Tata Nexon','Maruti Baleno','Mahindra Thar','Kia Seltos'].map(x=><button key={x} onClick={()=>openUsedModel(x)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-medium text-blue-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">{x}</button>)}</div>}
-    </div>
-   </div>
+     {vehicleType==='Car' ? <div className="mt-4 space-y-3">
+      <div className="mb-1 flex items-center gap-5 border-b border-slate-100 pb-3">{['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Car</button>)}</div>
+      {kind==='New' ? <div className="space-y-3">
+       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <select aria-label="Budget" value={budget} onChange={e=>setBudget(e.target.value)} className={selectClass}><option value="">Budget</option>{['Under ₹10L','₹10-20L','₹20-40L','₹40L+'].map(x=><option key={x} value={x}>{x}</option>)}</select>
+        <select aria-label="Body type" value={body} onChange={e=>setBody(e.target.value)} className={selectClass}><option value="">Body Type</option>{['SUV','Sedan','Hatchback','Coupe','MUV','Convertible'].map(x=><option key={x}>{x}</option>)}</select>
+        <select aria-label="Fuel type" value={fuel} onChange={e=>setFuel(e.target.value)} className={selectClass}><option value="">Fuel Type</option>{['Petrol','Diesel','Electric','Hybrid','CNG'].map(x=><option key={x}>{x}</option>)}</select>
+        <select aria-label="Transmission" value={transmission} onChange={e=>setTransmission(e.target.value)} className={selectClass}><option value="">Transmission</option>{['Manual','Automatic'].map(x=><option key={x}>{x}</option>)}</select>
+       </div>
+       <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="text-slate-500">Filter new cars by your preferences</span><button type="button" onClick={()=>{window.location.href='/browse?'+new URLSearchParams({condition:'New',filters:'1'}).toString();}} className="inline-flex items-center gap-1.5 font-semibold text-red-600 hover:underline"><SlidersHorizontal className="h-3.5 w-3.5"/> All Filters <ChevronRight className="h-3.5 w-3.5"/></button></div>
+      </div> : <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600"><span className="mr-1 font-semibold">Popular used cars:</span>{['Maruti Swift','Maruti Wagon R','Hyundai i20','Hyundai Creta','Tata Nexon','Maruti Baleno','Mahindra Thar','Kia Seltos'].map(x=><button key={x} onClick={()=>openUsedModel(x)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 font-medium text-blue-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">{x}</button>)}</div>}
+     </div> : vehicleType==='Bike' ? <div className="mt-4 space-y-3">
+      <div className="flex flex-wrap gap-2">{[['Find New Bike','find-new-bikes'],['Popular Bikes','popular-bikes'],['Upcoming Bikes','upcoming-bikes'],['By Budget','bikes-by-budget'],['By Brands','bikes-by-brand'],['Scooters','scooters']].map(([label,path])=><button key={path} onClick={()=>window.location.href='/vehicle-category/'+path+(query?'?q='+encodeURIComponent(query):'')} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
+      <p className="text-xs text-slate-500">Search bikes by name, brand, budget or category.</p>
+     </div> : vehicleType==='Commercial Vehicle' ? <div className="mt-4 space-y-3">
+      <div className="flex flex-wrap gap-2">{['Find Commercial Vehicle','By Budget','By Body Type','By Brands'].map(label=><button key={label} onClick={()=>window.location.href='/vehicle-category/commercial-vehicles'+(query?'?q='+encodeURIComponent(query):'')} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
+      <p className="text-xs text-slate-500">Search commercial vehicles by name, budget, body type or brand.</p>
+     </div> : <div className="mt-4 space-y-3">
+      <div className="flex flex-wrap gap-2">{[['Find Electric Cars','/browse?condition=New&fuel=Electric'],['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],['By Body Type','/browse?condition=New&fuel=Electric']].map(([label,to])=><button key={label} onClick={()=>window.location.href=to} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
+      <p className="text-xs text-slate-500">Search electric cars by name, budget or body type.</p>
+     </div>}
   </section>
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
    <SectionHeading title="Cars by Fuel Type" subtitle="Choose a fuel type to see matching cars"/>
