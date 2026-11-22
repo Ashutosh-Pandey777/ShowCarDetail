@@ -22,15 +22,12 @@ export default function Home(){
  const [selectedFuel,setSelectedFuel]=useState('Petrol');
  const fuelCars=useMemo(()=>newCars.filter(c=>normalize(c.fuel_type)===normalize(selectedFuel)).slice(0,4),[newCars,selectedFuel]);
  const DEFAULT_BUDGETS=[
-  {title:'Sub Compact SUV',group:'under',mode:'body',body:'compact-suv',min:0,max:1000000,sort_order:0},
-  {title:'Hatchback',group:'under',mode:'body',body:'hatchback',min:0,max:1000000,sort_order:1},
-  {title:'Sedan & Others',group:'under',mode:'body',body:'others',min:0,max:1000000,sort_order:2},
-  {title:'10 - 20 Lakh',group:'above',mode:'price',min:1000000,max:2000000,sort_order:3},
-  {title:'20 - 30 Lakh',group:'above',mode:'price',min:2000000,max:3000000,sort_order:4},
-  {title:'Luxury Cars',group:'above',mode:'luxury',min:3000000,max:999999999,sort_order:5},
-  {title:'SUV',group:'above',mode:'body',body:'suv',min:1000000,max:999999999,sort_order:6},
-  {title:'Sub Compact SUV',group:'above',mode:'body',body:'compact-suv',min:1000000,max:999999999,sort_order:7},
-  {title:'Sedan & Others',group:'above',mode:'body',body:'others',min:1000000,max:999999999,sort_order:8}
+  {title:'Under 5 Lakh',group:'under',mode:'price',min:0,max:500000,sort_order:0},
+  {title:'5 - 10 Lakh',group:'under',mode:'price',min:500000,max:1000000,sort_order:1},
+  {title:'10 - 20 Lakh',group:'above',mode:'price',min:1000000,max:2000000,sort_order:2},
+  {title:'20 - 30 Lakh',group:'above',mode:'price',min:2000000,max:3000000,sort_order:3},
+  {title:'30 - 50 Lakh',group:'above',mode:'price',min:3000000,max:5000000,sort_order:4},
+  {title:'Above 50 Lakh',group:'above',mode:'price',min:5000000,max:999999999,sort_order:5}
  ];
  const configuredBudgets=useMemo(()=>{const saved=budgetItems.map(x=>{let cfg={};try{cfg=JSON.parse(x.description||'{}')}catch{}return {...cfg,...x,title:x.title,group:cfg.group||'under',mode:cfg.mode||'price',min:Number(cfg.min)||0,max:Number(cfg.max)||999999999,sort_order:Number(x.sort_order)||0};});const merged=DEFAULT_BUDGETS.map(d=>{const found=saved.find(x=>x.title===d.title&&x.group===d.group);return found?{...d,...found}:d;});const extras=saved.filter(x=>!DEFAULT_BUDGETS.some(d=>d.title===x.title&&d.group===x.group));return [...merged,...extras].filter(x=>x.active!==false).sort((a,b)=>a.sort_order-b.sort_order);},[budgetItems]);
  const [budgetGroup,setBudgetGroup]=useState('under');
@@ -93,7 +90,7 @@ export default function Home(){
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
    <SectionHeading title="Popular Cars by Budget" subtitle="Find your next car in the right price range"/>
    <div className="mb-5 flex flex-wrap gap-2">{[['under','Cars Under 10 Lakh'],['above','Cars Above 10 Lakh']].map(([key,label])=><button key={key} onClick={()=>{setBudgetGroup(key);const first=configuredBudgets.find(x=>x.group===key);if(first)setSelectedBudget(first.title);}} className={'rounded-md border px-5 py-3 text-sm font-bold '+(budgetGroup===key?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-700 hover:border-red-300')}>{label}</button>)}</div>
-   <div className="mb-5 flex flex-wrap gap-2">{currentBudgetOptions.map(item=><button key={item.id||item.title} onClick={()=>setSelectedBudget(item.title)} className={'rounded-full border px-4 py-2 text-sm font-semibold transition '+(activeBudget?.title===item.title?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600 hover:border-red-300')}>{item.title}</button>)}</div>
+   <div className="mb-5 flex flex-wrap gap-2">{currentBudgetOptions.map(item=><Link key={item.id||item.title} to={'/vehicle-category/cars-by-budget?range='+encodeURIComponent(item.title)} className={'rounded-full border px-4 py-2 text-sm font-semibold transition '+(activeBudget?.title===item.title?'border-red-600 bg-red-600 text-white':'border-slate-200 bg-white text-slate-600 hover:border-red-300')}>{item.title}</Link>)}</div>
    {loading?<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[1,2,3,4].map(x=><div key={x} className="h-64 animate-pulse rounded-lg bg-slate-100"/>)}</div>:budgetCars.length?<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">{budgetCars.slice(0,4).map(car=><CarCard key={car.id} car={car}/>)}</div>:<EmptyCars label={activeBudget?.title||'budget'} to={'/browse?'+new URLSearchParams({condition:'New'}).toString()}/>}
    {activeBudget&&<div className="mt-4 text-right"><Link to={'/browse?'+new URLSearchParams(activeBudget.mode==='body'?{condition:'New',body:activeBudget.body==='compact-suv'?'CompactSUV':activeBudget.body==='others'?'SedanOthers':'SUV'}:{condition:'New',budget:activeBudget.min+'-'+activeBudget.max}).toString()} className="text-sm font-semibold text-red-600">View all {activeBudget.title} cars →</Link></div>}
   </section>
@@ -106,7 +103,7 @@ export default function Home(){
     <SectionHeading title="All Car Brands" subtitle="Explore car manufacturers"/>
     <div className="brand-marquee relative mx-auto max-w-full overflow-hidden" aria-label="All car brands">
      <div className="brand-marquee-track flex w-max items-center gap-4 py-2">
-      {[...BRANDS,...BRANDS].map((b,i)=>{const domains={'Maruti Suzuki':'marutisuzuki.com','Hyundai':'hyundai.com','Tata':'tatamotors.com','Mahindra':'mahindra.com','Kia':'kia.com','Toyota':'toyotabharat.com','Honda':'hondacarindia.com','Renault':'renault.co.in','Skoda':'skoda-auto.co.in','Volkswagen':'volkswagen.co.in','BMW':'bmw.in','Mercedes-Benz':'mercedes-benz.co.in','MG':'mgmotor.co.in','Jeep':'jeep-india.com','Citroen':'citroen.in','Nissan':'nissan.in','Audi':'audi.in','Volvo':'volvocars.com','Lexus':'lexusindia.co.in','BYD':'byd.com','Porsche':'porsche.com','Isuzu':'isuzu.in','Force Motors':'forcemotors.com'};return <Link key={b+i} to={'/brand/'+b.toLowerCase().replace(/\\s+/g,'-')} className="group flex h-28 w-32 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition hover:border-red-300 hover:shadow-md" aria-label={b}>
+      {[...BRANDS,...BRANDS].map((b,i)=>{const domains={'Maruti Suzuki':'marutisuzuki.com','Hyundai':'hyundai.com','Tata':'tatamotors.com','Mahindra':'mahindra.com','Kia':'kia.com','Toyota':'toyotabharat.com','Honda':'hondacarindia.com','Renault':'renault.co.in','Skoda':'skoda-auto.co.in','Volkswagen':'volkswagen.co.in','BMW':'bmw.in','Mercedes-Benz':'mercedes-benz.co.in','MG':'mgmotor.co.in','Jeep':'jeep-india.com','Citroen':'citroen.in','Nissan':'nissan.in','Audi':'audi.in','Volvo':'volvocars.com','Lexus':'lexusindia.co.in','BYD':'byd.com','Porsche':'porsche.com','Isuzu':'isuzu.in','Force Motors':'forcemotors.com'};return <Link key={b+i} to={'/vehicle-category/cars-by-brand?brand='+encodeURIComponent(b)} className="group flex h-28 w-32 shrink-0 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition hover:border-red-300 hover:shadow-md" aria-label={b}>
        <div className="grid h-14 w-20 place-items-center rounded-lg bg-white">
         <img src={'https://www.google.com/s2/favicons?domain='+domains[b]+'&sz=128'} alt={b+' logo'} loading="eager" referrerPolicy="no-referrer" className="h-11 w-11 object-contain" onError={e=>{e.currentTarget.style.display='none';e.currentTarget.nextSibling.style.display='grid';}}/>
         <span style={{display:'none'}} className="h-11 w-11 place-items-center rounded-full bg-slate-100 text-2xl font-extrabold text-slate-600">{b.slice(0,1)}</span>

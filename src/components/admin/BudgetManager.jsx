@@ -4,9 +4,9 @@ import {Plus,Pencil,Trash2,Loader2,Eye,EyeOff} from "lucide-react";
 import AdminModal,{Field,TextInput} from "@/components/admin/AdminModal";
 const SECTION="Budget";
 const DEFAULTS=[
- ["Sub Compact SUV","under","body","compact-suv",0,1000000],["Hatchback","under","body","hatchback",0,1000000],["Sedan & Others","under","body","others",0,1000000],
- ["10 - 20 Lakh","above","price","",1000000,2000000],["20 - 30 Lakh","above","price","",2000000,3000000],["Luxury Cars","above","luxury","",3000000,999999999],
- ["SUV","above","body","suv",1000000,999999999],["Sub Compact SUV","above","body","compact-suv",1000000,999999999],["Sedan & Others","above","body","others",1000000,999999999]
+ ["Under 5 Lakh","under","price","",0,500000],["5 - 10 Lakh","under","price","",500000,1000000],
+ ["10 - 20 Lakh","above","price","",1000000,2000000],["20 - 30 Lakh","above","price","",2000000,3000000],
+ ["30 - 50 Lakh","above","price","",3000000,5000000],["Above 50 Lakh","above","price","",5000000,999999999]
 ].map(([title,group,mode,body,min,max],sort_order)=>({title,group,mode,body,min,max,sort_order,active:true,isDefault:true}));
 const safe=value=>{try{return JSON.parse(value||"{}")}catch{return {}}};
 export default function BudgetManager(){

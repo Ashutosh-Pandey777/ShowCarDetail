@@ -51,6 +51,7 @@ export const base44 = {
   entities: {
     Car:entityApi('Car'), Brand:entityApi('Brand'), GalleryImage:entityApi('GalleryImage'),
     Bike:entityApi('Bike'), BikeGalleryImage:entityApi('BikeGalleryImage'),
+    Scooter:entityApi('Scooter'), ScooterGalleryImage:entityApi('ScooterGalleryImage'),
     ElectricVehicle:entityApi('ElectricVehicle'), ElectricVehicleGalleryImage:entityApi('ElectricVehicleGalleryImage'),
     CommercialVehicle:entityApi('CommercialVehicle'), CommercialVehicleGalleryImage:entityApi('CommercialVehicleGalleryImage'),
     Visit:entityApi('Visit'), Review:entityApi('Review'), User:entityApi('User'), Contact:entityApi('Contact'), News:entityApi('News')
