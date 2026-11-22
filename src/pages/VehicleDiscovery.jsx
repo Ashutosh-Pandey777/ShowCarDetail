@@ -12,7 +12,7 @@ const CONFIG={
 const norm=v=>String(v??'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const tagsOf=x=>Array.isArray(x.tags)?x.tags.map(String):String(x.tags||'').split(',');
 const isUpcoming=x=>x.is_upcoming===true||String(x.condition||x.status||'').toLowerCase()==='upcoming'||tagsOf(x).some(t=>t.trim().toLowerCase()==='upcoming');
-const isPopular=x=>x.is_popular===true||x.is_popular==='true';
+const isPopularBike=x=>x.is_popular===true||x.is_popular==='true';
 function TwoWheelerCard({item,kind}){return <article className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><div className="aspect-[16/10] bg-slate-100"><img src={item.image_url||'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800'} alt={item.brand+' '+item.name} className="h-full w-full object-cover"/></div><div className="p-4"><p className="text-xs font-semibold uppercase text-red-600">{item.brand||kind}</p><h2 className="mt-1 font-bold text-slate-900">{item.name||kind}</h2><p className="mt-2 text-lg font-extrabold text-slate-900">{Number(item.price)>0?'₹'+Number(item.price).toLocaleString('en-IN'):'Price coming soon'}</p><p className="mt-1 text-xs text-slate-500">{item.engine||item.engine_cc||item.fuel_type||kind}</p>{isUpcoming(item)&&<span className="mt-3 inline-block rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">Upcoming</span>}</div></article>}
 export default function VehicleDiscovery({vehicle='Bike',section='brand'}){
  const kind=CONFIG[vehicle]?vehicle:'Bike',cfg=CONFIG[kind],[params,setParams]=useSearchParams();
@@ -24,7 +24,7 @@ export default function VehicleDiscovery({vehicle='Bike',section='brand'}){
  const visible=useMemo(()=>{
   let rows=items.filter(x=>x.active!==false);
   if(kind==='Car')rows=rows.filter(x=>String(x.condition||x.listing_type||'New').toLowerCase()!=='used');
-  if(section==='popular')rows=rows.filter(isPopular);
+  if(section==='popular')rows=rows.filter(isPopularBike);
   if(section==='upcoming')rows=rows.filter(isUpcoming);
   if(section==='brand'&&brand)rows=rows.filter(x=>norm(x.brand)===norm(brand));
   if(section==='budget'&&selectedRange){const range=budgetOptions.find(x=>x.title===selectedRange);if(range){if(range.mode==='body'){rows=rows.filter(x=>{const actual=norm(x.body_type),wanted=norm(range.body);return wanted==='others'?!actual.includes('suv')&&!actual.includes('hatch'):actual.includes(wanted)});}else if(range.mode==='luxury')rows=rows.filter(x=>Number(x.price)>=Number(range.min||0)&&(Number(x.price)>=4000000||String(x.tags||'').toLowerCase().includes('luxury')));else rows=rows.filter(x=>Number(x.price)>=Number(range.min||0)&&Number(x.price)<Number(range.max||999999999));}}
