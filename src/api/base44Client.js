@@ -64,7 +64,7 @@ export const base44 = {
       localStorage.setItem(tokenKey,result.access_token);
       return result;
     },
-    register:async({email,password})=>request('/auth/register',{method:'POST',body:JSON.stringify({email,password})),
+    register:async({email,password})=>request('/auth/register',{method:'POST',body:JSON.stringify({email,password})}),
     sendOtp:mobile=>request('/auth/otp/send',{method:'POST',body:JSON.stringify({mobile})),
     verifyMobileOtp:(mobile,otp)=>request('/auth/otp/verify',{method:'POST',body:JSON.stringify({mobile,otp})),
     setToken:token=>localStorage.setItem(tokenKey,token),
