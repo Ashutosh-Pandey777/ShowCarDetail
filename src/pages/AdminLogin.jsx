@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,21 +14,35 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { checkUserAuth } = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
     setError("");
     setLoading(true);
     try {
       const result = await base44.auth.loginViaEmailPassword(email.trim(), password);
-      if (result?.user?.role !== "admin") {
+      if (result?.user?.role?.toLowerCase() !== "admin") {
         base44.auth.logout();
+        await checkUserAuth();
         setError("This account does not have administrator access.");
         return;
       }
+
+      // Refresh the shared auth state before entering the protected dashboard.
+      const authenticatedUser = await checkUserAuth();
+      if (authenticatedUser?.role?.toLowerCase() !== "admin") {
+        base44.auth.logout();
+        await checkUserAuth();
+        setError("Login succeeded, but this account is not authorized for the admin dashboard.");
+        return;
+      }
+
       navigate("/admin", { replace: true });
-      window.location.reload();
     } catch (err) {
+      base44.auth.logout();
+      await checkUserAuth();
       setError(err?.message || "Unable to sign in. Check your admin email and password.");
     } finally {
       setLoading(false);
@@ -61,7 +76,7 @@ export default function AdminLogin() {
           </div>
         </div>
         <Button type="submit" className="h-12 w-full font-medium" disabled={loading || !email.trim() || !password}>
-          {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Login to Admin Dashboard"}
+          {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Checking admin account...</> : "Login to Admin Dashboard"}
         </Button>
       </form>
     </AuthLayout>
