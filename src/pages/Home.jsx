@@ -84,6 +84,8 @@ export default function Home(){
       <div className="flex flex-wrap gap-2">{[['Find Electric Cars','/browse?condition=New&fuel=Electric'],['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],['By Body Type','/browse?condition=New&fuel=Electric']].map(([label,to])=><button key={label} onClick={()=>window.location.href=to} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600">{label}</button>)}</div>
       <p className="text-xs text-slate-500">Search electric cars by name, budget or body type.</p>
      </div>}
+    </div>
+   </div>
   </section>
   <section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">
    <SectionHeading title="Cars by Fuel Type" subtitle="Choose a fuel type to see matching cars"/>
