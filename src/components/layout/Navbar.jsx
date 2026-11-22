@@ -56,7 +56,7 @@ const getStateForCity = value => {
 };
 
 export default function Navbar() {
-  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState(''), [carOptions,setCarOptions]=useState([]), [searchFocused,setSearchFocused]=useState(false);
+  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [activeSubMenu,setActiveSubMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState(''), [carOptions,setCarOptions]=useState([]), [searchFocused,setSearchFocused]=useState(false);
   const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || '');
   const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
   const navigate=useNavigate();
@@ -64,7 +64,7 @@ export default function Navbar() {
   const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=String(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
   const selectCarSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');navigate('/browse?q='+encodeURIComponent(label));setQuery(label);setSearchFocused(false);close();};
   const {user,isAuthenticated,logout}=useAuth();
-  const close=()=>{setOpen(false);setActiveMenu('');setAccountOpen(false);setLocationOpen(false);};
+  const close=()=>{setOpen(false);setActiveMenu('');setActiveSubMenu('');setAccountOpen(false);setLocationOpen(false);};
   const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);window.dispatchEvent(new Event('showcardetail:locationchange'));setLocationOpen(false);setCitySearch('');setLocationError('');};
   const detectLocation=()=>{
     setLocationError('');
@@ -87,23 +87,53 @@ export default function Navbar() {
   const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
   const menus={
     'Bike':[
-      ['Popular Bikes','/vehicle-category/popular-bikes'],['Upcoming Bikes','/vehicle-category/upcoming-bikes'],['Scooters','/vehicle-category/scooters']
+      {label:'Popular Bikes',to:'/vehicle-category/popular-bikes'},
+      {label:'Upcoming Bikes',to:'/vehicle-category/upcoming-bikes'},
+      {label:'Scooters',to:'/vehicle-category/scooters'}
     ],
     'Car':[
-      ['New Cars','/browse?condition=New'],['Find New Cars','/browse?condition=New'],['By Budget','/browse?condition=New'],['By Body Type','/browse?condition=New'],['By Fuel Type','/browse?condition=New'],['By Brand','/browse?condition=New'],['Electric Cars','/browse?condition=New&fuel=Electric'],['Compare Cars','/compare'],
-      ['Used Cars','/browse?condition=Used'],['Find Used Cars','/browse?condition=Used'],['Under ₹5 Lakh','/browse?condition=Used'],['Under ₹10 Lakh','/browse?condition=Used'],['SUVs','/browse?condition=Used&body=SUV'],['Sedans','/browse?condition=Used&body=Sedan'],['Browse by Brand','/browse?condition=Used']
+      {label:'New Car',children:[
+        ['Find New Car','/browse?condition=New'],
+        ['By Budget','/browse?condition=New'],
+        ['By Body Type','/browse?condition=New'],
+        ['By Fuel Type','/browse?condition=New'],
+        ['Under 5 Lakh','/browse?condition=New&budget=0-500000'],
+        ['Under 10 Lakh','/browse?condition=New&budget=0-1000000']
+      ]},
+      {label:'Used Car',children:[
+        ['Find Used Car','/browse?condition=Used'],
+        ['By Budget','/browse?condition=Used'],
+        ['By Body Type','/browse?condition=Used'],
+        ['By Fuel Type','/browse?condition=Used'],
+        ['Under 5 Lakh','/browse?condition=Used&budget=0-500000'],
+        ['Under 10 Lakh','/browse?condition=Used&budget=0-1000000']
+      ]},
+      {label:'Electric Car',children:[
+        ['Find Electric Cars','/browse?condition=New&fuel=Electric'],
+        ['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],
+        ['By Body Type','/browse?condition=New&fuel=Electric']
+      ]},
+      {label:'Compare Car',to:'/compare'}
     ],
     'Commercial Vehicle':[
-      ['Commercial Vehicles','/vehicle-category/commercial-vehicles']
+      {label:'Commercial Vehicles',to:'/vehicle-category/commercial-vehicles'}
     ],
     'News & Reviews':[
-      ['Latest News','/news-reviews?tab=news'],['Car Reviews','/news-reviews?tab=reviews'],['Expert Reviews','/news-reviews?tab=expert'],['Videos','/news-reviews?tab=videos']
+      {label:'Latest News',to:'/news-reviews?tab=news'},
+      {label:'Car Reviews',to:'/news-reviews?tab=reviews'},
+      {label:'Expert Reviews',to:'/news-reviews?tab=expert'},
+      {label:'Videos',to:'/news-reviews?tab=videos'}
     ]
   };
-  const MenuGroup=({name})=><div className="relative" onMouseEnter={()=>setActiveMenu(name)} onMouseLeave={()=>setActiveMenu('')}>
+  const MenuGroup=({name})=><div className="relative" onMouseEnter={()=>setActiveMenu(name)} onMouseLeave={()=>{setActiveMenu('');setActiveSubMenu('');}}>
     <button type="button" onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
     {activeMenu===name&&<div className="absolute left-0 top-full z-50 w-60 rounded-b-lg border border-slate-200 bg-white p-2 shadow-xl">
-      {menus[name].map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}
+      {menus[name].map(item=>item.children?
+        <div key={item.label} className="relative" onMouseEnter={()=>setActiveSubMenu(item.label)}>
+          <button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}<ChevronDown className="h-4 w-4 -rotate-90"/></button>
+          {activeSubMenu===item.label&&<div className="absolute left-full top-0 z-[60] ml-1 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}</div>}
+        </div>
+        :<Link key={item.label} to={item.to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}</Link>)}
     </div>}
   </div>;
   return <header className="sticky top-0 z-50 border-b border-slate-200 bg-white text-slate-900 shadow-sm">
@@ -141,7 +171,7 @@ export default function Navbar() {
        </div>
        <LocationPicker mobile/>
       </div>
-      {Object.entries(menus).map(([name,items])=><section key={name} className="border-b border-slate-100 py-2"><button onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex w-full items-center justify-between py-2 font-semibold text-slate-800">{name}<ChevronDown className="h-4 w-4"/></button>{activeMenu===name&&<div className="grid grid-cols-2 gap-1">{items.map(([label,to])=><Link key={label} to={to} onClick={close} className="rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{label}</Link>)}</div>}</section>)}
+      {Object.entries(menus).map(([name,items])=><section key={name} className="border-b border-slate-100 py-2"><button onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex w-full items-center justify-between py-2 font-semibold text-slate-800">{name}<ChevronDown className="h-4 w-4"/></button>{activeMenu===name&&<div className="space-y-1 pl-2">{items.map(item=>item.children?<div key={item.label}><button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-red-50">{item.label}<ChevronDown className="h-4 w-4"/></button>{activeSubMenu===item.label&&<div className="grid grid-cols-2 gap-1 border-l-2 border-red-100 pl-2">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{label}</Link>)}</div>}</div>:<Link key={item.label} to={item.to} onClick={close} className="block rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{item.label}</Link>)}</div>}</section>)}
       <div className="flex items-center justify-between border-t border-slate-100 pt-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-800"><UserRound className="h-5 w-5 text-red-600"/>{isAuthenticated&&user?'My Account':'Your Account'}</div>
         {isAuthenticated&&user?<div className="flex gap-4"><Link to="/admin" onClick={close} className="text-sm font-medium text-red-600">Admin</Link><button type="button" onClick={()=>{close();logout(false)}} className="text-sm text-slate-700">Logout</button></div>:<Link to="/login" onClick={close} className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white">Login / Sign Up</Link>}
