@@ -65,7 +65,7 @@ export default function Home(){
       <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Vehicles <ArrowRight className="h-4 w-4"/></button>
      </div>
      {vehicleType==='Car' ? <div className="mt-4 space-y-3">
-      {kind==='New' ? <div className="space-y-3">
+      {kind==='New' && <div className="space-y-3">
        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <select aria-label="Budget" value={budget} onChange={e=>setBudget(e.target.value)} className={selectClass}><option value="">Budget</option>{['Under ₹10L','₹10-20L','₹20-40L','₹40L+'].map(x=><option key={x} value={x}>{x}</option>)}</select>
         <select aria-label="Body type" value={body} onChange={e=>setBody(e.target.value)} className={selectClass}><option value="">Body Type</option>{['SUV','Sedan','Hatchback','Coupe','MUV','Convertible'].map(x=><option key={x}>{x}</option>)}</select>
