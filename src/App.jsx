@@ -23,6 +23,7 @@ import Contact from '@/pages/Contact';
 import NewsReviews from '@/pages/NewsReviews';
 import CompanyInfoPage from '@/pages/CompanyInfoPage';
 import Bike from '@/pages/Bike/Bike';
+import BikeCompare from '@/pages/Bike/BikeCompare';
 import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
 import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
 
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => (
       <Route path="/" element={<Home />} />
       <Route path="/car" element={<Home />} />
       <Route path="/bike" element={<Bike />} />
+      <Route path="/compare/bikes" element={<BikeCompare />} />
       <Route path="/electric-vehicle" element={<ElectricVehicle />} />
       <Route path="/commercial-vehicle" element={<CommercialVehicle />} />
       <Route path="/browse" element={<Browse />} />
