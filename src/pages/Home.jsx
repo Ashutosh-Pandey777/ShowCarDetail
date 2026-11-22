@@ -8,7 +8,7 @@ import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
 const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
 export default function Home(){
- const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
+ const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[vehicleType,setVehicleType]=useState('Car'),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
  useEffect(()=>{const syncLocation=()=>{setCity(localStorage.getItem('showcardetail_city')||'');setState(localStorage.getItem('showcardetail_state')||'');};window.addEventListener('storage',syncLocation);window.addEventListener('focus',syncLocation);window.addEventListener('showcardetail:locationchange',syncLocation);return()=>{window.removeEventListener('storage',syncLocation);window.removeEventListener('focus',syncLocation);window.removeEventListener('showcardetail:locationchange',syncLocation);};},[]);
  useEffect(()=>{base44.entities.Car.list('-created_date',500).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
  useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'))).catch(()=>setBudgetItems([]));},[]);
@@ -40,7 +40,7 @@ export default function Home(){
  const latestUsed=useMemo(()=>[...usedCars].slice(0,8),[usedCars]);
 
 
- const go=()=>{const p=new URLSearchParams();p.set('condition',kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
+ const go=()=>{if(vehicleType==='Bike'){window.location.href='/vehicle-category/find-new-bikes'+(query?'?q='+encodeURIComponent(query):'');return;}if(vehicleType==='Commercial Vehicle'){window.location.href='/vehicle-category/commercial-vehicles'+(query?'?q='+encodeURIComponent(query):'');return;}const p=new URLSearchParams();p.set('condition',vehicleType==='Electric Vehicle'?'New':kind);if(query)p.set('q',query);if(city)p.set('city',city);if(state)p.set('state',state);if(vehicleType==='Electric Vehicle')p.set('fuel','Electric');else if(kind==='New'){if(budget)p.set('budget',budget);if(body)p.set('body',body);if(fuel)p.set('fuel',fuel);if(transmission)p.set('transmission',transmission);}window.location.href='/browse?'+p.toString();};
  const openUsedModel=(model)=>{window.location.href='/browse?'+new URLSearchParams({condition:'Used',q:model}).toString();};
  const selectClass='min-w-0 w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-red-400';
  return <div className="min-h-screen bg-white text-slate-800">
@@ -52,8 +52,8 @@ export default function Home(){
    <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
     <div className="relative -mt-1 rounded-b-xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-      <div className="flex items-center gap-5">
-       {['New','Used'].map(v=><button key={v} onClick={()=>setKind(v)} className={'relative pb-2 text-sm font-bold '+(kind===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v} Cars</button>)}
+      <div className="flex flex-wrap items-center gap-4">
+       {['Bike','Car','Commercial Vehicle','Electric Vehicle'].map(v=><button key={v} onClick={()=>{setVehicleType(v);setQuery('');setBudget('');setBody('');setFuel('');setTransmission('');}} className={'relative pb-2 text-sm font-bold '+(vehicleType===v?'text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600':'text-slate-500 hover:text-slate-800')}>{v}</button>)}
       </div>
       <div className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-right text-xs font-semibold text-red-700" aria-live="polite">
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
