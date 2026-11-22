@@ -37,6 +37,15 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const setAuthenticatedUser = useCallback((authenticatedUser) => {
+    authRequestId.current += 1;
+    setUser(authenticatedUser);
+    setIsAuthenticated(true);
+    setIsLoadingAuth(false);
+    setAuthChecked(true);
+    setAuthError(null);
+  }, []);
+
   useEffect(() => { checkUserAuth(); }, [checkUserAuth]);
   const logout = (shouldRedirect = true) => {
     authRequestId.current += 1;
@@ -48,6 +57,6 @@ export const AuthProvider = ({ children }) => {
     if (shouldRedirect) window.location.href = '/login';
   };
   const navigateToLogin = () => { window.location.href = '/login'; };
-  return <AuthContext.Provider value={{ user, isAuthenticated, isLoadingAuth, isLoadingPublicSettings, authError, appPublicSettings: null, authChecked, logout, navigateToLogin, checkUserAuth, checkAppState: checkUserAuth }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, isAuthenticated, isLoadingAuth, isLoadingPublicSettings, authError, appPublicSettings: null, authChecked, logout, navigateToLogin, checkUserAuth, setAuthenticatedUser, checkAppState: checkUserAuth }}>{children}</AuthContext.Provider>;
 };
 export const useAuth = () => { const c = useContext(AuthContext); if (!c) throw new Error('useAuth must be used within an AuthProvider'); return c; };
