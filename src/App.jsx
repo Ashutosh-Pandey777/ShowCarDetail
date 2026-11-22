@@ -27,6 +27,7 @@ import Bike from '@/pages/Bike/Bike';
 import BikeCompare from '@/pages/Bike/BikeCompare';
 import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
 import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
+import VehicleDiscovery from '@/pages/VehicleDiscovery';
 
 const AuthenticatedApp = () => (
   <Routes>
@@ -58,6 +59,18 @@ const AuthenticatedApp = () => (
       <Route path="/vehicle-category/find-new-bikes" element={<FindNewVehicles vehicle="Bike" />} />
       <Route path="/vehicle-category/find-used-cars" element={<FindNewVehicles vehicle="Car" mode="Used" />} />
       <Route path="/vehicle-category/find-electric-cars" element={<FindNewVehicles vehicle="Car" mode="Electric" />} />
+      <Route path="/vehicle-category/popular-bikes" element={<VehicleDiscovery vehicle="Bike" section="popular" />} />
+      <Route path="/vehicle-category/upcoming-bikes" element={<VehicleDiscovery vehicle="Bike" section="upcoming" />} />
+      <Route path="/vehicle-category/bikes-by-budget" element={<VehicleDiscovery vehicle="Bike" section="budget" />} />
+      <Route path="/vehicle-category/bikes-by-brand" element={<VehicleDiscovery vehicle="Bike" section="brand" />} />
+      <Route path="/vehicle-category/cars-by-budget" element={<VehicleDiscovery vehicle="Car" section="budget" />} />
+      <Route path="/vehicle-category/cars-by-brand" element={<VehicleDiscovery vehicle="Car" section="brand" />} />
+      <Route path="/vehicle-category/scoote" element={<VehicleDiscovery vehicle="Scoote" section="all" />} />
+      <Route path="/vehicle-category/find-new-scoote" element={<VehicleDiscovery vehicle="Scoote" section="all" />} />
+      <Route path="/vehicle-category/popular-scoote" element={<VehicleDiscovery vehicle="Scoote" section="popular" />} />
+      <Route path="/vehicle-category/upcoming-scoote" element={<VehicleDiscovery vehicle="Scoote" section="upcoming" />} />
+      <Route path="/vehicle-category/scoote-by-budget" element={<VehicleDiscovery vehicle="Scoote" section="budget" />} />
+      <Route path="/vehicle-category/scoote-by-brand" element={<VehicleDiscovery vehicle="Scoote" section="brand" />} />
       <Route path="/emi" element={<Finance />} />
       <Route path="/contact" element={<Contact />} />
     </Route>
