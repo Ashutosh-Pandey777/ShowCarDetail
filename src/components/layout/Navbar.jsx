@@ -104,7 +104,7 @@ export default function Navbar() {
         ['Under 10 Lakh','/browse?condition=New&budget=0-1000000']
       ]},
       {label:'Used Car',children:[
-        ['Find Used Car','/browse?condition=Used'],
+        ['Find Used Car','/vehicle-category/find-used-cars'],
         ['By Budget','/browse?condition=Used'],
         ['By Body Type','/browse?condition=Used'],
         ['By Fuel Type','/browse?condition=Used'],
@@ -112,7 +112,7 @@ export default function Navbar() {
         ['Under 10 Lakh','/browse?condition=Used&budget=0-1000000']
       ]},
       {label:'Electric Car',children:[
-        ['Find Electric Cars','/browse?condition=New&fuel=Electric'],
+        ['Find Electric Cars','/vehicle-category/find-electric-cars'],
         ['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],
         ['By Body Type','/browse?condition=New&fuel=Electric']
       ]},
