@@ -1,67 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
-import { ChevronRight, Zap } from 'lucide-react';
+import React,{useEffect,useMemo,useState} from 'react';
+import {useParams,useSearchParams,Link} from 'react-router-dom';
+import {ArrowLeft,ArrowRight} from 'lucide-react';
+import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
-
-export default function Brand() {
-  const { slug } = useParams();
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const brandName = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-
-  useEffect(() => {
-    setLoading(true);
-    base44.entities.Car.filter({}, '-created_date', 100)
-      .then(all => setCars(all.filter(c => c.brand_slug === slug || c.brand?.toLowerCase().replace(/\s+/g,'-') === slug)))
-      .catch(() => setCars([]))
-      .finally(() => setLoading(false));
-  }, [slug]);
-
-  const byTag = (t) => cars.filter(c => c.tags?.includes(t));
-
-  return (
-    <div className="bg-obsidian">
-      {/* Brand banner */}
-      <section className="relative h-[40vh] min-h-[300px] overflow-hidden border-b border-hairline">
-        <img src={cars[0]?.image_url || 'https://media.base44.com/images/public/6a7339c4158e000097245929/f14449a2c_generated_46ce4132.png'} alt={brandName} className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-obsidian to-transparent" />
-        <div className="relative h-full max-w-chassis mx-auto px-4 sm:px-6 flex flex-col justify-end pb-10">
-          <div className="flex items-center gap-2 text-xs font-mono-data uppercase tracking-widest text-muted-foreground mb-3">
-            <Link to="/" className="hover:text-primary">Home</Link><ChevronRight className="w-3 h-3" /> Brands <ChevronRight className="w-3 h-3" /> {brandName}
-          </div>
-          <h1 className="font-heading text-5xl sm:text-7xl font-extrabold tracking-tight">{brandName}</h1>
-          <p className="text-muted-foreground mt-2 max-w-xl">{cars.length} models in our precision-indexed inventory — from everyday commuters to flagship machines.</p>
-        </div>
-      </section>
-
-      <div className="max-w-chassis mx-auto px-4 sm:px-6 py-10 space-y-12">
-        <BrandSection title="All Models" label="Inventory" cars={cars} loading={loading} />
-        {byTag('Electric').length > 0 && <BrandSection title="Electric" label="Zero Emission" cars={byTag('Electric')} />}
-        {byTag('Upcoming').length > 0 && <BrandSection title="Upcoming" label="Forthcoming" cars={byTag('Upcoming')} />}
-        {byTag('Luxury').length > 0 && <BrandSection title="Luxury" label="Prestige Tier" cars={byTag('Luxury')} />}
-      </div>
-    </div>
-  );
-}
-
-function BrandSection({ title, label, cars, loading }) {
-  if (!loading && cars.length === 0) return null;
-  return (
-    <section>
-      <div className="flex items-end justify-between mb-5">
-        <div>
-          <div className="section-label mb-1"><span className="w-8 h-px bg-primary" />{label}</div>
-          <h2 className="font-heading text-2xl sm:text-3xl font-bold">{title}</h2>
-        </div>
-        <span className="text-xs font-mono-data text-muted-foreground">{cars.length} models</span>
-      </div>
-      {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{[...Array(4)].map((_,i) => <div key={i} className="aspect-[16/10] bg-card animate-pulse" />)}</div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{cars.map(c => <CarCard key={c.id} car={c} />)}</div>
-      )}
-    </section>
-  );
+const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const conditionOf=x=>String(x.condition||x.listing_type||x.type||'').toLowerCase();
+const fuelOf=x=>String(x.fuel_type||x.fuel||x.fuelType||'').toLowerCase();
+function BikeModelCard({bike}){return <Link to={'/browse?vehicle=Bike&brand='+encodeURIComponent(bike.brand||'')+'&q='+encodeURIComponent(bike.name||'')} className="overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg"><img src={bike.image_url||'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=700'} alt={bike.name||'Bike'} className="h-44 w-full bg-slate-100 object-cover"/><div className="p-4"><p className="text-xs font-semibold uppercase text-red-600">{bike.brand}</p><h2 className="mt-1 font-bold text-slate-900">{bike.name||'New Bike'}</h2><p className="mt-2 text-sm font-bold text-red-600">{Number(bike.price)>0?'₹'+Number(bike.price).toLocaleString('en-IN'):'Price coming soon'}</p></div></Link>}
+export default function Brand(){
+ const {slug}=useParams();const [params]=useSearchParams();const vehicle=params.get('vehicle')==='Bike'?'Bike':'Car';const isBike=vehicle==='Bike';const mode=params.get('mode')||'New';const isUsed=mode==='Used',isElectric=mode==='Electric';
+ const [items,setItems]=useState([]),[loading,setLoading]=useState(true);
+ const brandName=slug.split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+ useEffect(()=>{let alive=true;const entity=isBike?base44.entities.Bike:base44.entities.Car;entity.list('-created_date',500).then(data=>{if(!alive)return;const rows=Array.isArray(data)?data:[];setItems(rows.filter(x=>x.active!==false&&normalize(x.brand)===normalize(brandName)&&(isBike||(isUsed?conditionOf(x).includes('used'):!conditionOf(x).includes('used')))&&(isBike||!isElectric||fuelOf(x).includes('electric'))))}).catch(()=>{if(alive)setItems([])}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false};},[slug,brandName,isBike,isUsed,isElectric]);
+ const backPath='/vehicle-category/'+(isBike?'find-new-bikes':isUsed?'find-used-cars':isElectric?'find-electric-cars':'find-new-cars');
+ const category=isBike?'Bikes':isUsed?'Used Cars':isElectric?'Electric Cars':'New Cars';
+ const sorted=useMemo(()=>items,[items]);
+ return <main className="min-h-screen bg-[#f7f8fa] text-slate-900"><section className="border-b border-slate-200 bg-white"><div className="mx-auto max-w-6xl px-4 py-8 sm:px-6"><Link to={backPath} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-red-600"><ArrowLeft size={16}/> All {isBike?'Bike':'Car'} Brands</Link><div className="mt-5 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-red-600">{category} Manufacturer</p><h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{brandName} {category}</h1><p className="mt-2 text-sm text-slate-500">Explore {category.toLowerCase()} from {brandName} available in ShowCarDetail inventory.</p></div><div className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{loading?'Loading…':sorted.length+' listings'}</div></div></div></section><section className="mx-auto max-w-6xl px-4 py-9 sm:px-6">{loading?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1,2,3,4].map(n=><div key={n} className="h-64 animate-pulse rounded-xl bg-slate-200"/>)}</div>:sorted.length?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{sorted.map(item=>isBike?<BikeModelCard key={item.id} bike={item}/>:<CarCard key={item.id} car={item}/>)}</div>:<div className="rounded-xl border border-dashed border-slate-300 bg-white px-5 py-14 text-center"><h2 className="text-lg font-bold">No {category.toLowerCase()} listed for {brandName} yet</h2><p className="mt-2 text-sm text-slate-500">When matching {brandName} vehicles are added from Admin Dashboard, they will appear here.</p><Link to={backPath} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-red-600">Explore other brands <ArrowRight size={15}/></Link></div>}</section></main>;
 }

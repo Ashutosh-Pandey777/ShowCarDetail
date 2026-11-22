@@ -5,19 +5,29 @@ import { Search, Loader2 } from "lucide-react";
 export default function VisitManager() {
   const [items, setItems] = useState(null);
   const [q, setQ] = useState("");
+  const [error, setError] = useState("");
 
-  const load = async () => setItems(await base44.entities.Visit.list("-created_date", 200));
+  const load = async () => {
+    try {
+      const data = await base44.entities.Visit.list("-created_date", 200);
+      setItems(Array.isArray(data) ? data : []);
+      setError("");
+    } catch (err) {
+      setItems([]);
+      setError(err.message || "Unable to load site visits.");
+    }
+  };
   useEffect(() => { load(); }, []);
 
-  if (!items) return <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />;
+  if (!items && !error) return <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />;
 
-  const filtered = items.filter(
+  const filtered = (Array.isArray(items) ? items : []).filter(
     (v) => !q || `${v.page} ${v.visitor_name} ${v.visitor_email}`.toLowerCase().includes(q.toLowerCase())
   );
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 gap-4">
+      {error && <p role="alert" className="mb-4 text-sm text-destructive">{error}</p>}\n      <div className="flex items-center justify-between mb-4 gap-4">
         <h2 className="font-heading text-xl font-semibold">Site Visits ({items.length})</h2>
         <div className="flex items-center bg-obsidian border border-hairline px-3 h-9">
           <Search className="w-4 h-4 text-muted-foreground" />

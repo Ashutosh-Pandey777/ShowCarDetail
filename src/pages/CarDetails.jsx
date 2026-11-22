@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Image } from '@/components/ui/image';
+import CarPhoto from '@/components/CarPhoto';
 import { Fuel, Gauge, Cog, Users, Zap, Shield, Ruler, Heart, Share2, Download, GitCompare, ChevronRight, Star, Check, MapPin } from 'lucide-react';
 import CarCard from '@/components/CarCard';
 import EMICalculator from '@/components/EMICalculator';
@@ -36,7 +36,9 @@ export default function CarDetails() {
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin" /></div>;
   if (!car) return <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4"><p className="text-muted-foreground">Vehicle not found.</p><Link to="/browse" className="btn-kinetic">Browse all</Link></div>;
 
-  const gallery = car.gallery?.length ? car.gallery : [car.image_url];
+  const gallery = [...new Set([...(Array.isArray(car.gallery) ? car.gallery : []), car.image_url].filter(Boolean))];
+  const displayPrice = Number(car.price || 0);
+  const isUsed = String(car.condition || car.listing_type || '').toLowerCase() === 'used';
 
   return (
     <div className="bg-obsidian">
@@ -51,14 +53,14 @@ export default function CarDetails() {
       <section className="max-w-chassis mx-auto px-4 sm:px-6 grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="relative aspect-[16/10] bg-gunmetal overflow-hidden border border-hairline">
-            <Image src={gallery[activeImg]} alt={car.name} className="w-full h-full object-cover" />
+            <CarPhoto car={{...car,image_url:gallery[activeImg]||car.image_url}} alt={car.name} className="w-full h-full object-cover" />
             {car.tags?.map(t => <span key={t} className="absolute top-4 left-4 chip bg-obsidian/70 backdrop-blur">{t}</span>)}
           </div>
           {gallery.length > 1 && (
             <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-thin">
               {gallery.map((g, i) => (
                 <button key={i} onClick={() => setActiveImg(i)} className={`relative shrink-0 w-24 aspect-[4/3] border-2 overflow-hidden ${activeImg === i ? 'border-primary' : 'border-hairline'}`}>
-                  <img src={g} alt="" className="w-full h-full object-cover" />
+                  <CarPhoto car={{...car,image_url:g}} alt={car.name} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -67,17 +69,17 @@ export default function CarDetails() {
 
         {/* Summary */}
         <div className="bg-card border border-hairline p-6">
-          <p className="text-xs font-mono-data uppercase tracking-widest text-primary">{car.brand}</p>
+          <div className="flex items-center gap-2"><p className="text-xs font-mono-data uppercase tracking-widest text-primary">{car.brand}</p>{isUsed && <span className="chip border-amber-400/40 text-amber-300">Used Car</span>}</div>
           <h1 className="font-heading text-3xl font-bold mt-1">{car.name}</h1>
           <div className="flex items-center gap-2 mt-2">
-            <div className="flex">{[...5].map((_,i) => <Star key={i} className={`w-4 h-4 ${i < (car.safety_rating||4) ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
+            <div className="flex">{Array.from({ length: 5 }).map((_,i) => <Star key={i} className={`w-4 h-4 ${i < (car.safety_rating||4) ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
             <span className="text-xs text-muted-foreground">Safety {car.safety_rating}/5</span>
           </div>
 
           <div className="mt-5 pt-5 border-t border-hairline">
-            <p className="text-xs font-mono-data uppercase tracking-widest text-muted-foreground">Ex-showroom</p>
-            <p className="font-mono-data text-3xl font-bold text-primary">₹{(car.price/100000).toFixed(2)}<span className="text-lg">L</span></p>
-            <p className="text-xs text-muted-foreground mt-1">On-road ≈ ₹{(car.on_road_price/100000).toFixed(2)}L</p>
+            <p className="text-xs font-mono-data uppercase tracking-widest text-muted-foreground">{isUsed ? "Asking Price" : "Ex-showroom"}</p>
+            <p className="font-mono-data text-3xl font-bold text-primary">₹{(displayPrice/100000).toFixed(2)}<span className="text-lg">L</span></p>
+            {!isUsed && car.on_road_price ? <p className="text-xs text-muted-foreground mt-1">On-road ≈ ₹{(car.on_road_price/100000).toFixed(2)}L</p> : isUsed && <p className="text-xs text-muted-foreground mt-1">Used vehicle · Verify condition and documents with seller</p> }
           </div>
 
           <div className="mt-5 grid grid-cols-4 gap-2">
@@ -88,7 +90,7 @@ export default function CarDetails() {
           </div>
 
           <div className="mt-5 space-y-2">
-            <button className="btn-kinetic w-full">Get Best Offer</button>
+            <a href="#dealer-inquiry" className="btn-kinetic w-full">Get Best Offer</a>
             <div className="grid grid-cols-2 gap-2">
               <Link to="/compare" className="btn-ghost"><GitCompare className="w-4 h-4" /> Compare</Link>
               <button className="btn-ghost"><Download className="w-4 h-4" /> Brochure</button>
@@ -166,7 +168,7 @@ export default function CarDetails() {
       </section>
 
       {/* Dealer Inquiry */}
-      <section className="max-w-chassis mx-auto px-4 sm:px-6 py-12 border-t border-hairline">
+      <section id="dealer-inquiry" className="max-w-chassis mx-auto px-4 sm:px-6 py-12 border-t border-hairline">
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
             <div className="section-label mb-3"><span className="w-8 h-px bg-primary" />Dealer Inquiry</div>
@@ -174,7 +176,7 @@ export default function CarDetails() {
             <p className="text-muted-foreground mb-6">Connect with an authorized dealer near you. Receive a personalized offer within 24 hours.</p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="w-4 h-4 text-primary" /> Available in {car.city || 'all major cities'}</div>
           </div>
-          <DealerForm carName={car.name} />
+          <DealerForm carName={car.name} carId={car.id} city={car.city} />
         </div>
       </section>
 
@@ -239,7 +241,7 @@ function ReviewCard({ r }) {
           <p className="font-semibold text-sm">{r.author}</p>
           <span className="chip mt-1">{r.type}</span>
         </div>
-        <div className="flex">{[...5].map((_,i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
+        <div className="flex">{Array.from({ length: 5 }).map((_,i) => <Star key={i} className={`w-3.5 h-3.5 ${i < r.rating ? 'text-primary fill-primary' : 'text-muted-foreground/30'}`} />)}</div>
       </div>
       <p className="font-medium text-sm mb-2">{r.title}</p>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{r.body}</p>
@@ -249,8 +251,20 @@ function ReviewCard({ r }) {
   );
 }
 
-function DealerForm({ carName }) {
+function DealerForm({ carName, carId, city }) {
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ name: "", phone: "", email: "", city: city || "" });
+  const update = (e) => setForm(current => ({ ...current, [e.target.name]: e.target.value }));
+  const submit = async (e) => {
+    e.preventDefault(); setBusy(true); setError("");
+    try {
+      await base44.entities.Contact.create({ name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim(), city: form.city.trim(), car_name: carName, car_id: carId, message: "Request a test drive / best offer", status: "New" });
+      setSent(true);
+    } catch (err) { setError(err.message || "Unable to submit inquiry. Please try again."); }
+    finally { setBusy(false); }
+  };
   return sent ? (
     <div className="bg-card border border-primary/40 p-8 flex flex-col items-center justify-center text-center">
       <Check className="w-10 h-10 text-primary mb-3" />
@@ -258,14 +272,13 @@ function DealerForm({ carName }) {
       <p className="text-sm text-muted-foreground mt-1">A dealer will contact you shortly regarding the {carName}.</p>
     </div>
   ) : (
-    <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="bg-card border border-hairline p-6 space-y-3">
-      <input required placeholder="Full name" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
-      <input required type="tel" placeholder="Phone number" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
-      <input required type="email" placeholder="Email" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
-      <select className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none">
-        <option className="bg-gunmetal">Mumbai</option><option className="bg-gunmetal">Delhi</option><option className="bg-gunmetal">Bangalore</option>
-      </select>
-      <button type="submit" className="btn-kinetic w-full">Submit Inquiry</button>
+    <form onSubmit={submit} className="bg-card border border-hairline p-6 space-y-3">
+      <input required name="name" value={form.name} onChange={update} placeholder="Full name" autoComplete="name" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
+      <input required name="phone" value={form.phone} onChange={update} type="tel" pattern="[0-9+() -]{8,18}" placeholder="Phone number" autoComplete="tel" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
+      <input required name="email" value={form.email} onChange={update} type="email" placeholder="Email" autoComplete="email" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
+      <input required name="city" value={form.city} onChange={update} placeholder="Your city" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      <button type="submit" disabled={busy} className="btn-kinetic w-full">{busy ? "Submitting…" : "Submit Inquiry"}</button>
     </form>
   );
 }

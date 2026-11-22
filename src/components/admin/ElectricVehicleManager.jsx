@@ -1,0 +1,1 @@
+import React from 'react';import CategoryVehicleManager from './CategoryVehicleManager';export default function ElectricVehicleManager(){return <CategoryVehicleManager entity="ElectricVehicle" category="Electric Vehicle" title="Electric Vehicle Inventory"/>;}

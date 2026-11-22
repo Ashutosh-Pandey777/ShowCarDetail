@@ -7,23 +7,37 @@ const EMPTY = {
   name: "", brand: "", brand_slug: "", condition: "New", body_type: "SUV", fuel_type: "Petrol",
   transmission: "Manual", price: "", on_road_price: "", mileage: "", engine: "",
   power: "", torque: "", seating: "", boot_space: "", safety_rating: "",
-  launch_year: "", range_km: "", image_url: "", city: "", description: "",
-  colors: "", features: "", tags: "",
+  launch_year: "", range_km: "", image_url: "", gallery: "", city: "", description: "",
+  colors: "", features: "", tags: "", is_popular: false,
 };
 
 export default function CarManager() {
   const [items, setItems] = useState(null);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [formError, setFormError] = useState("");
 
-  const load = async () => setItems(await base44.entities.Car.list("-created_date", 100));
+  const load = async () => setItems(await base44.entities.Car.list("-created_date", 500));
   useEffect(() => { load(); }, []);
 
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
-    const data = {
-      ...editing,
+    setFormError("");
+    try {
+      let imageUrl = editing.image_url;
+      let galleryUrls = toList(editing.gallery);
+      if (imageFile) {
+        const uploaded = await base44.integrations.Core.UploadFile({ file: imageFile });
+        imageUrl = uploaded.file_url;
+      }
+      for (const file of galleryFiles) {
+        const uploaded = await base44.integrations.Core.UploadFile({ file });
+        galleryUrls.push(uploaded.file_url);
+      }
+    const data = { ...editing, image_url: imageUrl, gallery: galleryUrls,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
       seating: editing.seating ? Number(editing.seating) : undefined,
@@ -34,11 +48,14 @@ export default function CarManager() {
       features: toList(editing.features),
       tags: toList(editing.tags),
     };
-    try {
       if (editing.id) await base44.entities.Car.update(editing.id, data);
       else await base44.entities.Car.create(data);
       setEditing(null);
-      load();
+      setImageFile(null);
+      setGalleryFiles([]);
+      await load();
+    } catch (err) {
+      setFormError(err.message || "Unable to save vehicle. Please try again.");
     } finally { setSaving(false); }
   };
 
@@ -54,7 +71,7 @@ export default function CarManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Vehicles ({items.length})</h2>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-kinetic py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Vehicle
         </button>
       </div>
@@ -82,7 +99,7 @@ export default function CarManager() {
                 <td className="px-4 py-3 text-right font-mono-data">{(c.price || 0).toLocaleString("en-IN")}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setEditing({ ...c, colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") })} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...c, gallery: (c.gallery || []).join(", "), colors: (c.colors || []).join(", "), features: (c.features || []).join(", "), tags: (c.tags || []).join(", ") }); }} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
                     <button onClick={() => remove(c.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </td>
@@ -104,7 +121,7 @@ export default function CarManager() {
               <Field label="Car condition"><Select value={editing.condition || "New"} onChange={(e) => setEditing({ ...editing, condition: e.target.value })}>{["New","Used","Upcoming"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Brand slug"><TextInput value={editing.brand_slug} onChange={(e) => setEditing({ ...editing, brand_slug: e.target.value })} /></Field>
               <Field label="City"><TextInput value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} /></Field>
-              <Field label="Body type"><Select value={editing.body_type} onChange={(e) => setEditing({ ...editing, body_type: e.target.value })}>{["SUV","Sedan","Hatchback","Coupe","Convertible","MUV","Pickup"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
+              <Field label="Body type"><Select value={editing.body_type} onChange={(e) => setEditing({ ...editing, body_type: e.target.value })}>{["SUV","Compact SUV","Hatchback","Sedan","Compact Sedan","Coupe","Convertible","MUV","Luxury","Pickup","Minivan"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Fuel type"><Select value={editing.fuel_type} onChange={(e) => setEditing({ ...editing, fuel_type: e.target.value })}>{["Petrol","Diesel","Electric","Hybrid","CNG"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Transmission"><Select value={editing.transmission} onChange={(e) => setEditing({ ...editing, transmission: e.target.value })}>{["Manual","Automatic"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Price (₹)"><TextInput type="number" required value={editing.price} onChange={(e) => setEditing({ ...editing, price: e.target.value })} /></Field>
@@ -118,12 +135,17 @@ export default function CarManager() {
               <Field label="Safety rating (0-5)"><TextInput type="number" step="0.1" value={editing.safety_rating} onChange={(e) => setEditing({ ...editing, safety_rating: e.target.value })} /></Field>
               <Field label="Launch year"><TextInput type="number" value={editing.launch_year} onChange={(e) => setEditing({ ...editing, launch_year: e.target.value })} /></Field>
               <Field label="Range (km)"><TextInput type="number" value={editing.range_km} onChange={(e) => setEditing({ ...editing, range_km: e.target.value })} /></Field>
-              <Field label="Image URL"><TextInput value={editing.image_url} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Upload cover image"><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{imageFile && <span className="text-xs text-muted-foreground">{imageFile.name}</span>}</Field>
+              <Field label="Gallery image URLs (comma-separated)"><TextArea value={editing.gallery || ""} onChange={(e) => setEditing({ ...editing, gallery: e.target.value })} /></Field>
+              <Field label="Upload gallery images"><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{galleryFiles.length > 0 && <span className="text-xs text-muted-foreground">{galleryFiles.length} image(s) selected</span>}</Field>
             </div>
             <Field label="Colors (comma-separated)"><TextInput value={editing.colors} onChange={(e) => setEditing({ ...editing, colors: e.target.value })} /></Field>
             <Field label="Features (comma-separated)"><TextInput value={editing.features} onChange={(e) => setEditing({ ...editing, features: e.target.value })} /></Field>
             <Field label="Tags (comma-separated)"><TextInput value={editing.tags} onChange={(e) => setEditing({ ...editing, tags: e.target.value })} /></Field>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(editing.is_popular)} onChange={(e) => setEditing({ ...editing, is_popular: e.target.checked })} /> Feature this vehicle in Popular New Cars (when condition is New)</label>
             <Field label="Description"><TextArea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+            {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditing(null)} className="btn-ghost py-2 px-4 text-xs">Cancel</button>
               <button type="submit" disabled={saving} className="btn-kinetic py-2 px-4 text-xs">

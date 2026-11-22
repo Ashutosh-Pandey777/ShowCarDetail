@@ -1,110 +1,209 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, LogOut, ShieldCheck, MapPinned, UserRound, Navigation } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 
-const BRANDS = ['Maruti Suzuki', 'Hyundai', 'Tata', 'Mahindra', 'Kia', 'Toyota', 'Honda', 'BMW', 'Mercedes-Benz', 'Audi', 'MG', 'Skoda', 'Volkswagen', 'Nissan', 'Renault', 'BYD', 'Volvo', 'Jeep'];
+const BRANDS = ['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','BMW','Mercedes-Benz','Audi','MG','Skoda','Volkswagen','Nissan','Renault','BYD'];
+const STATE_CITIES = {
+  'Andhra Pradesh':['Visakhapatnam','Vijayawada','Guntur','Tirupati','Nellore','Kurnool','Rajahmundry','Kakinada'],
+  'Arunachal Pradesh':['Itanagar','Naharlagun','Tawang','Pasighat'],
+  'Assam':['Guwahati','Dibrugarh','Silchar','Jorhat','Tezpur','Nagaon'],
+  'Bihar':['Patna','Gaya','Muzaffarpur','Bhagalpur','Darbhanga','Purnia','Ara','Begusarai','Katihar','Munger','Chhapra','Samastipur','Bihar Sharif','Sasaram'],
+  'Chhattisgarh':['Raipur','Bhilai','Bilaspur','Korba','Durg','Rajnandgaon','Jagdalpur'],
+  'Goa':['Panaji','Margao','Vasco da Gama','Mapusa'],
+  'Gujarat':['Ahmedabad','Surat','Vadodara','Rajkot','Gandhinagar','Bhavnagar','Jamnagar','Junagadh','Anand','Nadiad'],
+  'Haryana':['Gurugram','Faridabad','Panipat','Ambala','Hisar','Karnal','Rohtak','Sonipat'],
+  'Himachal Pradesh':['Shimla','Dharamshala','Solan','Mandi','Kullu','Hamirpur'],
+  'Jharkhand':['Ranchi','Jamshedpur','Dhanbad','Bokaro','Deoghar','Hazaribagh'],
+  'Karnataka':['Bengaluru','Mysuru','Mangaluru','Hubballi','Belagavi','Kalaburagi','Davanagere','Udupi'],
+  'Kerala':['Kochi','Thiruvananthapuram','Kozhikode','Thrissur','Kollam','Kannur','Kottayam'],
+  'Madhya Pradesh':['Indore','Bhopal','Jabalpur','Gwalior','Ujjain','Sagar','Dewas','Satna','Ratlam'],
+  'Maharashtra':['Mumbai','Pune','Nagpur','Nashik','Thane','Navi Mumbai','Chhatrapati Sambhajinagar','Kolhapur','Solapur','Amravati'],
+  'Manipur':['Imphal','Thoubal','Bishnupur'],
+  'Meghalaya':['Shillong','Tura','Jowai'],
+  'Mizoram':['Aizawl','Lunglei','Champhai'],
+  'Nagaland':['Kohima','Dimapur','Mokokchung'],
+  'Odisha':['Bhubaneswar','Cuttack','Rourkela','Berhampur','Sambalpur','Puri','Balasore'],
+  'Punjab':['Ludhiana','Amritsar','Jalandhar','Patiala','Bathinda','Mohali','Pathankot'],
+  'Rajasthan':['Jaipur','Jodhpur','Udaipur','Kota','Ajmer','Bikaner','Alwar','Bharatpur','Sikar'],
+  'Sikkim':['Gangtok','Namchi','Gyalshing'],
+  'Tamil Nadu':['Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tiruppur','Erode','Vellore'],
+  'Telangana':['Hyderabad','Warangal','Karimnagar','Nizamabad','Khammam','Ramagundam'],
+  'Tripura':['Agartala','Udaipur','Dharmanagar'],
+  'Uttar Pradesh':['Lucknow','Kanpur','Varanasi','Agra','Prayagraj','Noida','Ghaziabad','Meerut','Gorakhpur','Bareilly','Aligarh','Moradabad','Jhansi','Mathura'],
+  'Uttarakhand':['Dehradun','Haridwar','Rishikesh','Roorkee','Haldwani','Rudrapur','Kashipur'],
+  'West Bengal':['Kolkata','Howrah','Durgapur','Asansol','Siliguri','Kharagpur','Darjeeling'],
+  'Andaman and Nicobar Islands':['Port Blair'],
+  'Chandigarh':['Chandigarh'],
+  'Dadra and Nagar Haveli and Daman and Diu':['Daman','Diu','Silvassa'],
+  'Delhi':['New Delhi','Delhi'],
+  'Jammu and Kashmir':['Srinagar','Jammu','Anantnag','Baramulla'],
+  'Ladakh':['Leh','Kargil'],
+  'Lakshadweep':['Kavaratti'],
+  'Puducherry':['Puducherry','Karaikal','Yanam']
+};
+const POPULAR_CITIES = ['Delhi NCR','Mumbai','Bengaluru','Hyderabad','Chennai','Pune','Kolkata','Ahmedabad','Jaipur','Lucknow','Patna','Chandigarh','Indore','Bhopal','Nagpur','Surat','Vadodara','Kanpur','Varanasi','Ranchi','Bhubaneswar','Guwahati','Dehradun','Noida','Gurugram'];
+
+const getStateForCity = value => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return '';
+  for (const [state, cities] of Object.entries(STATE_CITIES)) {
+    if (state.toLowerCase() === normalized || cities.some(city => city.toLowerCase() === normalized)) return state;
+  }
+  if (normalized === 'delhi ncr') return 'Delhi';
+  return '';
+};
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [brandOpen, setBrandOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
-
-  const submit = (e) => {
-    e.preventDefault();
-    navigate(`/browse?q=${encodeURIComponent(query)}`);
-    setOpen(false);
+  const [open,setOpen]=useState(false), [activeMenu,setActiveMenu]=useState(''), [activeSubMenu,setActiveSubMenu]=useState(''), [query,setQuery]=useState(''), [accountOpen,setAccountOpen]=useState(false), [locationOpen,setLocationOpen]=useState(false), [citySearch,setCitySearch]=useState(''), [detecting,setDetecting]=useState(false), [locationError,setLocationError]=useState(''), [carOptions,setCarOptions]=useState([]), [searchFocused,setSearchFocused]=useState(false);
+  const [city,setCity]=useState(()=>localStorage.getItem('showcardetail_city') || '');
+  const [selectedState,setSelectedState]=useState(()=>localStorage.getItem('showcardetail_state') || getStateForCity(localStorage.getItem('showcardetail_city')) || '');
+  const navigate=useNavigate();
+  useEffect(()=>{let active=true;base44.entities.Car.list('-created_date',500).then(data=>{if(active)setCarOptions(Array.isArray(data)?data:[]);}).catch(()=>{if(active)setCarOptions([]);});return()=>{active=false;};},[]);
+  const carSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return carOptions.filter(car=>{const name=String(car.name||car.model||'').trim();const brand=String(car.brand||'').trim();const label=[brand,name].filter(Boolean).join(' ');const key=String(car.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[query,carOptions]);
+  const selectCarSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');navigate('/browse?q='+encodeURIComponent(label));setQuery(label);setSearchFocused(false);close();};
+  const {user,isAuthenticated,logout}=useAuth();
+  const close=()=>{setOpen(false);setActiveMenu('');setActiveSubMenu('');setAccountOpen(false);setLocationOpen(false);};
+  const chooseCity=(value,stateValue='')=>{const resolvedState=stateValue||getStateForCity(value);setCity(value);setSelectedState(resolvedState);localStorage.setItem('showcardetail_city',value);if(resolvedState)localStorage.setItem('showcardetail_state',resolvedState);window.dispatchEvent(new Event('showcardetail:locationchange'));setLocationOpen(false);setCitySearch('');setLocationError('');};
+  const detectLocation=()=>{
+    setLocationError('');
+    if(!navigator.geolocation){setLocationError('Your browser does not support location detection. Please select your city.');return;}
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(async position=>{
+      const {latitude,longitude}=position.coords;
+      try{
+        const response=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+latitude+'&lon='+longitude);
+        if(!response.ok) throw new Error('Could not identify your city.');
+        const data=await response.json();
+        const address=data.address||{};
+        const detectedCity=address.city||address.town||address.city_district||address.suburb||address.county||address.state_district||address.state||'Current Location';
+        chooseCity(detectedCity,address.state||'');
+      }catch(error){chooseCity('Current Location');setLocationError('Location detected, but city name could not be fetched.');}
+      finally{setDetecting(false);}
+    },error=>{setDetecting(false);setLocationError(error.code===1?'Location permission was denied. Allow location access in your browser, or select a city below.':'Unable to detect your location. Please select a city below.');},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
   };
-
-  const closeMenu = () => setOpen(false);
-
-  return (
-    <header className="sticky top-0 z-50 bg-[#0b0f15]/95 text-white border-b border-white/10 backdrop-blur-xl">
-      <div className="max-w-chassis mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2.5 group" onClick={closeMenu}>
-            <svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-              <path d="M4 24.5 9.5 12h17L32 24.5" stroke="#eeb52e" strokeWidth="2.4" strokeLinejoin="round"/>
-              <path d="M7 24.5h22" stroke="#eeb52e" strokeWidth="2.4" strokeLinecap="round"/>
-              <circle cx="11" cy="25" r="3" fill="#0b0f15" stroke="#eeb52e" strokeWidth="2"/>
-              <circle cx="25" cy="25" r="3" fill="#0b0f15" stroke="#eeb52e" strokeWidth="2"/>
-            </svg>
-            <span className="font-heading font-extrabold text-lg tracking-tight text-white">SHOW<span className="text-amber-400">CAR</span>DETAIL</span>
-          </Link>
-
-          <nav className="hidden lg:flex items-center gap-1">
-            <Link to="/browse" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">New Cars</Link>
-            <Link to="/browse" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">Used Cars</Link>
-            <div className="relative" onMouseEnter={() => setBrandOpen(true)} onMouseLeave={() => setBrandOpen(false)}>
-              <button type="button" onClick={() => setBrandOpen(v => !v)} className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors flex items-center gap-1">
-                Brands <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {brandOpen && (
-                <div className="absolute top-full left-0 w-[480px] bg-[#111722] border border-white/10 p-4 grid grid-cols-3 gap-1 shadow-2xl">
-                  {BRANDS.map(b => (
-                    <Link key={b} to={`/brand/${b.toLowerCase().replace(/\\s+/g, '-')}`} className="px-3 py-2 text-sm text-white/70 hover:text-amber-400 hover:bg-white/5 transition-colors">{b}</Link>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Link to="/compare" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">Compare</Link>
-            <Link to="/browse?fuel=Electric" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">Electric</Link>
-            <Link to="/emi" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">EMI & Loans</Link>
-            <Link to="/contact" className="px-3 py-2 text-sm font-medium text-white/75 hover:text-amber-400 transition-colors">Contact</Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <form onSubmit={submit} className="hidden md:flex items-center bg-white/5 border border-white/15 px-3 h-9 w-52 focus-within:border-amber-400/70 transition-colors">
-              <Search className="w-4 h-4 text-white/60" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search cars…" aria-label="Search cars" className="bg-transparent text-sm ml-2 outline-none flex-1 text-white placeholder:text-white/40" />
-            </form>
-            {isAuthenticated && user ? (
-              <>
-                <Link to="/admin" className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-amber-400 transition-colors"><ShieldCheck className="w-4 h-4" /> Admin</Link>
-                <div className="hidden sm:flex items-center gap-2 text-sm"><span className="text-white/50">Hi,</span><span className="font-medium text-white max-w-[140px] truncate">{user.full_name || user.email}</span></div>
-                <button type="button" onClick={() => logout(false)} className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-amber-400 transition-colors"><LogOut className="w-4 h-4" /> Logout</button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="hidden sm:block text-sm font-medium text-white/70 hover:text-amber-400 transition-colors">Sign In</Link>
-                <Link to="/register" className="hidden sm:block btn-kinetic py-2 px-4 text-xs">Register</Link>
-              </>
-            )}
-          </div>
-
-          <button type="button" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen(!open)} className="lg:hidden p-2 text-white">
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+  const LocationPicker=({mobile=false})=><button type="button" onClick={()=>{setCitySearch(selectedState||'');setLocationOpen(true);}} aria-label={city?'Selected location: '+(selectedState?selectedState+', ':'')+city:'Select location'} title={city?(selectedState?selectedState+', ':'')+city:'Select location'} className={'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition '+(city?'border-emerald-300 bg-emerald-50 text-emerald-700':'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700')+' '+(mobile?'':'')}><MapPinned className="h-5 w-5"/>{city&&<span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" aria-label="Location selected"/>}</button>;
+  const submit=e=>{e.preventDefault();navigate('/browse?q='+encodeURIComponent(query));close();};
+  const menus={
+    'Bike':[
+      {label:'Find New Bike',to:'/vehicle-category/find-new-bikes'},
+      {label:'Popular Bikes',to:'/vehicle-category/popular-bikes'},
+      {label:'Upcoming Bikes',to:'/vehicle-category/upcoming-bikes'},
+      {label:'By Budget',to:'/vehicle-category/bikes-by-budget'},
+      {label:'By Brands',to:'/vehicle-category/bikes-by-brand'},
+      {label:'Scooters',to:'/vehicle-category/scooters'}
+    ],
+    'Car':[
+      {label:'New Car',children:[
+        ['Find New Car','/vehicle-category/find-new-cars'],
+        ['By Budget','/browse?condition=New'],
+        ['By Body Type','/browse?condition=New'],
+        ['By Fuel Type','/browse?condition=New'],
+        ['Under 5 Lakh','/browse?condition=New&budget=0-500000'],
+        ['Under 10 Lakh','/browse?condition=New&budget=0-1000000']
+      ]},
+      {label:'Used Car',children:[
+        ['Find Used Car','/vehicle-category/find-used-cars'],
+        ['By Budget','/browse?condition=Used'],
+        ['By Body Type','/browse?condition=Used'],
+        ['By Fuel Type','/browse?condition=Used'],
+        ['Under 5 Lakh','/browse?condition=Used&budget=0-500000'],
+        ['Under 10 Lakh','/browse?condition=Used&budget=0-1000000']
+      ]},
+      {label:'Electric Car',children:[
+        ['Find Electric Cars','/vehicle-category/find-electric-cars'],
+        ['By Budget','/browse?condition=New&fuel=Electric&budget=0-1000000'],
+        ['By Body Type','/browse?condition=New&fuel=Electric']
+      ]},
+      {label:'Compare Car',to:'/compare'}
+    ],
+    'Commercial Vehicle':[
+      {label:'Commercial Vehicles',to:'/vehicle-category/commercial-vehicles'}
+    ],
+    'News & Reviews':[
+      {label:'Latest News',to:'/news-reviews?tab=news'},
+      {label:'Car Reviews',to:'/news-reviews?tab=reviews'},
+      {label:'Expert Reviews',to:'/news-reviews?tab=expert'},
+      {label:'Videos',to:'/news-reviews?tab=videos'}
+    ]
+  };
+  const MenuGroup=({name})=><div className="relative" onMouseEnter={()=>setActiveMenu(name)} onMouseLeave={()=>{setActiveMenu('');setActiveSubMenu('');}}>
+    <button type="button" onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
+    {activeMenu===name&&<div className="absolute left-0 top-full z-50 w-60 rounded-b-lg border border-slate-200 bg-white p-2 shadow-xl">
+      {menus[name].map(item=>item.children?
+        <div key={item.label} className="relative" onMouseEnter={()=>setActiveSubMenu(item.label)}>
+          <button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}<ChevronDown className="h-4 w-4 -rotate-90"/></button>
+          {activeSubMenu===item.label&&<div className="absolute left-full top-0 z-[60] ml-1 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}</div>}
         </div>
+        :<Link key={item.label} to={item.to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}</Link>)}
+    </div>}
+  </div>;
+  return <header className="sticky top-0 z-50 border-b border-slate-200 bg-white text-slate-900 shadow-sm">
+    <div className="mx-auto max-w-chassis px-4 sm:px-6">
+      <div className="flex h-[72px] items-center justify-between gap-4">
+        <Link to="/" onClick={close} className="flex shrink-0 items-center gap-2">
+          <svg width="34" height="34" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 24.5 9.5 12h17L32 24.5M7 24.5h22" stroke="#e31e24" strokeWidth="2.4" strokeLinejoin="round"/><circle cx="11" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/><circle cx="25" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/></svg>
+          <span className="font-heading text-lg font-extrabold tracking-tight">SHOW<span className="text-red-600">CAR</span>DETAIL</span>
+        </Link>
+        <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Car"/><MenuGroup name="Commercial Vehicle"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="News & Reviews"/></nav>
+        <div className="hidden md:flex items-center gap-3">
+          <div className="relative">
+            <form onSubmit={submit} className="flex h-10 w-56 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-red-400"><Search className="h-4 w-4 shrink-0 text-slate-500"/><input value={query} onFocus={()=>setSearchFocused(true)} onBlur={()=>setTimeout(()=>setSearchFocused(false),150)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" aria-label="Search cars" autoComplete="off" className="w-full bg-transparent text-sm outline-none"/></form>
+            {searchFocused&&query.trim().length>=2&&<div className="absolute left-0 top-full z-[70] mt-2 max-h-80 w-80 overflow-y-auto rounded-lg border border-slate-200 bg-white py-2 shadow-xl">{carSuggestions.length?carSuggestions.map((car,i)=><button type="button" key={car.id||i} onMouseDown={e=>e.preventDefault()} onClick={()=>selectCarSuggestion(car)} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-red-50"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600"><Search className="h-4 w-4"/></span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-slate-800">{[car.brand,car.name||car.model].filter(Boolean).join(' ')}</span><span className="block text-xs text-slate-500">{car.condition||car.listing_type||'Car'}{car.price?' · ₹'+Number(car.price).toLocaleString('en-IN'):''}</span></span></button>):<p className="px-4 py-4 text-sm text-slate-500">No matching cars found in listings.</p>}</div>}
+          </div>
+          <LocationPicker/>
+          <div className="relative">
+            <button type="button" aria-label="Account menu" aria-expanded={accountOpen} onClick={()=>setAccountOpen(v=>!v)} className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600">
+              <UserRound className="h-5 w-5"/>
+            </button>
+            {accountOpen&&<div className="absolute right-0 top-full z-[60] mt-2 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-2 shadow-xl">
+              <div className="border-b border-slate-100 px-4 py-3"><p className="text-sm font-semibold text-slate-900">{isAuthenticated&&user?'My Account':'Welcome to ShowCarDetail'}</p><p className="mt-1 text-xs text-slate-500">{isAuthenticated&&user?'Manage your account':'Login to access your account'}</p></div>
+              {isAuthenticated&&user?<><Link to="/admin" onClick={close} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"><ShieldCheck className="h-4 w-4"/>Admin Dashboard</Link><button type="button" onClick={()=>{close();logout(false);}} className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50"><LogOut className="h-4 w-4"/>Logout</button></>:<Link to="/login" onClick={close} className="mx-3 mt-2 flex items-center justify-center rounded bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Login / Sign Up</Link>}
+            </div>}
+          </div>
+        </div>
+        <button type="button" aria-label="Toggle menu" onClick={()=>setOpen(!open)} className="p-2 text-slate-800 lg:hidden">{open?<X/>:<Menu/>}</button>
       </div>
+    </div>
+    {open&&<div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
+      <div className="mb-3 flex items-center gap-3">
+       <div className="relative min-w-0 flex-1">
+        <form onSubmit={submit} className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3"><Search className="h-4 w-4 shrink-0"/><input value={query} onFocus={()=>setSearchFocused(true)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" className="w-full min-w-0 bg-transparent text-sm outline-none"/></form>
+        {searchFocused&&query.trim().length>=2&&<div className="absolute left-0 right-0 top-full z-[70] mt-1 max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl">{carSuggestions.length?carSuggestions.map((car,i)=><button type="button" key={car.id||i} onClick={()=>selectCarSuggestion(car)} className="block w-full px-3 py-2 text-left text-sm hover:bg-red-50">{[car.brand,car.name||car.model].filter(Boolean).join(' ')}</button>):<p className="px-3 py-3 text-xs text-slate-500">No matching cars found in listings.</p>}</div>}
+       </div>
+       <LocationPicker mobile/>
+      </div>
+      {Object.entries(menus).map(([name,items])=><section key={name} className="border-b border-slate-100 py-2"><button onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex w-full items-center justify-between py-2 font-semibold text-slate-800">{name}<ChevronDown className="h-4 w-4"/></button>{activeMenu===name&&<div className="space-y-1 pl-2">{items.map(item=>item.children?<div key={item.label}><button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-red-50">{item.label}<ChevronDown className="h-4 w-4"/></button>{activeSubMenu===item.label&&<div className="grid grid-cols-2 gap-1 border-l-2 border-red-100 pl-2">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{label}</Link>)}</div>}</div>:<Link key={item.label} to={item.to} onClick={close} className="block rounded px-2 py-2 text-sm text-slate-600 hover:bg-red-50">{item.label}</Link>)}</div>}</section>)}
+      <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-slate-800"><UserRound className="h-5 w-5 text-red-600"/>{isAuthenticated&&user?'My Account':'Your Account'}</div>
+        {isAuthenticated&&user?<div className="flex gap-4"><Link to="/admin" onClick={close} className="text-sm font-medium text-red-600">Admin</Link><button type="button" onClick={()=>{close();logout(false)}} className="text-sm text-slate-700">Logout</button></div>:<Link to="/login" onClick={close} className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white">Login / Sign Up</Link>}
+      </div>
+    </div>}
 
-      {open && (
-        <div className="lg:hidden border-t border-white/10 bg-[#0b0f15] px-4 py-4 space-y-2 text-white">
-          <form onSubmit={submit} className="flex items-center bg-white/5 border border-white/15 px-3 h-10 mb-2">
-            <Search className="w-4 h-4 text-white/60" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search cars…" aria-label="Search cars" className="bg-transparent text-sm ml-2 outline-none flex-1 text-white placeholder:text-white/40" />
-          </form>
-          {[['New Cars','/browse'],['Used Cars','/browse'],['Compare','/compare'],['Electric','/browse?fuel=Electric'],['EMI & Loans','/emi'],['Contact','/contact']].map(([label, to]) => (
-            <Link key={label} to={to} className="block py-2 text-sm text-white/80 hover:text-amber-400" onClick={closeMenu}>{label}</Link>
-          ))}
-          <div className="flex gap-2 pt-3 border-t border-white/10">
-            {isAuthenticated && user ? (
-              <>
-                <div className="flex-1 text-sm text-white/80 py-2">Hi, <span className="font-medium text-white">{user.full_name || user.email}</span></div>
-                <Link to="/admin" className="btn-ghost flex-1 justify-center py-2 text-xs border-white/30 text-white hover:border-amber-400 hover:text-amber-400" onClick={closeMenu}>Admin</Link>
-                <button type="button" onClick={() => { closeMenu(); logout(false); }} className="btn-kinetic flex-1 py-2 text-xs flex items-center justify-center gap-1.5"><LogOut className="w-4 h-4" /> Logout</button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="btn-ghost flex-1 justify-center py-2 text-xs border-white/30 text-white hover:border-amber-400 hover:text-amber-400" onClick={closeMenu}>Sign In</Link>
-                <Link to="/register" className="btn-kinetic flex-1 py-2 text-xs" onClick={closeMenu}>Register</Link>
-              </>
-            )}
-          </div>
+    {locationOpen&&<div className="fixed inset-0 z-[100] flex items-start justify-center bg-slate-950/50 px-4 py-16 sm:items-center" onMouseDown={e=>{if(e.target===e.currentTarget)setLocationOpen(false);}}>
+      <section role="dialog" aria-modal="true" aria-labelledby="location-picker-title" className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><div><h2 id="location-picker-title" className="text-lg font-bold text-slate-900">Select your city</h2><p className="mt-1 text-xs text-slate-500">Find cars and prices available near you</p></div><button type="button" aria-label="Close location selector" onClick={()=>setLocationOpen(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5"/></button></div>
+        <div className="p-5">
+          <button type="button" onClick={detectLocation} disabled={detecting} className="flex w-full items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left text-red-700 hover:bg-red-100 disabled:opacity-60"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-white"><Navigation className="h-4 w-4"/></span><span className="flex-1"><span className="block text-sm font-semibold">{detecting?'Detecting your location…':'Detect my location'}</span><span className="mt-0.5 block text-xs text-red-600">Use your device location</span></span></button>
+          {locationError&&<p role="status" className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">{locationError}</p>}
+          <div className="relative mt-5"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><input value={citySearch} onChange={e=>setCitySearch(e.target.value)} placeholder="Search your city" aria-label="Search city" className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm text-slate-800 outline-none focus:border-red-400"/></div>
+          { !citySearch.trim() ? <>
+            <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Popular cities</p>
+            <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">{POPULAR_CITIES.map(c=><button type="button" key={c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-500 bg-red-100 font-semibold text-red-800 ring-1 ring-red-300':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+          </> : <>
+            {Object.entries(STATE_CITIES).filter(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()))).map(([state,cities])=>{
+              const stateMatches=state.toLowerCase().includes(citySearch.trim().toLowerCase());
+              const matches=stateMatches?cities:cities.filter(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase()));
+              return matches.length>0?<section key={state} className="mt-5">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{state}</h3>
+                <div className="grid grid-cols-2 gap-2">{matches.map(c=><button type="button" key={state+'-'+c} onClick={()=>chooseCity(c)} className={'rounded-lg border px-3 py-2.5 text-left text-sm transition hover:border-red-300 hover:bg-red-50 '+(city===c?'border-red-500 bg-red-100 font-semibold text-red-800 ring-1 ring-red-300':'border-slate-100 text-slate-700')}>{c}</button>)}</div>
+              </section>:null;
+            })}
+            {!Object.entries(STATE_CITIES).some(([state,cities])=>state.toLowerCase().includes(citySearch.trim().toLowerCase())||cities.some(c=>c.toLowerCase().includes(citySearch.trim().toLowerCase())))&&<p className="mt-5 py-4 text-center text-sm text-slate-500">No city found. Try another city or state name.</p>}
+          </>}
         </div>
-      )}
-    </header>
-  );
+      </section>
+    </div>}
+  </header>;
 }

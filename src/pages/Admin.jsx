@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Car, BadgeCheck, Star, Newspaper, Mail, Eye, ImageIcon, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Car, Bike, Zap, Truck, BadgeCheck, Star, Newspaper, Mail, Eye, ImageIcon, ArrowLeft, Wallet } from "lucide-react";
 import AdminStats from "@/components/admin/AdminStats";
 import CarManager from "@/components/admin/CarManager";
 import BrandManager from "@/components/admin/BrandManager";
@@ -9,16 +9,31 @@ import NewsManager from "@/components/admin/NewsManager";
 import ContactManager from "@/components/admin/ContactManager";
 import VisitManager from "@/components/admin/VisitManager";
 import ImageManager from "@/components/admin/ImageManager";
+import BudgetManager from "@/components/admin/BudgetManager";
+import BikeManager from "@/components/admin/BikeManager";
+import ElectricVehicleManager from "@/components/admin/ElectricVehicleManager";
+import CommercialVehicleManager from "@/components/admin/CommercialVehicleManager";
+import BikeImageManager from "@/components/admin/BikeImageManager";
+import ElectricVehicleImageManager from "@/components/admin/ElectricVehicleImageManager";
+import CommercialVehicleImageManager from "@/components/admin/CommercialVehicleImageManager";
 
 const NAV = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "cars", label: "Cars", icon: Car },
+  { id: "gallery", label: "Car Images", icon: ImageIcon },
+  { id: "bikes", label: "Bikes", icon: Bike },
+  { id: "bike-images", label: "Bike Images", icon: ImageIcon },
+  { id: "electric-vehicles", label: "Electric Vehicles", icon: Zap },
+  { id: "ev-images", label: "EV Images", icon: ImageIcon },
+  { id: "commercial-vehicles", label: "Commercial Vehicles", icon: Truck },
+  { id: "cv-images", label: "CV Images", icon: ImageIcon },
   { id: "brands", label: "Brands", icon: BadgeCheck },
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "news", label: "News", icon: Newspaper },
   { id: "contacts", label: "Inquiries", icon: Mail },
   { id: "visits", label: "Visits", icon: Eye },
-  { id: "gallery", label: "Gallery", icon: ImageIcon },
+
+  { id: "budgets", label: "Budget Sections", icon: Wallet },
 ];
 
 export default function Admin() {
@@ -71,6 +86,13 @@ export default function Admin() {
             {active === "contacts" && <ContactManager />}
             {active === "visits" && <VisitManager />}
             {active === "gallery" && <ImageManager />}
+            {active === "bikes" && <BikeManager />}
+            {active === "bike-images" && <BikeImageManager />}
+            {active === "electric-vehicles" && <ElectricVehicleManager />}
+            {active === "ev-images" && <ElectricVehicleImageManager />}
+            {active === "commercial-vehicles" && <CommercialVehicleManager />}
+            {active === "cv-images" && <CommercialVehicleImageManager />}
+            {active === "budgets" && <BudgetManager />}
           </section>
         </div>
       </div>

@@ -1,0 +1,1 @@
+import React from 'react';import CategoryImageManager from './CategoryImageManager';export default function ElectricVehicleImageManager(){return <CategoryImageManager entity="ElectricVehicleGalleryImage" category="Electric Vehicle" title="Electric Vehicle Images"/>;}

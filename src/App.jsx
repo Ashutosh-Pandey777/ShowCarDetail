@@ -3,50 +3,69 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
+import AdminLogin from '@/pages/AdminLogin';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
-// Add page imports here
 import Layout from '@/components/layout/Layout';
 import Home from '@/pages/Home';
 import Browse from '@/pages/Browse';
 import CarDetails from '@/pages/CarDetails';
 import Compare from '@/pages/Compare';
 import Brand from '@/pages/Brand';
+import FindNewVehicles from '@/pages/FindNewVehicles';
 import Finance from '@/pages/Finance';
 import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
+import NewsReviews from '@/pages/NewsReviews';
+import CompanyInfoPage from '@/pages/CompanyInfoPage';
+import Bike from '@/pages/Bike/Bike';
+import BikeCompare from '@/pages/Bike/BikeCompare';
+import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
+import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
 
 const AuthenticatedApp = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
     <Route path="/register" element={<Register />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route element={<ProtectedRoute requireAdmin unauthenticatedElement={<Navigate to="/admin/login" replace />} />}>
+      <Route path="/admin" element={<Admin />} />
+    </Route>
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
+      <Route path="/car" element={<Home />} />
+      <Route path="/bike" element={<Bike />} />
+      <Route path="/compare/bikes" element={<BikeCompare />} />
+      <Route path="/electric-vehicle" element={<ElectricVehicle />} />
+      <Route path="/commercial-vehicle" element={<CommercialVehicle />} />
       <Route path="/browse" element={<Browse />} />
+      <Route path="/news-reviews" element={<NewsReviews />} />
+      <Route path="/about-us" element={<CompanyInfoPage />} />
+      <Route path="/careers" element={<CompanyInfoPage />} />
+      <Route path="/terms-and-conditions" element={<CompanyInfoPage />} />
+      <Route path="/advertise" element={<CompanyInfoPage />} />
       <Route path="/car/:id" element={<CarDetails />} />
       <Route path="/compare" element={<Compare />} />
       <Route path="/brand/:slug" element={<Brand />} />
+      <Route path="/vehicle-category/find-new-cars" element={<FindNewVehicles vehicle="Car" />} />
+      <Route path="/vehicle-category/find-new-bikes" element={<FindNewVehicles vehicle="Bike" />} />
+      <Route path="/vehicle-category/find-used-cars" element={<FindNewVehicles vehicle="Car" mode="Used" />} />
+      <Route path="/vehicle-category/find-electric-cars" element={<FindNewVehicles vehicle="Car" mode="Electric" />} />
       <Route path="/emi" element={<Finance />} />
       <Route path="/contact" element={<Contact />} />
-      <Route element={<ProtectedRoute requireAdmin unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/admin" element={<Admin />} />
-      </Route>
     </Route>
     <Route path="*" element={<PageNotFound />} />
   </Routes>
 );
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
@@ -59,5 +78,4 @@ function App() {
     </AuthProvider>
   )
 }
-
 export default App

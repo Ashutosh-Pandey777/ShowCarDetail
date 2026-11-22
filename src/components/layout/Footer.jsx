@@ -1,16 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-const BRANDS = ['Maruti Suzuki', 'Hyundai', 'Tata', 'Mahindra', 'Kia', 'Toyota', 'BMW', 'Mercedes-Benz', 'Audi', 'MG'];
+import { Facebook, Instagram, Youtube, Twitter, CarFront } from 'lucide-react';
+const footerLinks = [['About Us','/about-us'],['Careers','/careers'],['Terms & Conditions','/terms-and-conditions'],['Advertise','/advertise']];
 export default function Footer() {
-  return <footer className="bg-obsidian border-t border-hairline mt-24"><div className="max-w-chassis mx-auto px-4 sm:px-6 py-14">
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-      <div className="col-span-2"><Link to="/" className="flex items-center gap-2.5 mb-4"><svg width="32" height="32" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 24.5 9.5 12h17L32 24.5M7 24.5h22" stroke="#eeb52e" strokeWidth="2.4" strokeLinejoin="round"/><circle cx="11" cy="25" r="3" fill="#0d1118" stroke="#eeb52e" strokeWidth="2"/><circle cx="25" cy="25" r="3" fill="#0d1118" stroke="#eeb52e" strokeWidth="2"/></svg><span className="font-heading font-extrabold text-lg">SHOW<span className="text-amber-400">CAR</span>DETAIL</span></Link>
-        <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">Research, compare and discover new and used cars. Find specifications, prices and finance tools to make a confident decision.</p></div>
-      <FooterCol title="Explore" links={[['New Cars','/browse?condition=New'],['Used Cars','/browse?condition=Used'],['Compare Cars','/compare'],['Electric Cars','/browse?fuel=Electric'],['EMI Calculator','/emi']]} />
-      <FooterCol title="Popular Brands" links={BRANDS.map(b => [b, '/brand/' + b.toLowerCase().replace(/\s+/g, '-')])} />
-      <FooterCol title="Company" links={ [['Contact Us','/contact'],['Admin Login','/login']] } />
+ return <footer className="mt-16 bg-[#17212f] text-white">
+  <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+   <div className="flex flex-col justify-between gap-8 md:flex-row md:items-start">
+    <div>
+     <Link to="/" className="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight"><span className="grid h-9 w-9 place-items-center rounded-lg bg-red-600"><CarFront size={22}/></span><span>SHOW<span className="text-red-400">CAR</span>DETAIL</span></Link>
+     <p className="mt-3 max-w-sm text-sm leading-6 text-slate-300">Explore cars and make informed car-buying decisions with ShowCarDetail.</p>
+     <div className="mt-5 flex gap-3">{[[Facebook,'https://www.facebook.com/','Facebook'],[Instagram,'https://www.instagram.com/','Instagram'],[Youtube,'https://www.youtube.com/','YouTube'],[Twitter,'https://twitter.com/','Twitter']].map(([Icon,url,label])=><a key={label} href={url} target="_blank" rel="noreferrer" aria-label={label} className="grid h-9 w-9 place-items-center rounded-full border border-slate-600 text-slate-200 transition hover:border-red-500 hover:bg-red-600"><Icon size={17}/></a>)}</div>
     </div>
-    <div className="mt-12 pt-6 border-t border-hairline flex flex-col sm:flex-row justify-between items-center gap-3"><p className="text-xs font-mono-data text-muted-foreground">© {new Date().getFullYear()} SHOWCARDETAIL — ALL RIGHTS RESERVED</p><p className="text-xs font-mono-data text-muted-foreground">RESEARCH · COMPARE · DRIVE</p></div>
-  </div></footer>;
+    <div className="grid grid-cols-2 gap-x-10 gap-y-4 sm:grid-cols-4 md:gap-x-8">{footerLinks.map(([label,to])=><Link key={label} to={to} className="text-sm text-slate-300 transition hover:text-white">{label}</Link>)}</div>
+   </div>
+   <div className="mt-9 flex flex-col justify-between gap-4 border-t border-slate-700 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center">
+    <p>© {new Date().getFullYear()} ShowCarDetail. All rights reserved.</p>
+    <div className="flex items-center gap-3"><span className="text-slate-300">Language:</span><span className="font-semibold text-white">English</span><span className="text-slate-600">|</span><span className="text-slate-400" title="Hindi version is not available yet">हिंदी (Coming soon)</span></div>
+   </div>
+  </div>
+ </footer>;
 }
-function FooterCol({ title, links }) { return <div><h4 className="text-xs font-mono-data uppercase tracking-widest text-primary mb-4">{title}</h4><ul className="space-y-2">{links.map(([label,to]) => <li key={label}><Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link></li>)}</ul></div>; }

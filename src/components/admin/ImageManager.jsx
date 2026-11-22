@@ -9,6 +9,7 @@ export default function ImageManager() {
   const [section, setSection] = useState("Showroom");
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const load = async () => setItems(await base44.entities.GalleryImage.list("-created_date", 100));
   useEffect(() => { load(); }, []);
@@ -17,6 +18,7 @@ export default function ImageManager() {
     e.preventDefault();
     if (!file) return;
     setBusy(true);
+    setError("");
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.entities.GalleryImage.create({
@@ -27,7 +29,9 @@ export default function ImageManager() {
       });
       setTitle("");
       setFile(null);
-      load();
+      await load();
+    } catch (err) {
+      setError(err.message || "Image upload failed. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -50,6 +54,7 @@ export default function ImageManager() {
     <div>
       <h2 className="font-heading text-xl font-semibold mb-4">Gallery Images ({items.length})</h2>
 
+      {error && <p role="alert" className="text-sm text-destructive mb-3">{error}</p>}
       <form onSubmit={upload} className="bg-gunmetal border border-hairline p-4 mb-6 flex flex-col sm:flex-row gap-3 sm:items-end">
         <label className="block flex-1">
           <span className="block text-xs font-mono-data uppercase tracking-widest text-muted-foreground mb-1.5">Title</span>
