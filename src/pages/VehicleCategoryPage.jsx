@@ -3,7 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { Bike, Truck, ArrowLeft } from 'lucide-react';
 
 const CATEGORY_INFO = {
+  'find-new-bikes': { title: 'Find New Bikes', description: 'New bike listings will appear here once bike inventory is added.', icon: Bike },
   'popular-bikes': { title: 'Popular Bikes', description: 'Popular bike listings will appear here once bike inventory is added.', icon: Bike },
+  'bikes-by-budget': { title: 'Bikes by Budget', description: 'Bike options by price range will appear here once bike inventory and prices are added.', icon: Bike },
+  'bikes-by-brand': { title: 'Bikes by Brand', description: 'Bike brands and their models will appear here once bike inventory is added.', icon: Bike },
   'upcoming-bikes': { title: 'Upcoming Bikes', description: 'Upcoming bike updates will appear here soon.', icon: Bike },
   scooters: { title: 'Scooters', description: 'Scooter listings will appear here once scooter inventory is added.', icon: Bike },
   'commercial-vehicles': { title: 'Commercial Vehicles', description: 'Commercial vehicle listings are not available yet.', icon: Truck }
