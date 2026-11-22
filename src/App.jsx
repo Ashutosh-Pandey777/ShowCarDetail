@@ -17,6 +17,7 @@ import Browse from '@/pages/Browse';
 import CarDetails from '@/pages/CarDetails';
 import Compare from '@/pages/Compare';
 import Brand from '@/pages/Brand';
+import FindNewVehicles from '@/pages/FindNewVehicles';
 import Finance from '@/pages/Finance';
 import Admin from '@/pages/Admin';
 import Contact from '@/pages/Contact';
@@ -53,6 +54,8 @@ const AuthenticatedApp = () => (
       <Route path="/car/:id" element={<CarDetails />} />
       <Route path="/compare" element={<Compare />} />
       <Route path="/brand/:slug" element={<Brand />} />
+      <Route path="/vehicle-category/find-new-cars" element={<FindNewVehicles vehicle="Car" />} />
+      <Route path="/vehicle-category/find-new-bikes" element={<FindNewVehicles vehicle="Bike" />} />
       <Route path="/emi" element={<Finance />} />
       <Route path="/contact" element={<Contact />} />
     </Route>
