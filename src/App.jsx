@@ -56,6 +56,8 @@ const AuthenticatedApp = () => (
       <Route path="/brand/:slug" element={<Brand />} />
       <Route path="/vehicle-category/find-new-cars" element={<FindNewVehicles vehicle="Car" />} />
       <Route path="/vehicle-category/find-new-bikes" element={<FindNewVehicles vehicle="Bike" />} />
+      <Route path="/vehicle-category/find-used-cars" element={<FindNewVehicles vehicle="Car" mode="Used" />} />
+      <Route path="/vehicle-category/find-electric-cars" element={<FindNewVehicles vehicle="Car" mode="Electric" />} />
       <Route path="/emi" element={<Finance />} />
       <Route path="/contact" element={<Contact />} />
     </Route>
