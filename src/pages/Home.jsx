@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
 import CarPhoto from '@/components/CarPhoto';
+import GalleryStrip from '@/components/GalleryStrip';
 import Bike from '@/pages/Bike/Bike';
 import ElectricVehicle from '@/pages/ElectricVehicle/ElectricVehicle';
 import CommercialVehicle from '@/pages/CommercialVehicle/CommercialVehicle';
@@ -113,6 +114,7 @@ export default function Home(){
    <style>{`@keyframes brand-marquee-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}.brand-marquee-track{animation:brand-marquee-right 48s linear infinite;will-change:transform}.brand-marquee:hover .brand-marquee-track{animation-play-state:paused}@media(prefers-reduced-motion:reduce){.brand-marquee-track{animation:none}}`}</style>
   </section>
   </div>}
+  {vehicleType==='Car' && <GalleryStrip />}
  </div>;
 }
 function EmptyCars({label,to}){return <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center"><p className="text-sm font-semibold text-slate-700">No {label} added yet</p><p className="mt-1 text-xs text-slate-500">Admin Dashboard → Cars mein matching cars add karein.</p><Link to={to} className="mt-3 inline-block text-sm font-semibold text-red-600">Browse matching cars →</Link></div>}
