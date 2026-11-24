@@ -175,6 +175,20 @@ public static class CatalogSeeder
             catch { }
         }
 
+        foreach (var entry in db.ChangeTracker.Entries<EntityRecord>().Where(e => e.State == EntityState.Added && e.Entity.EntityType == "Brand"))
+        {
+            try
+            {
+                var node = JsonNode.Parse(entry.Entity.Data)?.AsObject();
+                if (node is null || !string.Equals((string?)node["category"], "Bike", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.IsNullOrWhiteSpace((string?)node["image_url"])) continue;
+                var website = (string?)node["website"];
+                if (!string.IsNullOrWhiteSpace(website)) node["image_url"] = Favicon(website);
+                entry.Entity.Data = node.ToJsonString();
+            }
+            catch { }
+        }
+
         await db.SaveChangesAsync();
     }
 
