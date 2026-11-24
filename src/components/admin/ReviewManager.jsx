@@ -37,7 +37,7 @@ export default function ReviewManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Reviews ({items.length})</h2>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => setEditing({ ...EMPTY })} className="btn-showcardetail py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Review
         </button>
       </div>
@@ -79,7 +79,7 @@ export default function ReviewManager() {
             <Field label="Cons (comma-separated)"><TextInput value={editing.cons} onChange={(e) => setEditing({ ...editing, cons: e.target.value })} /></Field>
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditing(null)} className="btn-ghost py-2 px-4 text-xs">Cancel</button>
-              <button type="submit" disabled={saving} className="btn-kinetic py-2 px-4 text-xs">
+              <button type="submit" disabled={saving} className="btn-showcardetail py-2 px-4 text-xs">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
               </button>
             </div>
