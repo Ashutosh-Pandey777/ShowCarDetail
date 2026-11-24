@@ -34,7 +34,7 @@ export default function CarDetails() {
   }, [id]);
 
   if (loading) return <div className="min-h-[60vh] flex items-center justify-center"><div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin" /></div>;
-  if (!car) return <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4"><p className="text-muted-foreground">Vehicle not found.</p><Link to="/browse" className="btn-kinetic">Browse all</Link></div>;
+  if (!car) return <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4"><p className="text-muted-foreground">Vehicle not found.</p><Link to="/browse" className="btn-showcardetail">Browse all</Link></div>;
 
   const gallery = [...new Set([...(Array.isArray(car.gallery) ? car.gallery : []), car.image_url].filter(Boolean))];
   const displayPrice = Number(car.price || 0);
@@ -90,7 +90,7 @@ export default function CarDetails() {
           </div>
 
           <div className="mt-5 space-y-2">
-            <a href="#dealer-inquiry" className="btn-kinetic w-full">Get Best Offer</a>
+            <a href="#dealer-inquiry" className="btn-showcardetail w-full">Get Best Offer</a>
             <div className="grid grid-cols-2 gap-2">
               <Link to="/compare" className="btn-ghost"><GitCompare className="w-4 h-4" /> Compare</Link>
               <button className="btn-ghost"><Download className="w-4 h-4" /> Brochure</button>
@@ -278,7 +278,7 @@ function DealerForm({ carName, carId, city }) {
       <input required name="email" value={form.email} onChange={update} type="email" placeholder="Email" autoComplete="email" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
       <input required name="city" value={form.city} onChange={update} placeholder="Your city" className="w-full bg-secondary border border-hairline px-4 py-3 text-sm outline-none focus:border-primary/50" />
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <button type="submit" disabled={busy} className="btn-kinetic w-full">{busy ? "Submitting…" : "Submit Inquiry"}</button>
+      <button type="submit" disabled={busy} className="btn-showcardetail w-full">{busy ? "Submitting…" : "Submit Inquiry"}</button>
     </form>
   );
 }
