@@ -7,61 +7,27 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+// Use the configured SQL Server connection string.
+// Local development uses appsettings.json; MonsterASP should override it
+// with ConnectionStrings__DefaultConnection in its application settings.
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
 
-string cs;
-
-if (!string.IsNullOrWhiteSpace(databaseUrl))
+if (string.IsNullOrWhiteSpace(cs))
 {
-    var uri = new Uri(databaseUrl);
-
-    var userInfo = uri.UserInfo.Split(':', 2);
-
-    if (userInfo.Length != 2)
-    {
-        throw new InvalidOperationException(
-            "DATABASE_URL format is invalid."
-        );
-    }
-
-    var username = Uri.UnescapeDataString(userInfo[0]);
-    var password = Uri.UnescapeDataString(userInfo[1]);
-
-    var databaseName = uri.AbsolutePath.TrimStart('/');
-
-    // Render PostgreSQL normally uses port 5432
-    var port = uri.Port > 0 ? uri.Port : 5432;
-
-    cs =
-        $"Host={uri.Host};" +
-        $"Port={port};" +
-        $"Database={databaseName};" +
-        $"Username={username};" +
-        $"Password={password};" +
-        "SSL Mode=Require;" +
-        "Trust Server Certificate=true;";
-}
-else
-{
-    cs = builder.Configuration.GetConnectionString("DefaultConnection")
-         ?? throw new InvalidOperationException(
-             "DefaultConnection is not configured."
-         );
+    throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection is not configured."
+    );
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(cs));
-
+    options.UseSqlServer(cs));
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpClient<Msg91OtpService>();
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddCors(options =>
 {
@@ -95,12 +61,9 @@ builder.Services
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-
-            IssuerSigningKey =
-                new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
@@ -109,20 +72,15 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseCors();
-
 app.UseStaticFiles();
 
-
-// Swagger only in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
@@ -133,32 +91,48 @@ app.MapGet("/", () => Results.Ok(new
     message = "Welcome To ShowCarDetail"
 }));
 
+// Create the database if it does not exist and safely add the phone field
+// to an existing SQL Server Users table without deleting existing data.
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     await db.Database.EnsureCreatedAsync();
 
-    // Add phone login support to existing PostgreSQL databases without dropping user data.
-    await db.Database.ExecuteSqlRawAsync("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "PhoneNumber" character varying(20);""");
-    await db.Database.ExecuteSqlRawAsync("""CREATE UNIQUE INDEX IF NOT EXISTS "IX_Users_PhoneNumber" ON "Users" ("PhoneNumber") WHERE "PhoneNumber" IS NOT NULL;""");
+    await db.Database.ExecuteSqlRawAsync("""
+        IF OBJECT_ID(N'dbo.Users', N'U') IS NOT NULL
+           AND COL_LENGTH(N'dbo.Users', N'PhoneNumber') IS NULL
+        BEGIN
+            ALTER TABLE dbo.Users ADD PhoneNumber nvarchar(20) NULL;
+        END;
 
-    // Create default admin if no users exist
-    if (!db.Users.Any())
+        IF OBJECT_ID(N'dbo.Users', N'U') IS NOT NULL
+           AND NOT EXISTS (
+               SELECT 1
+               FROM sys.indexes
+               WHERE name = N'IX_Users_PhoneNumber'
+                 AND object_id = OBJECT_ID(N'dbo.Users')
+           )
+        BEGIN
+            CREATE UNIQUE INDEX IX_Users_PhoneNumber
+            ON dbo.Users (PhoneNumber)
+            WHERE PhoneNumber IS NOT NULL;
+        END;
+        """);
+
+    if (!await db.Users.AnyAsync())
     {
-        db.Users.Add(
-            new LocalApi.Models.AppUser
-            {
-                Id = Guid.NewGuid(),
-                Email = "admin@local.com",
-                PasswordHash = PasswordService.Hash("Admin@123"),
-                Role = "admin",
-                CreatedDate = DateTime.UtcNow
-            }
-        );
+        db.Users.Add(new LocalApi.Models.AppUser
+        {
+            Id = Guid.NewGuid(),
+            Email = "admin@local.com",
+            PasswordHash = PasswordService.Hash("Admin@123"),
+            Role = "admin",
+            CreatedDate = DateTime.UtcNow
+        });
 
         await db.SaveChangesAsync();
     }
 }
+
 app.Run();
