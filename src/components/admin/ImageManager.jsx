@@ -68,7 +68,7 @@ export default function ImageManager() {
           <span className="block text-xs font-mono-data uppercase tracking-widest text-muted-foreground mb-1.5">Image file</span>
           <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} className="w-full text-sm file:mr-3 file:px-3 file:py-1.5 file:border file:border-hairline file:bg-obsidian file:text-foreground" />
         </label>
-        <button type="submit" disabled={busy || !file} className="btn-kinetic py-2 px-4 text-xs whitespace-nowrap">
+        <button type="submit" disabled={busy || !file} className="btn-showcardetail py-2 px-4 text-xs whitespace-nowrap">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Upload className="w-4 h-4" /> Upload</>}
         </button>
       </form>
