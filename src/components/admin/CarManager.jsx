@@ -71,7 +71,7 @@ export default function CarManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Vehicles ({items.length})</h2>
-        <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => { setImageFile(null); setGalleryFiles([]); setFormError(""); setEditing({ ...EMPTY }); }} className="btn-showcardetail py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Vehicle
         </button>
       </div>
@@ -148,7 +148,7 @@ export default function CarManager() {
             {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditing(null)} className="btn-ghost py-2 px-4 text-xs">Cancel</button>
-              <button type="submit" disabled={saving} className="btn-kinetic py-2 px-4 text-xs">
+              <button type="submit" disabled={saving} className="btn-showcardetail py-2 px-4 text-xs">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
               </button>
             </div>
