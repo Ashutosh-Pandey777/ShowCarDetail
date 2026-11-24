@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Trash2, Loader2, Upload, Eye, EyeOff } from "lucide-react";
-import { Image } from "@/components/ui/image";
 
 export default function ImageManager() {
   const [items, setItems] = useState(null);
@@ -77,7 +76,7 @@ export default function ImageManager() {
         {items.map((img) => (
           <div key={img.id} className="bg-gunmetal border border-hairline group">
             <div className="relative aspect-[4/3] overflow-hidden bg-obsidian">
-              <Image src={img.image_url} alt={img.title} fittingType="fill" className="w-full h-full" />
+              <img src={img.image_url || ""} alt={img.title || "Car gallery image"} loading="lazy" className="block h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; }} />
               {!img.active && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><span className="chip text-white border-white/40">Hidden</span></div>}
             </div>
             <div className="p-3 flex items-center justify-between gap-2">
