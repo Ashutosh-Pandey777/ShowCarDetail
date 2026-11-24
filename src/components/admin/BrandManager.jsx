@@ -76,7 +76,7 @@ export default function BrandManager() {
             <Field label="Description"><TextArea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditing(null)} className="btn-ghost py-2 px-4 text-xs">Cancel</button>
-              <button type="submit" disabled={saving} className="btn-kinetic py-2 px-4 text-xs">
+              <button type="submit" disabled={saving} className="btn-showcardetail py-2 px-4 text-xs">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
               </button>
             </div>
