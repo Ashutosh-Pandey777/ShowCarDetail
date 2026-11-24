@@ -9,6 +9,7 @@ export default function BrandManager() {
   const [items, setItems] = useState(null);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
 
   const load = async () => setItems((await base44.entities.Brand.list("-created_date", 200)).filter((brand) => brand.category !== "Bike"));
   useEffect(() => { load(); }, []);
@@ -16,11 +17,14 @@ export default function BrandManager() {
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
-    const data = { ...editing, founded: editing.founded ? Number(editing.founded) : undefined };
+    let image_url = editing.image_url || "";
     try {
+      if (logoFile) image_url = (await base44.integrations.Core.UploadFile({ file: logoFile })).file_url;
+      const data = { ...editing, image_url, founded: editing.founded ? Number(editing.founded) : undefined };
       if (editing.id) await base44.entities.Brand.update(editing.id, data);
       else await base44.entities.Brand.create(data);
       setEditing(null);
+      setLogoFile(null);
       load();
     } finally { setSaving(false); }
   };
@@ -37,7 +41,7 @@ export default function BrandManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Brands ({items.length})</h2>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-showcardetail py-2 px-4 text-xs">
+        <button onClick={() => { setLogoFile(null); setEditing({ ...EMPTY }); }} className="btn-showcardetail py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Brand
         </button>
       </div>
@@ -51,7 +55,7 @@ export default function BrandManager() {
                 <div className="text-xs text-muted-foreground">{b.country || "—"}</div>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => setEditing({ ...b })} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => { setLogoFile(null); setEditing({ ...b }); }} className="p-1.5 text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => remove(b.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
@@ -71,6 +75,7 @@ export default function BrandManager() {
               <Field label="Country"><TextInput value={editing.country} onChange={(e) => setEditing({ ...editing, country: e.target.value })} /></Field>
               <Field label="Founded year"><TextInput type="number" value={editing.founded} onChange={(e) => setEditing({ ...editing, founded: e.target.value })} /></Field>
               <Field label="Brand logo image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
+              <Field label="Upload brand logo"><input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full text-sm" />{logoFile && <span className="text-xs text-muted-foreground">{logoFile.name}</span>}</Field>
               <Field label="Tagline"><TextInput value={editing.tagline} onChange={(e) => setEditing({ ...editing, tagline: e.target.value })} /></Field>
               <Field label="Accent color (hex)"><TextInput value={editing.accent_color} onChange={(e) => setEditing({ ...editing, accent_color: e.target.value })} /></Field>
             </div>
