@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://showcardetail-2.onrender.com/api/$1"
+      "destination": "https://showcardetail.runasp.net/api/$1"
     },
     {
       "source": "/(.*)",
