@@ -94,12 +94,12 @@ export default function Navbar() {
         ['By Budget','/vehicle-category/bikes-by-budget'],
         ['By Brand','/vehicle-category/bikes-by-brand']
       ]},
-      {label:'Scoote',children:[
-        ['Find New Scoote','/vehicle-category/find-new-scoote'],
-        ['Upcoming Scoote','/vehicle-category/upcoming-scoote'],
-        ['Popular Scoote','/vehicle-category/popular-scoote'],
-        ['By Budget','/vehicle-category/scoote-by-budget'],
-        ['By Brand','/vehicle-category/scoote-by-brand']
+      {label:'Scooty',children:[
+        ['Find New Scooty','/vehicle-category/find-new-scooty'],
+        ['Upcoming Scooty','/vehicle-category/upcoming-scooty'],
+        ['Popular Scooty','/vehicle-category/popular-scooty'],
+        ['By Budget','/vehicle-category/scooty-by-budget'],
+        ['By Brand','/vehicle-category/scooty-by-brand']
       ]},
       {label:'Compare',to:'/compare/bikes'}
     ],
