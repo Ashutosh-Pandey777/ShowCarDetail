@@ -37,6 +37,9 @@ export default function CarManager() {
         const uploaded = await base44.integrations.Core.UploadFile({ file });
         galleryUrls.push(uploaded.file_url);
       }
+      // If the admin uploads gallery photos but no cover photo, use the first
+      // gallery photo as the vehicle's primary card image.
+      if (!imageUrl && galleryUrls.length) imageUrl = galleryUrls[0];
     const data = { ...editing, image_url: imageUrl, gallery: galleryUrls,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
@@ -91,7 +94,7 @@ export default function CarManager() {
           <tbody>
             {items.map((c) => (
               <tr key={c.id} className="border-t border-hairline hover:bg-secondary/40">
-                <td className="px-4 py-3"><div className="h-14 w-20 overflow-hidden rounded-md border border-hairline bg-secondary"><img key={String(c.id) + ":" + String(c.image_url || "")} src={c.image_url || "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=240"} alt={c.brand+" "+c.name} loading="lazy" className="block h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=240"; }} /></div></td>
+                <td className="px-4 py-3"><div className="h-14 w-20 overflow-hidden rounded-md border border-hairline bg-secondary"><img key={String(c.id) + ":" + String(c.image_url || "")} src={c.image_url || (Array.isArray(c.gallery) ? c.gallery[0] : "") || "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=240"} alt={c.brand+" "+c.name} loading="lazy" className="block h-full w-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=240"; }} /></div></td>
                 <td className="px-4 py-3">
                   <div className="font-medium">{c.name}</div>
                   <div className="text-xs text-muted-foreground">{c.brand}</div>
@@ -138,7 +141,7 @@ export default function CarManager() {
               <Field label="Launch year"><TextInput type="number" value={editing.launch_year} onChange={(e) => setEditing({ ...editing, launch_year: e.target.value })} /></Field>
               <Field label="Range (km)"><TextInput type="number" value={editing.range_km} onChange={(e) => setEditing({ ...editing, range_km: e.target.value })} /></Field>
               <Field label="Image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
-              {editing.image_url && <div className="sm:col-span-2"><span className="mb-2 block text-xs text-muted-foreground">Current cover image preview</span><div className="h-44 w-full overflow-hidden rounded-lg border border-hairline bg-secondary"><img key={String(editing.id || "new") + ":" + String(editing.image_url || "")} src={editing.image_url} alt={editing.brand+" "+editing.name} className="h-full w-full object-contain" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; }} /></div></div>}
+              {(editing.image_url || (Array.isArray(editing.gallery) ? editing.gallery[0] : "")) && <div className="sm:col-span-2"><span className="mb-2 block text-xs text-muted-foreground">Current cover image preview</span><div className="h-44 w-full overflow-hidden rounded-lg border border-hairline bg-secondary"><img key={String(editing.id || "new") + ":" + String(editing.image_url || "")} src={editing.image_url || (Array.isArray(editing.gallery) ? editing.gallery[0] : "")} alt={editing.brand+" "+editing.name} className="h-full w-full object-contain" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; }} /></div></div>}
               <Field label="Upload cover image"><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{imageFile && <span className="text-xs text-muted-foreground">{imageFile.name}</span>}</Field>
               <Field label="Gallery image URLs (comma-separated)"><TextArea value={editing.gallery || ""} onChange={(e) => setEditing({ ...editing, gallery: e.target.value })} /></Field>
               <Field label="Upload gallery images"><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))} className="w-full text-sm file:mr-3 file:px-3 file:py-2 file:border file:border-hairline file:bg-secondary file:text-foreground" />{galleryFiles.length > 0 && <span className="text-xs text-muted-foreground">{galleryFiles.length} image(s) selected</span>}</Field>
