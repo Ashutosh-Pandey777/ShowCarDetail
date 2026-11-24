@@ -11,6 +11,7 @@ import VisitManager from "@/components/admin/VisitManager";
 import ImageManager from "@/components/admin/ImageManager";
 import BudgetManager from "@/components/admin/BudgetManager";
 import BikeManager from "@/components/admin/BikeManager";
+import BikeBrandManager from "@/components/admin/BikeBrandManager";
 import ElectricVehicleManager from "@/components/admin/ElectricVehicleManager";
 import CommercialVehicleManager from "@/components/admin/CommercialVehicleManager";
 import BikeImageManager from "@/components/admin/BikeImageManager";
@@ -25,6 +26,7 @@ const NAV = [
   { id: "gallery", label: "Car Images", icon: ImageIcon },
   { id: "bikes", label: "Bikes", icon: Bike },
   { id: "bike-images", label: "Bike Images", icon: ImageIcon },
+  { id: "bike-brands", label: "Bike Brands", icon: BadgeCheck },
   { id: "scooty", label: "Scooty", icon: Bike },
   { id: "scooty-images", label: "Scooty Images", icon: ImageIcon },
   { id: "electric-vehicles", label: "Electric Vehicles", icon: Zap },
@@ -92,6 +94,7 @@ export default function Admin() {
             {active === "gallery" && <ImageManager />}
             {active === "bikes" && <BikeManager />}
             {active === "bike-images" && <BikeImageManager />}
+            {active === "bike-brands" && <BikeBrandManager />}
             {active === "scooty" && <ScootyrManager />}
             {active === "scooty-images" && <ScootyrImageManager />}
             {active === "electric-vehicles" && <ElectricVehicleManager />}
