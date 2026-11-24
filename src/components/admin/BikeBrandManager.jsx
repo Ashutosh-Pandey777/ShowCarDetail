@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {base44} from '@/api/base44Client';
-import {Plus,Pencil,Trash2,Loader2,Globe} from 'lucide-react';
+import {Plus,Pencil,Trash2,Loader2} from 'lucide-react';
 import AdminModal,{Field,TextInput,TextArea} from '@/components/admin/AdminModal';
 
 const EMPTY={name:'',slug:'',country:'India',website:'',image_url:'',description:'',category:'Bike'};
