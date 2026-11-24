@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import AdminModal, { Field, TextInput, TextArea, toList } from "@/components/admin/AdminModal";
 
-const EMPTY = { name: "", slug: "", country: "", founded: "", description: "", tagline: "", accent_color: "" };
+const EMPTY = { name: "", slug: "", country: "", founded: "", description: "", tagline: "", accent_color: "", image_url: "" };
 
 export default function BrandManager() {
   const [items, setItems] = useState(null);
@@ -47,7 +47,7 @@ export default function BrandManager() {
           <div key={b.id} className="bg-gunmetal border border-hairline p-4">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <div className="font-heading font-semibold">{b.name}</div>
+                <div className="flex items-center gap-3"><div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded bg-white">{b.image_url ? <img src={b.image_url} alt={b.name} className="h-full w-full object-contain" /> : <span className="text-xs font-bold text-slate-500">{String(b.name || "").split(" ").map((w) => w[0]).join("").slice(0,2)}</span>}</div><div><div className="font-heading font-semibold">{b.name}</div><div className="text-xs text-muted-foreground">{b.country || "—"}</div></div></div>
                 <div className="text-xs text-muted-foreground">{b.country || "—"}</div>
               </div>
               <div className="flex gap-1">
@@ -70,6 +70,7 @@ export default function BrandManager() {
               <Field label="Slug"><TextInput required value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} /></Field>
               <Field label="Country"><TextInput value={editing.country} onChange={(e) => setEditing({ ...editing, country: e.target.value })} /></Field>
               <Field label="Founded year"><TextInput type="number" value={editing.founded} onChange={(e) => setEditing({ ...editing, founded: e.target.value })} /></Field>
+              <Field label="Brand logo image URL"><TextInput value={editing.image_url || ""} onChange={(e) => setEditing({ ...editing, image_url: e.target.value })} /></Field>
               <Field label="Tagline"><TextInput value={editing.tagline} onChange={(e) => setEditing({ ...editing, tagline: e.target.value })} /></Field>
               <Field label="Accent color (hex)"><TextInput value={editing.accent_color} onChange={(e) => setEditing({ ...editing, accent_color: e.target.value })} /></Field>
             </div>
