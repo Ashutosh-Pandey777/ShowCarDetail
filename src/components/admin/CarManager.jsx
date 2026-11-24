@@ -80,6 +80,7 @@ export default function CarManager() {
         <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-secondary text-muted-foreground text-xs uppercase tracking-widest">
             <tr>
+              <th className="text-left px-4 py-3 font-medium">Image</th>
               <th className="text-left px-4 py-3 font-medium">Vehicle</th>
               <th className="text-left px-4 py-3 font-medium">Type</th>
               <th className="text-left px-4 py-3 font-medium">Fuel</th>
@@ -90,6 +91,7 @@ export default function CarManager() {
           <tbody>
             {items.map((c) => (
               <tr key={c.id} className="border-t border-hairline hover:bg-secondary/40">
+                <td className="px-4 py-3"><img src={c.image_url || "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=240"} alt={c.brand+" "+c.name} className="h-14 w-20 rounded-md border border-hairline object-cover" /></td>
                 <td className="px-4 py-3">
                   <div className="font-medium">{c.name}</div>
                   <div className="text-xs text-muted-foreground">{c.brand}</div>
@@ -106,7 +108,7 @@ export default function CarManager() {
               </tr>
             ))}
             {items.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">No vehicles yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">No vehicles yet.</td></tr>
             )}
           </tbody>
         </table>
