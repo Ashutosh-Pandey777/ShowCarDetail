@@ -31,7 +31,8 @@ export function getCarFallback(car={}){
 // the previous vehicle's image when its record or image URL changes.
 export default function CarPhoto({car={},className='',alt,onClick}){
  const fallback=getCarFallback(car);
- const imageUrl=String(car.image_url||'').trim()||fallback;
+ const galleryImages=Array.isArray(car.gallery)?car.gallery:(typeof car.gallery==='string'?car.gallery.split(',').map(x=>x.trim()).filter(Boolean):[]);
+ const imageUrl=String(car.image_url||'').trim()||String(galleryImages[0]||'').trim()||fallback;
  const identity=String(car.id||car.name||'car')+'|'+imageUrl;
  return <img
   key={identity}
