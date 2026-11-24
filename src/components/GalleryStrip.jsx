@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Image } from "@/components/ui/image";
-import { Loader2 } from "lucide-react";
 
 export default function GalleryStrip() {
   const [images, setImages] = useState(null);
@@ -28,7 +25,7 @@ export default function GalleryStrip() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {images.map((img) => (
             <div key={img.id} className="group relative aspect-square overflow-hidden bg-card border border-hairline">
-              <Image src={img.image_url} alt={img.title} fittingType="fill" className="w-full h-full transition-transform duration-500 group-hover:scale-105" />
+              <img key={String(img.id) + ":" + String(img.image_url || "")} src={img.image_url || ""} alt={img.title || "ShowCarDetail gallery"} loading="lazy" decoding="async" className="block w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute bottom-0 left-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <p className="text-white text-sm font-medium">{img.title}</p>
