@@ -15,8 +15,8 @@ import BikeBrandManager from "@/components/admin/BikeBrandManager";
 import ElectricVehicleManager from "@/components/admin/ElectricVehicleManager";
 import CommercialVehicleManager from "@/components/admin/CommercialVehicleManager";
 import BikeImageManager from "@/components/admin/BikeImageManager";
-import ScootyrManager from "@/components/admin/ScootyrManager";
-import ScootyrImageManager from "@/components/admin/ScootyrImageManager";
+import ScooterManager from "@/components/admin/ScooterManager";
+import ScooterImageManager from "@/components/admin/ScooterImageManager";
 import ElectricVehicleImageManager from "@/components/admin/ElectricVehicleImageManager";
 import CommercialVehicleImageManager from "@/components/admin/CommercialVehicleImageManager";
 
@@ -95,8 +95,8 @@ export default function Admin() {
             {active === "bikes" && <BikeManager />}
             {active === "bike-images" && <BikeImageManager />}
             {active === "bike-brands" && <BikeBrandManager />}
-            {active === "scooty" && <ScootyrManager />}
-            {active === "scooty-images" && <ScootyrImageManager />}
+            {active === "scooty" && <ScooterManager />}
+            {active === "scooty-images" && <ScooterImageManager />}
             {active === "electric-vehicles" && <ElectricVehicleManager />}
             {active === "ev-images" && <ElectricVehicleImageManager />}
             {active === "commercial-vehicles" && <CommercialVehicleManager />}
