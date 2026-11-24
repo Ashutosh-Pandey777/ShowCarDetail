@@ -65,12 +65,12 @@ const AuthenticatedApp = () => (
       <Route path="/vehicle-category/bikes-by-brand" element={<VehicleDiscovery vehicle="Bike" section="brand" />} />
       <Route path="/vehicle-category/cars-by-budget" element={<VehicleDiscovery vehicle="Car" section="budget" />} />
       <Route path="/vehicle-category/cars-by-brand" element={<VehicleDiscovery vehicle="Car" section="brand" />} />
-      <Route path="/vehicle-category/scoote" element={<VehicleDiscovery vehicle="Scoote" section="all" />} />
-      <Route path="/vehicle-category/find-new-scoote" element={<VehicleDiscovery vehicle="Scoote" section="all" />} />
-      <Route path="/vehicle-category/popular-scoote" element={<VehicleDiscovery vehicle="Scoote" section="popular" />} />
-      <Route path="/vehicle-category/upcoming-scoote" element={<VehicleDiscovery vehicle="Scoote" section="upcoming" />} />
-      <Route path="/vehicle-category/scoote-by-budget" element={<VehicleDiscovery vehicle="Scoote" section="budget" />} />
-      <Route path="/vehicle-category/scoote-by-brand" element={<VehicleDiscovery vehicle="Scoote" section="brand" />} />
+      <Route path="/vehicle-category/scooty" element={<VehicleDiscovery vehicle="Scooty" section="all" />} />
+      <Route path="/vehicle-category/find-new-scooty" element={<VehicleDiscovery vehicle="Scooty" section="all" />} />
+      <Route path="/vehicle-category/popular-scooty" element={<VehicleDiscovery vehicle="Scooty" section="popular" />} />
+      <Route path="/vehicle-category/upcoming-scooty" element={<VehicleDiscovery vehicle="Scooty" section="upcoming" />} />
+      <Route path="/vehicle-category/scooty-by-budget" element={<VehicleDiscovery vehicle="Scooty" section="budget" />} />
+      <Route path="/vehicle-category/scooty-by-brand" element={<VehicleDiscovery vehicle="Scooty" section="brand" />} />
       <Route path="/emi" element={<Finance />} />
       <Route path="/contact" element={<Contact />} />
     </Route>
