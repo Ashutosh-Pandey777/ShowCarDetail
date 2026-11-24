@@ -10,7 +10,7 @@ export default function BrandManager() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const load = async () => setItems(await base44.entities.Brand.list("-created_date", 100));
+  const load = async () => setItems((await base44.entities.Brand.list("-created_date", 200)).filter((brand) => brand.category !== "Bike"));
   useEffect(() => { load(); }, []);
 
   const save = async (e) => {
@@ -37,7 +37,7 @@ export default function BrandManager() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-heading text-xl font-semibold">Brands ({items.length})</h2>
-        <button onClick={() => setEditing({ ...EMPTY })} className="btn-kinetic py-2 px-4 text-xs">
+        <button onClick={() => setEditing({ ...EMPTY })} className="btn-showcardetail py-2 px-4 text-xs">
           <Plus className="w-4 h-4" /> Add Brand
         </button>
       </div>
