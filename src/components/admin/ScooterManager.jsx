@@ -1,1 +1,1 @@
-import React from 'react';import CategoryVehicleManager from './CategoryVehicleManager';export default function ScooterManager(){return <CategoryVehicleManager entity="Scooter" category="Scoote" title="Scoote Inventory"/>;}
+import React from 'react';import CategoryVehicleManager from './CategoryVehicleManager';export default function ScootyrManager(){return <CategoryVehicleManager entity="Scootyr" category="Scooty" title="Scooty Inventory"/>;}
