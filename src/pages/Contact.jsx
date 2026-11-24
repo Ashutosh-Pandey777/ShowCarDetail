@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Mail, Phone, MapPin, Clock, Send, Loader2, CheckCircle2 } from "lucide-react";
 
 const INFO = [
-  { icon: Mail, label: "Email", value: "hello@kinetic.auto", href: "mailto:hello@kinetic.auto" },
+  { icon: Mail, label: "Email", value: "hello@showcardetail.auto", href: "mailto:hello@showcardetail.auto" },
   { icon: Phone, label: "Phone", value: "9891984320", href: "tel:9891984320" },
   { icon: MapPin, label: "Showroom", value: "Unit 12, Auto District, Mumbai 400001" },
   { icon: Clock, label: "Hours", value: "Mon–Sat · 10:00–19:00" },
@@ -88,7 +88,7 @@ export default function Contact() {
                   <label className="block text-xs font-mono-data uppercase tracking-widest text-muted-foreground mb-1.5">Message</label>
                   <textarea required value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={`${input} min-h-[140px]`} />
                 </div>
-                <button type="submit" disabled={saving} className="btn-kinetic w-full sm:w-auto py-3 px-6 text-xs">
+                <button type="submit" disabled={saving} className="btn-showcardetail w-full sm:w-auto py-3 px-6 text-xs">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Send Message</>}
                 </button>
               </form>
