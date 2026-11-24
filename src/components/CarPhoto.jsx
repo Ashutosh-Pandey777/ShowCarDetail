@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React from 'react';
 
 const FALLBACKS={
  suv:'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1200&q=85',
@@ -27,9 +27,25 @@ export function getCarFallback(car={}){
  return FALLBACKS.suv;
 }
 
+// Stateless image rendering prevents a reused card component from retaining
+// the previous vehicle's image when its record or image URL changes.
 export default function CarPhoto({car={},className='',alt,onClick}){
  const fallback=getCarFallback(car);
- const [src,setSrc]=useState(car.image_url||fallback);
- useEffect(()=>setSrc(car.image_url||fallback),[car.image_url,fallback]);
- return <img src={src} alt={alt||[car.brand,car.name].filter(Boolean).join(' ')||'Car'} className={className} loading="lazy" onClick={onClick} onError={()=>{if(src!==fallback)setSrc(fallback);}}/>;
+ const imageUrl=String(car.image_url||'').trim()||fallback;
+ const identity=String(car.id||car.name||'car')+'|'+imageUrl;
+ return <img
+  key={identity}
+  src={imageUrl}
+  alt={alt||[car.brand,car.name].filter(Boolean).join(' ')||'Car'}
+  className={className}
+  loading="lazy"
+  decoding="async"
+  onClick={onClick}
+  onError={e=>{
+   const img=e.currentTarget;
+   if(img.dataset.fallbackApplied==='true')return;
+   img.dataset.fallbackApplied='true';
+   if(img.src!==fallback)img.src=fallback;
+  }}
+ />;
 }
