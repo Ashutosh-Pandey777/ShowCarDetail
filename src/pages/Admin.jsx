@@ -14,8 +14,8 @@ import BikeManager from "@/components/admin/BikeManager";
 import ElectricVehicleManager from "@/components/admin/ElectricVehicleManager";
 import CommercialVehicleManager from "@/components/admin/CommercialVehicleManager";
 import BikeImageManager from "@/components/admin/BikeImageManager";
-import ScooterManager from "@/components/admin/ScooterManager";
-import ScooterImageManager from "@/components/admin/ScooterImageManager";
+import ScootyrManager from "@/components/admin/ScootyrManager";
+import ScootyrImageManager from "@/components/admin/ScootyrImageManager";
 import ElectricVehicleImageManager from "@/components/admin/ElectricVehicleImageManager";
 import CommercialVehicleImageManager from "@/components/admin/CommercialVehicleImageManager";
 
@@ -25,8 +25,8 @@ const NAV = [
   { id: "gallery", label: "Car Images", icon: ImageIcon },
   { id: "bikes", label: "Bikes", icon: Bike },
   { id: "bike-images", label: "Bike Images", icon: ImageIcon },
-  { id: "scoote", label: "Scoote", icon: Bike },
-  { id: "scoote-images", label: "Scoote Images", icon: ImageIcon },
+  { id: "scooty", label: "Scooty", icon: Bike },
+  { id: "scooty-images", label: "Scooty Images", icon: ImageIcon },
   { id: "electric-vehicles", label: "Electric Vehicles", icon: Zap },
   { id: "ev-images", label: "EV Images", icon: ImageIcon },
   { id: "commercial-vehicles", label: "Commercial Vehicles", icon: Truck },
@@ -92,8 +92,8 @@ export default function Admin() {
             {active === "gallery" && <ImageManager />}
             {active === "bikes" && <BikeManager />}
             {active === "bike-images" && <BikeImageManager />}
-            {active === "scoote" && <ScooterManager />}
-            {active === "scoote-images" && <ScooterImageManager />}
+            {active === "scooty" && <ScootyrManager />}
+            {active === "scooty-images" && <ScootyrImageManager />}
             {active === "electric-vehicles" && <ElectricVehicleManager />}
             {active === "ev-images" && <ElectricVehicleImageManager />}
             {active === "commercial-vehicles" && <CommercialVehicleManager />}
