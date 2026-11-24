@@ -1,1 +1,1 @@
-import React from 'react';import CategoryImageManager from './CategoryImageManager';export default function ScooterImageManager(){return <CategoryImageManager entity="ScooterGalleryImage" category="Scoote" title="Scoote Images"/>;}
+import React from 'react';import CategoryImageManager from './CategoryImageManager';export default function ScootyrImageManager(){return <CategoryImageManager entity="ScootyrGalleryImage" category="Scooty" title="Scooty Images"/>;}
