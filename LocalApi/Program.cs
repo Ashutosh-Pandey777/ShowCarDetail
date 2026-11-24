@@ -281,6 +281,7 @@ using (var scope = app.Services.CreateScope())
         });
     }
 
+    await CatalogSeeder.SeedAsync(db);
     await db.SaveChangesAsync();
 }
 
