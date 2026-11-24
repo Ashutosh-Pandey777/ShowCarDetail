@@ -64,7 +64,7 @@
 }
 
 @layer components {
-  .btn-kinetic {
+  .btn-showcardetail {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold text-sm tracking-wide uppercase transition-all duration-200 hover:brightness-110 active:scale-[0.98];
   }
   .btn-ghost {
