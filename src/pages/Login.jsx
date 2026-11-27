@@ -36,7 +36,7 @@ export default function Login() {
   };
 
   return (
-    <AuthLayout icon={LogIn} title="Login to ShowCarDetail" subtitle={step === "mobile" ? "Continue with your mobile number" : "Verify your mobile number"} footer={<>New to ShowCarDetail? <Link to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="text-primary font-medium hover:underline">Create an account</Link></>}>
+    <AuthLayout icon={LogIn} title="Login to VahanHub" subtitle={step === "mobile" ? "Continue with your mobile number" : "Verify your mobile number"} footer={<>New to VahanHub? <Link to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")} className="text-primary font-medium hover:underline">Create an account</Link></>}>
       <div role="note" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">Preview mode: mobile OTP screens are ready, but SMS delivery and verification are not connected yet.</div>
       {error && <div role="alert" className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
       {notice && <div role="status" className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</div>}
