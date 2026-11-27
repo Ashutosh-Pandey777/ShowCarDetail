@@ -108,8 +108,8 @@ export default function Navbar() {
         ['Find New Car','/vehicle-category/find-new-cars'],
         ['By Budget','/vehicle-category/cars-by-budget'],
         ['By Brand','/vehicle-category/cars-by-brand'],
-        ['By Body Type','/browse?condition=New'],
-        ['By Fuel Type','/browse?condition=New'],
+        ['By Body Type','/vehicle-category/cars-by-body-type'],
+        ['By Fuel Type','/vehicle-category/cars-by-fuel-type'],
       ]},
       {label:'Electric Car',children:[
         ['Find Electric Cars','/vehicle-category/find-electric-cars'],
