@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, Twitter, CarFront } from 'lucide-react';
-const footerLinks = [['About Us','/about-us'],['Careers','/careers'],['Terms & Conditions','/terms-and-conditions'],['Advertise','/advertise']];
+const footerLinks = [['About Us','/about-us'],['Contact','/contact'],['Terms & Conditions','/terms-and-conditions'],['Advertise','/advertise']];
 export default function Footer() {
  return <footer className="mt-16 bg-[#17212f] text-white">
   <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
