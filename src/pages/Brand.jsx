@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {useParams,useSearchParams,Link} from 'react-router-dom';
-import {ArrowLeft,ArrowRight,CarFront,Images,Info,GitCompareArrows} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CarFront,Images,GitCompareArrows} from 'lucide-react';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
 import CarPhoto from '@/components/CarPhoto';
@@ -38,7 +38,6 @@ const tagsOf=x=>Array.isArray(x.tags)?x.tags.map(String):String(x.tags||'').spli
 const isUpcoming=x=>conditionOf(x).includes('upcoming')||x.is_upcoming===true||tagsOf(x).some(t=>t.trim().toLowerCase()==='upcoming');
 const isDiscontinued=x=>conditionOf(x).includes('discontinued')||x.is_discontinued===true||tagsOf(x).some(t=>t.trim().toLowerCase()==='discontinued');
 const isUsed=x=>conditionOf(x).includes('used');
-const money=value=>value>0?'₹'+(value/100000).toLocaleString('en-IN',{maximumFractionDigits:2})+' Lakh':'Price on request';
 const lines=value=>Array.isArray(value)?value:String(value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
 function Section({id,title,children,icon:Icon}){return <section id={id} className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7"><div className="mb-5 flex items-center gap-2">{Icon&&<Icon size={20} className="text-red-600"/>}<h2 className="text-xl font-extrabold">{title}</h2></div>{children}</section>}
 function BikeModelCard({bike}){return <Link to={'/browse?vehicle=Bike&brand='+encodeURIComponent(bike.brand||'')+'&q='+encodeURIComponent(bike.name||'')} className="overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg"><img src={bike.image_url||'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=700'} alt={bike.name||'Bike'} className="h-44 w-full bg-slate-100 object-cover"/><div className="p-4"><p className="text-xs font-semibold uppercase text-red-600">{bike.brand}</p><h3 className="mt-1 font-bold text-slate-900">{bike.name||'New Bike'}</h3><p className="mt-2 text-sm font-bold text-red-600">{Number(bike.price)>0?'₹'+Number(bike.price).toLocaleString('en-IN'):'Price coming soon'}</p></div></Link>}
@@ -54,10 +53,6 @@ export default function Brand(){
  const discontinued=useMemo(()=>items.filter(isDiscontinued),[items]);
  const electricCars=useMemo(()=>items.filter(x=>fuelOf(x).includes('electric')), [items]);
  const activeItems=isUsedMode?usedCars:isElectric?electricCars:isBike?items:newCars;
- const priceItems=newCars.filter(x=>Number(x.price)>0);
- const minPrice=priceItems.length?Math.min(...priceItems.map(x=>Number(x.price))):0;
- const maxPrice=priceItems.length?Math.max(...priceItems.map(x=>Number(x.price))):0;
- const categories=useMemo(()=>{const counts={};newCars.forEach(x=>{const type=x.body_type||'Other';counts[type]=(counts[type]||0)+1});return counts},[newCars]);
  const gallery=useMemo(()=>[...new Set(items.flatMap(x=>[x.image_url,...(Array.isArray(x.gallery)?x.gallery:String(x.gallery||'').split(',') )]).map(x=>String(x||'').trim()).filter(x=>/^https?:\/\//i.test(x)||x.startsWith('/uploads/')))], [items]);
  const comparisons=lines(profile?.comparisons),highlights=lines(profile?.key_highlights),popularUsed=lines(profile?.popular_used_models);
  const category=isBike?'Bikes':isUsedMode?'Used Cars':isElectric?'Electric Cars':'Cars';
@@ -72,7 +67,7 @@ export default function Brand(){
    <nav className="mt-6 flex flex-wrap gap-2">{sections.map(([id,label])=><a key={id} href={'#'+id} className="rounded-full border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-red-300 hover:text-red-600">{label}</a>)}</nav>
   </div></section>
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-   {!isBike&&!isUsedMode&&!isElectric&&<Section id="overview" title={brandName+' Cars'} icon={Info}><p className="whitespace-pre-line text-sm leading-7 text-slate-600">{profile?.description||'Explore all '+brandName+' car models available in ShowCarDetail. Model listings, prices and images are managed from the Admin Dashboard.'}</p><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Models listed</p><p className="mt-1 text-xl font-extrabold">{newCars.length}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Starting price</p><p className="mt-1 text-lg font-extrabold">{money(minPrice)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Highest listed price</p><p className="mt-1 text-lg font-extrabold">{money(maxPrice)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Upcoming models</p><p className="mt-1 text-xl font-extrabold">{upcoming.length}</p></div></div>{Object.keys(categories).length>0&&<div className="mt-5 flex flex-wrap gap-2">{Object.entries(categories).map(([name,count])=><span key={name} className="rounded-full bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{count} {name}</span>)}</div>}</Section>}
+
    <Section id="models" title={isUsedMode?'Popular Used '+brandName+' Cars':isElectric?brandName+' Electric Cars':brandName+' Car Models'} icon={CarFront}>
     {loading?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1,2,3,4].map(n=><div key={n} className="h-64 animate-pulse rounded-xl bg-slate-200"/>)}</div>:modelGroups.length?<div className="space-y-7">{modelGroups.map(group=><div key={group.name} className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2"><h3 className="text-lg font-bold text-slate-900">{group.name}</h3><span className="text-xs text-slate-500">{group.items.length} {group.items.length===1?'variant':'variants'}</span></div><div className="space-y-3">{isBike?group.items.map(item=><BikeModelCard key={item.id} bike={item}/>):<ModelListingCard group={group} brandName={brandName}/>}</div></div>)}</div>:<p className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">No matching {category.toLowerCase()} have been added for {brandName} yet. Add models from Admin Dashboard.</p>}
    </Section>
