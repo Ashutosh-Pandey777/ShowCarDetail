@@ -4,7 +4,7 @@ import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import AdminModal, { Field, TextInput, TextArea, Select, toList } from "@/components/admin/AdminModal";
 
 const EMPTY = {
-  name: "", model_name: "", brand: "", brand_slug: "", condition: "New", body_type: "SUV", fuel_type: "Petrol",
+  name: "", brand: "", brand_slug: "", condition: "New", body_type: "SUV", fuel_type: "Petrol",
   transmission: "Manual", price: "", on_road_price: "", mileage: "", engine: "",
   power: "", torque: "", seating: "", boot_space: "", safety_rating: "",
   launch_year: "", range_km: "", image_url: "", gallery: "", city: "", description: "",
@@ -40,7 +40,8 @@ export default function CarManager() {
       // If the admin uploads gallery photos but no cover photo, use the first
       // gallery photo as the vehicle's primary card image.
       if (!imageUrl && galleryUrls.length) imageUrl = galleryUrls[0];
-    const data = { ...editing, image_url: imageUrl, gallery: galleryUrls,
+    const { model_name, ...vehicleFields } = editing;
+    const data = { ...vehicleFields, image_url: imageUrl, gallery: galleryUrls,
       price: Number(editing.price) || 0,
       on_road_price: Number(editing.on_road_price) || undefined,
       seating: editing.seating ? Number(editing.seating) : undefined,
@@ -122,7 +123,6 @@ export default function CarManager() {
           <form onSubmit={save} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Vehicle / Variant Name"><TextInput required value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
-              <Field label="Model Name (used for model-wise grouping)"><TextInput required value={editing.model_name || editing.name || ""} onChange={(e) => setEditing({ ...editing, model_name: e.target.value })} placeholder="e.g. Swift, Brezza, Baleno" /></Field>
               <Field label="Brand"><TextInput required value={editing.brand} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
               <Field label="Car condition"><Select value={editing.condition || "New"} onChange={(e) => setEditing({ ...editing, condition: e.target.value })}>{["New","Used","Upcoming","Discontinued"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Brand slug"><TextInput value={editing.brand_slug} onChange={(e) => setEditing({ ...editing, brand_slug: e.target.value })} /></Field>
