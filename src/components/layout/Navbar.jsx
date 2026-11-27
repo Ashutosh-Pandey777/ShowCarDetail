@@ -130,8 +130,8 @@ export default function Navbar() {
       {label:'Videos',to:'/news-reviews?tab=videos'}
     ]
   };
-  const MenuGroup=({name})=><div className="relative" onMouseEnter={()=>{setActiveMenu(name);setActiveSubMenu('');}} onMouseLeave={()=>{if(!activeSubMenu){setActiveMenu('');}}}>
-    <button type="button" aria-expanded={activeMenu===name} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
+  const MenuGroup=({name})=><div className="relative">
+    <button type="button" onClick={()=>setActiveMenu(activeMenu===name?'':name)} aria-expanded={activeMenu===name} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
     {activeMenu===name&&<div className="absolute left-0 top-full z-50 w-60 rounded-b-lg border border-slate-200 bg-white p-2 shadow-xl">
       {menus[name].map(item=>item.children?
         <div key={item.label} className="w-full">
