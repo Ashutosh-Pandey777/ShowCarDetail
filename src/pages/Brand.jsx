@@ -3,7 +3,34 @@ import {useParams,useSearchParams,Link} from 'react-router-dom';
 import {ArrowLeft,ArrowRight,CarFront,Images,Info,GitCompareArrows} from 'lucide-react';
 import {base44} from '@/api/base44Client';
 import CarCard from '@/components/CarCard';
+import CarPhoto from '@/components/CarPhoto';
 
+const variantSuffixes=['lxi','vxi','zxi','zxi+','vxi+','lxi(o)','vxi(o)','zxi(o)','sigma','delta','delta+','zeta','alpha','alpha+','amt','amt+','ag','cng','diesel','petrol','ev','base','mid','top','plus','pro','max','gt','gtx','gt line','turbo'];
+function inferredModelName(item){
+ const saved=String(item.model_name||'').trim();if(saved)return saved;
+ let name=String(item.name||'').trim();
+ const brand=String(item.brand||item.make||'').trim();
+ if(brand&&name.toLowerCase().startsWith(brand.toLowerCase()+' '))name=name.slice(brand.length).trim();
+ const parts=name.split(/\\s+/);let changed=true;
+ while(parts.length>1&&changed){changed=false;const last=parts.slice(-2).join(' ').toLowerCase();if(variantSuffixes.includes(last)){parts.splice(-2);changed=true;continue;}if(variantSuffixes.includes(parts[parts.length-1].toLowerCase())){parts.pop();changed=true;}}
+ return parts.join(' ')||name||'Other';
+}
+function ModelListingCard({group,brandName}){
+ const lead=[...group.items].sort((a,b)=>Number(a.price||0)-Number(b.price||0))[0];
+ const prices=group.items.map(x=>Number(x.price||0)).filter(x=>x>0);const min=prices.length?Math.min(...prices):0;const max=prices.length?Math.max(...prices):0;
+ const priceText=min?('Rs. '+(min/100000).toFixed(2)+' Lakh'+(max>min?' - '+(max/100000).toFixed(2)+' Lakh':'')+' onwards'):'Price on request';
+ const specs=[lead.safety_rating?lead.safety_rating+' Star Safety':null,lead.mileage?lead.mileage+' kmpl':null,lead.power?lead.power+' bhp':null].filter(Boolean).join('  |  ');
+ const modelTitle=String(group.name).toLowerCase().startsWith(brandName.toLowerCase())?group.name:brandName+' '+group.name;
+ return <Link to={'/car/'+lead.id} className="grid min-h-[190px] grid-cols-1 items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-md sm:grid-cols-[240px_minmax(0,1fr)] sm:px-6">
+  <div className="flex h-36 items-center justify-center overflow-hidden"><CarPhoto car={lead} alt={modelTitle} className="h-full w-full object-contain"/></div>
+  <div className="min-w-0"><h3 className="text-xl font-medium text-slate-800">{modelTitle} <span className="text-slate-500">›</span></h3>
+   {specs&&<p className="mt-2 text-sm text-slate-500">{specs}</p>}
+   <p className="mt-4 text-lg font-bold text-slate-900">{priceText}</p>
+   <p className="mt-1 text-sm text-slate-500">Ex-showroom price</p>
+   <p className="mt-4 text-sm font-semibold text-sky-700">View {group.items.length} {group.items.length===1?'variant':'variants'} <span aria-hidden="true">›</span></p>
+  </div>
+ </Link>;
+}
 const normalize=value=>String(value||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const conditionOf=x=>String(x.condition||x.listing_type||x.type||'').toLowerCase();
 const fuelOf=x=>String(x.fuel_type||x.fuel||x.fuelType||'').toLowerCase();
@@ -36,7 +63,7 @@ export default function Brand(){
  const category=isBike?'Bikes':isUsedMode?'Used Cars':isElectric?'Electric Cars':'Cars';
  const backPath='/vehicle-category/'+(isBike?'find-new-bikes':isUsedMode?'find-used-cars':isElectric?'find-electric-cars':'find-new-cars');
  const models=activeItems;
- const modelGroups=useMemo(()=>{const groups=new Map();activeItems.forEach(item=>{const modelName=String(item.model_name||item.name||'Other').trim();const key=normalize(modelName);if(!groups.has(key))groups.set(key,{name:modelName,items:[]});groups.get(key).items.push(item)});return [...groups.values()].sort((a,b)=>a.name.localeCompare(b.name))},[activeItems]);
+ const modelGroups=useMemo(()=>{const groups=new Map();activeItems.forEach(item=>{const modelName=inferredModelName(item);const key=normalize(modelName);if(!groups.has(key))groups.set(key,{name:modelName,items:[]});groups.get(key).items.push(item)});return [...groups.values()].sort((a,b)=>a.name.localeCompare(b.name))},[activeItems]);
  const sections=[['models','Car Models'],['comparisons','Cars Comparisons'],['used','Popular Used Cars'],['images','Images'],['highlights','Key Highlights'],['discontinued','Discontinued Cars']];
  return <main className="min-h-screen bg-[#f7f8fa] text-slate-900">
   <section className="border-b border-slate-200 bg-white"><div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -47,7 +74,7 @@ export default function Brand(){
   <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
    {!isBike&&!isUsedMode&&!isElectric&&<Section id="overview" title={brandName+' Cars'} icon={Info}><p className="whitespace-pre-line text-sm leading-7 text-slate-600">{profile?.description||'Explore all '+brandName+' car models available in ShowCarDetail. Model listings, prices and images are managed from the Admin Dashboard.'}</p><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Models listed</p><p className="mt-1 text-xl font-extrabold">{newCars.length}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Starting price</p><p className="mt-1 text-lg font-extrabold">{money(minPrice)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Highest listed price</p><p className="mt-1 text-lg font-extrabold">{money(maxPrice)}</p></div><div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">Upcoming models</p><p className="mt-1 text-xl font-extrabold">{upcoming.length}</p></div></div>{Object.keys(categories).length>0&&<div className="mt-5 flex flex-wrap gap-2">{Object.entries(categories).map(([name,count])=><span key={name} className="rounded-full bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">{count} {name}</span>)}</div>}</Section>}
    <Section id="models" title={isUsedMode?'Popular Used '+brandName+' Cars':isElectric?brandName+' Electric Cars':brandName+' Car Models'} icon={CarFront}>
-    {loading?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1,2,3,4].map(n=><div key={n} className="h-64 animate-pulse rounded-xl bg-slate-200"/>)}</div>:modelGroups.length?<div className="space-y-7">{modelGroups.map(group=><div key={group.name} className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2"><h3 className="text-lg font-bold text-slate-900">{group.name}</h3><span className="text-xs text-slate-500">{group.items.length} {group.items.length===1?'variant':'variants'}</span></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{group.items.map(item=>isBike?<BikeModelCard key={item.id} bike={item}/>:<CarCard key={item.id} car={item}/>)}</div></div>)}</div>:<p className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">No matching {category.toLowerCase()} have been added for {brandName} yet. Add models from Admin Dashboard.</p>}
+    {loading?<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[1,2,3,4].map(n=><div key={n} className="h-64 animate-pulse rounded-xl bg-slate-200"/>)}</div>:modelGroups.length?<div className="space-y-7">{modelGroups.map(group=><div key={group.name} className="space-y-3"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2"><h3 className="text-lg font-bold text-slate-900">{group.name}</h3><span className="text-xs text-slate-500">{group.items.length} {group.items.length===1?'variant':'variants'}</span></div><div className="space-y-3">{isBike?group.items.map(item=><BikeModelCard key={item.id} bike={item}/>):<ModelListingCard group={group} brandName={brandName}/>}</div></div>)}</div>:<p className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">No matching {category.toLowerCase()} have been added for {brandName} yet. Add models from Admin Dashboard.</p>}
    </Section>
    {!isBike&&!isUsedMode&&!isElectric&&<>
     <Section id="comparisons" title={brandName+' Cars Comparisons'} icon={GitCompareArrows}>{comparisons.length?<ul className="grid gap-2 sm:grid-cols-2">{comparisons.map((x,i)=><li key={i} className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{x}</li>)}</ul>:<p className="text-sm text-slate-500">Add comparison names or notes in Admin Dashboard to show them here.</p>}</Section>
