@@ -65,7 +65,8 @@ export default function BrandManager() {
             <Field label="Tagline"><TextInput value={editing.tagline || ""} onChange={(e) => setEditing({ ...editing, tagline: e.target.value })} /></Field>
             <Field label="Accent color (hex)"><TextInput value={editing.accent_color || ""} onChange={(e) => setEditing({ ...editing, accent_color: e.target.value })} /></Field>
           </div>
-          <Field label="Brand overview / description"><TextArea value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          <Field label="Brand page description (shown below the brand heading)"><TextArea value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></Field>
+          <p className="text-xs text-muted-foreground">Write the full brand introduction here. New lines and paragraphs will be preserved on the public brand page. This is where you can add the Maruti Suzuki overview text, price context, model count and brand information.</p>
           <Field label="Cars Comparisons (one entry per line)"><TextArea value={editing.comparisons || ""} onChange={(e) => setEditing({ ...editing, comparisons: e.target.value })} /></Field>
           <Field label="Popular Used Models / notes (one per line)"><TextArea value={editing.popular_used_models || ""} onChange={(e) => setEditing({ ...editing, popular_used_models: e.target.value })} /></Field>
           <Field label="Key Highlights (one per line)"><TextArea value={editing.key_highlights || ""} onChange={(e) => setEditing({ ...editing, key_highlights: e.target.value })} /></Field>
