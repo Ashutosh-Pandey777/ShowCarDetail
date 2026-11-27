@@ -145,7 +145,7 @@ export default function Navbar() {
     <div className="mx-auto max-w-chassis px-4 sm:px-6">
       <div className="flex h-[72px] items-center justify-between gap-4">
         <Link to="/" onClick={close} className="flex shrink-0 items-center gap-2">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="11" fill="#102A56"/><text x="20" y="25" textAnchor="middle" fill="#D5AD55" fontSize="16" fontWeight="800" letterSpacing="-1" fontFamily="Arial, sans-serif">VH</text><path d="M11 30h18" stroke="#D5AD55" strokeWidth="1.8" strokeLinecap="round"/></svg>
+          <img src="/drivedunya-mark.svg" alt="" className="h-10 w-10 object-contain" />
           <span className="font-heading text-xl font-extrabold tracking-tight text-[#102A56]">Vahan<span className="text-[#B58A35]">Hub</span></span>
         </Link>
         <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Car"/><MenuGroup name="Commercial Vehicle"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="News & Reviews"/></nav>
