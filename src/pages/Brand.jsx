@@ -9,7 +9,7 @@ const variantSuffixes=['lxi','vxi','zxi','zxi+','vxi+','lxi(o)','vxi(o)','zxi(o)
 function inferredModelName(item){
  const saved=String(item.model_name||'').trim();if(saved)return saved;
  let name=String(item.name||'').trim();
- const brand=String(item.brand||item.make||'').trim();
+ const brand=String(item.brand||item.make||item.manufacturer||'').trim();
  if(brand&&name.toLowerCase().startsWith(brand.toLowerCase()+' '))name=name.slice(brand.length).trim();
  const parts=name.split(/\\s+/);let changed=true;
  while(parts.length>1&&changed){changed=false;const last=parts.slice(-2).join(' ').toLowerCase();if(variantSuffixes.includes(last)){parts.splice(-2);changed=true;continue;}if(variantSuffixes.includes(parts[parts.length-1].toLowerCase())){parts.pop();changed=true;}}
@@ -45,7 +45,7 @@ export default function Brand(){
  const {slug}=useParams();const [params]=useSearchParams();const vehicle=params.get('vehicle')==='Bike'?'Bike':'Car';const isBike=vehicle==='Bike';const mode=params.get('mode')||'New';const isUsedMode=mode==='Used',isElectric=mode==='Electric';
  const [items,setItems]=useState([]),[profile,setProfile]=useState(null),[loading,setLoading]=useState(true);
  const fallbackName=slug.split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
- useEffect(()=>{let alive=true;setLoading(true);const entity=isBike?base44.entities.Bike:base44.entities.Car;Promise.all([entity.list('-created_date',500),base44.entities.Brand.list('-created_date',300).catch(()=>[])]).then(([vehicles,brands])=>{if(!alive)return;const brand=brands.find(x=>normalize(x.slug||x.name)===normalize(slug)||normalize(x.name)===normalize(fallbackName));setProfile(brand||null);setItems((Array.isArray(vehicles)?vehicles:[]).filter(x=>x.active!==false&&normalize(x.brand||x.make||x.manufacturer)===normalize(brand?.name||fallbackName))) }).catch(()=>{if(alive){setItems([]);setProfile(null)}}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false}},[slug,fallbackName,isBike]);
+ useEffect(()=>{let alive=true;setLoading(true);const entity=isBike?base44.entities.Bike:base44.entities.Car;Promise.all([entity.list('-created_date',500),base44.entities.Brand.list('-created_date',300).catch(()=>[])]).then(([vehicles,brands])=>{if(!alive)return;const brand=brands.find(x=>normalize(x.slug||x.name)===normalize(slug)||normalize(x.name)===normalize(fallbackName));setProfile(brand||null);setItems((Array.isArray(vehicles)?vehicles:[]).filter(x=>x.active!==false&&[x.brand,x.make,x.manufacturer].some(value=>{const candidate=normalize(value),target=normalize(brand?.name||fallbackName);return candidate&&target&&(candidate===target||candidate.startsWith(target)||target.startsWith(candidate))}))) }).catch(()=>{if(alive){setItems([]);setProfile(null)}}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false}},[slug,fallbackName,isBike]);
  const brandName=profile?.name||fallbackName;
  const newCars=useMemo(()=>items.filter(x=>!isUsed(x)&&!isUpcoming(x)&&!isDiscontinued(x)),[items]);
  const usedCars=useMemo(()=>items.filter(isUsed),[items]);
