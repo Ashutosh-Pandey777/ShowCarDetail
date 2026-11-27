@@ -12,11 +12,13 @@ import {Search,ChevronRight,MapPin,ArrowRight,CarFront,Wallet,SlidersHorizontal,
 const BRANDS=['Maruti Suzuki','Hyundai','Tata','Mahindra','Kia','Toyota','Honda','Renault','Skoda','Volkswagen','BMW','Mercedes-Benz','MG','Jeep','Citroen','Nissan','Audi','Volvo','Lexus','BYD','Porsche','Isuzu','Force Motors'];
 const BUDGETS=[['Under ₹5 Lakh','0-500000'],['₹5 - 10 Lakh','500000-1000000'],['₹10 - 20 Lakh','1000000-2000000'],['₹20 - 30 Lakh','2000000-3000000'],['₹30 - 50 Lakh','3000000-5000000'],['Above ₹50 Lakh','5000000-999999999']];
 export default function Home(){
- const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[vehicleType,setVehicleType]=useState('Car'),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
+ const [cars,setCars]=useState([]),[loading,setLoading]=useState(true),[budgetItems,setBudgetItems]=useState([]),[vehicleType,setVehicleType]=useState('Car'),[kind,setKind]=useState('New'),[query,setQuery]=useState(''),[searchFocused,setSearchFocused]=useState(false),[budget,setBudget]=useState(''),[body,setBody]=useState(''),[fuel,setFuel]=useState(''),[transmission,setTransmission]=useState(''),[city,setCity]=useState(()=>localStorage.getItem('showcardetail_city')||''),[state,setState]=useState(()=>localStorage.getItem('showcardetail_state')||'');
  useEffect(()=>{const syncLocation=()=>{setCity(localStorage.getItem('showcardetail_city')||'');setState(localStorage.getItem('showcardetail_state')||'');};window.addEventListener('storage',syncLocation);window.addEventListener('focus',syncLocation);window.addEventListener('showcardetail:locationchange',syncLocation);return()=>{window.removeEventListener('storage',syncLocation);window.removeEventListener('focus',syncLocation);window.removeEventListener('showcardetail:locationchange',syncLocation);};},[]);
  useEffect(()=>{base44.entities.Car.list('-created_date',500).then(d=>setCars(Array.isArray(d)?d:[])).catch(()=>setCars([])).finally(()=>setLoading(false));},[]);
  useEffect(()=>{base44.entities.GalleryImage.list('-created_date',300).then(d=>setBudgetItems((Array.isArray(d)?d:[]).filter(x=>String(x.section||'').toLowerCase()==='budget'))).catch(()=>setBudgetItems([]));},[]);
  const newCars=useMemo(()=>cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used'),[cars]);
+ const searchSuggestions=useMemo(()=>{const term=query.trim().toLowerCase();if(term.length<2)return [];const seen=new Set();return cars.filter(c=>String(c.condition||c.listing_type||'New').toLowerCase()!=='used').filter(c=>{const label=[c.brand,c.name||c.model].filter(Boolean).join(' ').trim();const key=String(c.id||label).toLowerCase();if(!label||!label.toLowerCase().includes(term)||seen.has(key))return false;seen.add(key);return true;}).slice(0,7);},[cars,query]);
+ const selectSearchSuggestion=car=>{const label=[car.brand,car.name||car.model].filter(Boolean).join(' ');window.location.href='/browse?q='+encodeURIComponent(label);};
 
  const normalize=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
  const fuelOptions=['Petrol','Diesel','CNG','Electric','Hybrid'];
@@ -59,10 +61,17 @@ export default function Home(){
        <MapPin className="h-4 w-4 shrink-0"/><span>{state||'Select State'}{city?' · '+city:''}</span>
       </div>
      </div>
-     {vehicleType==='Car'&&<div className="mb-4 border-b border-slate-100 pb-3"><span className="relative inline-block pb-2 text-sm font-bold text-red-600 after:absolute after:bottom-[-13px] after:left-0 after:h-0.5 after:w-full after:bg-red-600">New Car</span></div>}
-     <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-      <div className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 px-4"><Search className="h-5 w-5 shrink-0 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()} placeholder="Search by vehicle name, brand or model" className="w-full py-3 text-sm outline-none"/></div>
-      <button onClick={()=>go()} className="flex items-center justify-center gap-2 rounded-md bg-red-600 px-8 py-3 text-sm font-bold text-white hover:bg-red-700">Search Vehicles <ArrowRight className="h-4 w-4"/></button>
+     <div className="relative">
+      <form onSubmit={e=>{e.preventDefault();go();}} className="flex h-11 w-full items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 focus-within:border-red-400 sm:h-12">
+       <Search className="h-4 w-4 shrink-0 text-slate-500"/>
+       <input value={query} onFocus={()=>setSearchFocused(true)} onBlur={()=>setTimeout(()=>{setSearchFocused(false);setQuery('');},150)} onChange={e=>setQuery(e.target.value)} placeholder="Search cars, e.g. BMW" aria-label="Search vehicles" autoComplete="off" className="w-full bg-transparent text-sm outline-none"/>
+      </form>
+      {searchFocused&&query.trim().length>=2&&<div className="absolute left-0 right-0 top-full z-[70] mt-2 max-h-72 overflow-y-auto rounded-lg border border-slate-200 bg-white py-2 shadow-xl">
+       {searchSuggestions.length?searchSuggestions.map((car,i)=><button type="button" key={car.id||i} onMouseDown={e=>e.preventDefault()} onClick={()=>selectSearchSuggestion(car)} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-red-50">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600"><Search className="h-4 w-4"/></span>
+        <span className="min-w-0"><span className="block truncate text-sm font-semibold text-slate-800">{[car.brand,car.name||car.model].filter(Boolean).join(' ')}</span><span className="block text-xs text-slate-500">{car.price?'₹'+Number(car.price).toLocaleString('en-IN'):'View details'}</span></span>
+       </button>):<p className="px-4 py-4 text-sm text-slate-500">No matching vehicles found.</p>}
+      </div>}
      </div>
      {vehicleType==='Car' ? <div className="mt-4 space-y-3">
       {kind==='New' && <div className="space-y-3">
