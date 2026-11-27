@@ -134,9 +134,9 @@ export default function Navbar() {
     <button type="button" aria-expanded={activeMenu===name} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
     {activeMenu===name&&<div className="absolute left-0 top-full z-50 w-60 rounded-b-lg border border-slate-200 bg-white p-2 shadow-xl">
       {menus[name].map(item=>item.children?
-        <div key={item.label} className="relative">
-          <button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}<ChevronDown className="h-4 w-4 -rotate-90"/></button>
-          {activeSubMenu===item.label&&<div className="absolute left-full top-0 z-[60] ml-1 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}</div>}
+        <div key={item.label} className="w-full">
+          <button type="button" aria-expanded={activeSubMenu===item.label} onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}<ChevronDown className={'h-4 w-4 transition-transform '+(activeSubMenu===item.label?'rotate-180':'-rotate-90')}/></button>
+          {activeSubMenu===item.label&&<div className="ml-3 border-l-2 border-red-100 py-1 pl-2">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}</div>}
         </div>
         :<Link key={item.label} to={item.to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}</Link>)}
     </div>}
