@@ -7,7 +7,7 @@ export default function Footer() {
   <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
    <div className="flex flex-col justify-between gap-8 md:flex-row md:items-start">
     <div>
-     <Link to="/" className="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight"><span className="grid h-9 w-9 place-items-center rounded-lg border border-[#D5AD55] bg-[#102A56] text-sm font-black text-[#D5AD55]">VH</span><span>Vahan<span className="text-[#D5AD55]">Hub</span></span></Link>
+     <Link to="/" className="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight"><img src="/drivedunya-mark.svg" alt="" className="h-10 w-10 object-contain" /><span>Vahan<span className="text-[#D5AD55]">Hub</span></span></Link>
      <p className="mt-3 max-w-sm text-sm leading-6 text-slate-300">Every Vehicle. One Destination. Explore, compare and discover cars, bikes and more with VahanHub.</p>
      <div className="mt-5 flex gap-3">{[[Facebook,'https://www.facebook.com/','Facebook'],[Instagram,'https://www.instagram.com/','Instagram'],[Youtube,'https://www.youtube.com/','YouTube'],[Twitter,'https://twitter.com/','Twitter']].map(([Icon,url,label])=><a key={label} href={url} target="_blank" rel="noreferrer" aria-label={label} className="grid h-9 w-9 place-items-center rounded-full border border-slate-600 text-slate-200 transition hover:border-red-500 hover:bg-red-600"><Icon size={17}/></a>)}</div>
     </div>
