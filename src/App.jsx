@@ -65,6 +65,8 @@ const AuthenticatedApp = () => (
       <Route path="/vehicle-category/bikes-by-brand" element={<VehicleDiscovery vehicle="Bike" section="brand" />} />
       <Route path="/vehicle-category/cars-by-budget" element={<VehicleDiscovery vehicle="Car" section="budget" />} />
       <Route path="/vehicle-category/cars-by-brand" element={<VehicleDiscovery vehicle="Car" section="brand" />} />
+      <Route path="/vehicle-category/cars-by-body-type" element={<VehicleDiscovery vehicle="Car" section="body" />} />
+      <Route path="/vehicle-category/cars-by-fuel-type" element={<VehicleDiscovery vehicle="Car" section="fuel" />} />
       <Route path="/vehicle-category/scooty" element={<VehicleDiscovery vehicle="Scooty" section="all" />} />
       <Route path="/vehicle-category/find-new-scooty" element={<VehicleDiscovery vehicle="Scooty" section="all" />} />
       <Route path="/vehicle-category/popular-scooty" element={<VehicleDiscovery vehicle="Scooty" section="popular" />} />
