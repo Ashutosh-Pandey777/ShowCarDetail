@@ -123,7 +123,7 @@ export default function CarManager() {
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Name"><TextInput required value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></Field>
               <Field label="Brand"><TextInput required value={editing.brand} onChange={(e) => setEditing({ ...editing, brand: e.target.value })} /></Field>
-              <Field label="Car condition"><Select value={editing.condition || "New"} onChange={(e) => setEditing({ ...editing, condition: e.target.value })}>{["New","Used","Upcoming"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
+              <Field label="Car condition"><Select value={editing.condition || "New"} onChange={(e) => setEditing({ ...editing, condition: e.target.value })}>{["New","Used","Upcoming","Discontinued"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
               <Field label="Brand slug"><TextInput value={editing.brand_slug} onChange={(e) => setEditing({ ...editing, brand_slug: e.target.value })} /></Field>
               <Field label="City"><TextInput value={editing.city} onChange={(e) => setEditing({ ...editing, city: e.target.value })} /></Field>
               <Field label="Body type"><Select value={editing.body_type} onChange={(e) => setEditing({ ...editing, body_type: e.target.value })}>{["SUV","Compact SUV","Hatchback","Sedan","Compact Sedan","Coupe","Convertible","MUV","Luxury","Pickup","Minivan"].map((o) => <option key={o}>{o}</option>)}</Select></Field>
