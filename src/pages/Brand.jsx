@@ -47,7 +47,7 @@ export default function Brand(){
  const fallbackName=slug.split('-').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
  useEffect(()=>{let alive=true;setLoading(true);const entity=isBike?base44.entities.Bike:base44.entities.Car;Promise.all([entity.list('-created_date',500),base44.entities.Brand.list('-created_date',300).catch(()=>[])]).then(([vehicles,brands])=>{if(!alive)return;const brand=brands.find(x=>normalize(x.slug||x.name)===normalize(slug)||normalize(x.name)===normalize(fallbackName));setProfile(brand||null);setItems((Array.isArray(vehicles)?vehicles:[]).filter(x=>x.active!==false&&[x.brand,x.make,x.manufacturer].some(value=>{const candidate=normalize(value),target=normalize(brand?.name||fallbackName);return candidate&&target&&(candidate===target||candidate.includes(target)||target.includes(candidate))}))) }).catch(()=>{if(alive){setItems([]);setProfile(null)}}).finally(()=>{if(alive)setLoading(false)});return()=>{alive=false}},[slug,fallbackName,isBike]);
  const brandName=profile?.name||fallbackName;
- const newCars=useMemo(()=>items.filter(x=>!isUsed(x)&&!isUpcoming(x)&&!isDiscontinued(x)),[items]);
+ const newCars=useMemo(()=>items.filter(x=>!isUsed(x)&&!isDiscontinued(x)),[items]);
  const usedCars=useMemo(()=>items.filter(isUsed),[items]);
  const upcoming=useMemo(()=>items.filter(isUpcoming),[items]);
  const discontinued=useMemo(()=>items.filter(isDiscontinued),[items]);
