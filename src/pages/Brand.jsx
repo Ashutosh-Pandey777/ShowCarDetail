@@ -11,7 +11,7 @@ function inferredModelName(item){
  let name=String(item.name||'').trim();
  const brand=String(item.brand||item.make||item.manufacturer||'').trim();
  if(brand&&name.toLowerCase().startsWith(brand.toLowerCase()+' '))name=name.slice(brand.length).trim();
- const parts=name.split(/\\s+/);let changed=true;
+ const parts=name.split(/\s+/);let changed=true;
  while(parts.length>1&&changed){changed=false;const last=parts.slice(-2).join(' ').toLowerCase();if(variantSuffixes.includes(last)){parts.splice(-2);changed=true;continue;}if(variantSuffixes.includes(parts[parts.length-1].toLowerCase())){parts.pop();changed=true;}}
  return parts.join(' ')||name||'Other';
 }
