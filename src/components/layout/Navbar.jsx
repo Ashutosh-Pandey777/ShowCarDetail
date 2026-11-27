@@ -110,8 +110,6 @@ export default function Navbar() {
         ['By Brand','/vehicle-category/cars-by-brand'],
         ['By Body Type','/browse?condition=New'],
         ['By Fuel Type','/browse?condition=New'],
-        ['Under 5 Lakh','/browse?condition=New&budget=0-500000'],
-        ['Under 10 Lakh','/browse?condition=New&budget=0-1000000']
       ]},
       {label:'Electric Car',children:[
         ['Find Electric Cars','/vehicle-category/find-electric-cars'],
