@@ -130,11 +130,11 @@ export default function Navbar() {
       {label:'Videos',to:'/news-reviews?tab=videos'}
     ]
   };
-  const MenuGroup=({name})=><div className="relative" onMouseEnter={()=>setActiveMenu(name)} onMouseLeave={()=>{setActiveMenu('');setActiveSubMenu('');}}>
+  const MenuGroup=({name})=><div className="relative">
     <button type="button" onClick={()=>setActiveMenu(activeMenu===name?'':name)} className="flex items-center gap-1 px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">{name}<ChevronDown className="w-4 h-4"/></button>
     {activeMenu===name&&<div className="absolute left-0 top-full z-50 w-60 rounded-b-lg border border-slate-200 bg-white p-2 shadow-xl">
       {menus[name].map(item=>item.children?
-        <div key={item.label} className="relative" onMouseEnter={()=>setActiveSubMenu(item.label)}>
+        <div key={item.label} className="relative">
           <button type="button" onClick={()=>setActiveSubMenu(activeSubMenu===item.label?'':item.label)} className="flex w-full items-center justify-between rounded px-3 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-600">{item.label}<ChevronDown className="h-4 w-4 -rotate-90"/></button>
           {activeSubMenu===item.label&&<div className="absolute left-full top-0 z-[60] ml-1 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">{item.children.map(([label,to])=><Link key={label} to={to} onClick={close} className="block rounded px-3 py-2.5 text-sm text-slate-700 hover:bg-red-50 hover:text-red-600">{label}</Link>)}</div>}
         </div>
@@ -145,8 +145,8 @@ export default function Navbar() {
     <div className="mx-auto max-w-chassis px-4 sm:px-6">
       <div className="flex h-[72px] items-center justify-between gap-4">
         <Link to="/" onClick={close} className="flex shrink-0 items-center gap-2">
-          <svg width="34" height="34" viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M4 24.5 9.5 12h17L32 24.5M7 24.5h22" stroke="#e31e24" strokeWidth="2.4" strokeLinejoin="round"/><circle cx="11" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/><circle cx="25" cy="25" r="3" fill="white" stroke="#e31e24" strokeWidth="2"/></svg>
-          <span className="font-heading text-lg font-extrabold tracking-tight">SHOW<span className="text-red-600">CAR</span>DETAIL</span>
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="11" fill="#102A56"/><path d="M8 28 15.2 11.5h9.6L32 28" stroke="#D5AD55" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M13 23.5h14" stroke="#D5AD55" strokeWidth="2.2" strokeLinecap="round"/><text x="20" y="25.5" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontWeight="800" fontFamily="Arial">VH</text></svg>
+          <span className="font-heading text-xl font-extrabold tracking-tight text-[#102A56]">Vahan<span className="text-[#B58A35]">Hub</span></span>
         </Link>
         <nav className="hidden lg:flex items-center"><MenuGroup name="Bike"/><MenuGroup name="Car"/><MenuGroup name="Commercial Vehicle"/><Link to="/browse?condition=New&fuel=Electric" className="px-3 py-3 text-sm font-semibold text-slate-700 hover:text-red-600">Electric Vehicle</Link><MenuGroup name="News & Reviews"/></nav>
         <div className="hidden md:flex items-center gap-3">
@@ -160,7 +160,7 @@ export default function Navbar() {
               <UserRound className="h-5 w-5"/>
             </button>
             {accountOpen&&<div className="absolute right-0 top-full z-[60] mt-2 w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-2 shadow-xl">
-              <div className="border-b border-slate-100 px-4 py-3"><p className="text-sm font-semibold text-slate-900">{isAuthenticated&&user?'My Account':'Welcome to ShowCarDetail'}</p><p className="mt-1 text-xs text-slate-500">{isAuthenticated&&user?'Manage your account':'Login to access your account'}</p></div>
+              <div className="border-b border-slate-100 px-4 py-3"><p className="text-sm font-semibold text-slate-900">{isAuthenticated&&user?'My Account':'Welcome to VahanHub'}</p><p className="mt-1 text-xs text-slate-500">{isAuthenticated&&user?'Manage your account':'Login to access your account'}</p></div>
               {isAuthenticated&&user?<><Link to="/admin" onClick={close} className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50"><ShieldCheck className="h-4 w-4"/>Admin Dashboard</Link><button type="button" onClick={()=>{close();logout(false);}} className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50"><LogOut className="h-4 w-4"/>Logout</button></>:<Link to="/login" onClick={close} className="mx-3 mt-2 flex items-center justify-center rounded bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Login / Sign Up</Link>}
             </div>}
           </div>
